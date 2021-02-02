@@ -2,11 +2,11 @@ import queue
 
 
 class GoBoard(object):
-    def __init__(self):
+    def __init__(self, player=1):
         self.boardSize = 19
         self.board = [[0 for _ in range(self.boardSize)] for _ in range(self.boardSize)]
         # player 1 -- black  2 -- white
-        self.player = 1
+        self.player = player
 
     def move(self, targetPoint):
         x = targetPoint.x
@@ -27,14 +27,34 @@ class GoBoard(object):
             if self.board[point.x][point.y] != self.player:
                 goBlocks.add(GoBlock(point, self.board))
 
+    def load(self, f):
+        line = f.readline()
+        i = 0
+        while line:
+            chess = line.strip().split(' ')
+            for j in range(len(chess)):
+                self.board[i][j] = int(chess[j])
+            i += 1
+            line = f.readline()
+
     def countPoint(self):
         pass
 
     def __str__(self):
-        pass
+        reStr = ''
+        for i in range(self.boardSize):
+            for j in range(self.boardSize):
+                if self.board[i][j] == 0:
+                    reStr += '+  '
+                elif self.board[i][j] == 1:
+                    reStr += '●  '
+                else:
+                    reStr += '○  '
+            reStr += '\n'
+        return reStr
 
     def __repr__(self):
-        pass
+        return self.__str__()
 
 
 class Point(object):
