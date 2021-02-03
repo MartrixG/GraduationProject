@@ -27,7 +27,7 @@ class GoBoard(object):
             if self.board[point.x][point.y] != self.player:
                 goBlocks.add(GoBlock(point, self.board))
 
-    def load(self, f):
+    def loadFromBoard(self, f):
         line = f.readline()
         i = 0
         while line:
