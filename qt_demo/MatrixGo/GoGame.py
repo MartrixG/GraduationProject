@@ -2,11 +2,13 @@ import queue
 from copy import deepcopy
 
 
-class GoBoard(object):
+class Game(object):
     def __init__(self, player=1):
         self.boardSize = 19
+        self.steps = []
+        self.numOfStep = 0
         self.board = [[0 for _ in range(self.boardSize)] for _ in range(self.boardSize)]
-        self.preBoard = self.board
+        self.preBoard = deepcopy(self.board)
         # player 1 -- black  2 -- white
         self.player = player
 
@@ -15,57 +17,49 @@ class GoBoard(object):
             return False
         x, y = step.x, step.y
         targetPoint = Point(x, y, self.boardSize)
-        if self.board[x][y] == 0:
-            self.board[x][y] = self.player
-        if self.legalCheck(targetPoint):
+        if self.board[x][y] == 0 and self.legalCheck(targetPoint):
             self.player = 1 if self.player == 2 else 2
+            self.steps.append(step)
+            self.numOfStep += 1
             return True
         else:
+            print('Illegal location.')
             return False
 
     def legalCheck(self, targetPoint):
-        flag = self.pickUpPiece(targetPoint)
-        if flag == 2:
+        tmpBoard = self.pickUpPiece(targetPoint)
+        if tmpBoard == self.preBoard:
             return False
-        elif flag == 1:
+        targetBlock = GoBlock(targetPoint, tmpBoard)
+        if targetBlock.getQi() != 0:
+            self.preBoard = self.board
+            self.board = tmpBoard
             return True
         else:
-            targetBlock = GoBlock(targetPoint, self.board)
-            if targetBlock.getQi() != 0:
-                return True
-            else:
-                return False
+            return False
 
     def pickUpPiece(self, targetPoint):
-        # flag = 0 不能提 flag = 1 能提 flag = 2 打劫
-        flag = 0
         goBlocks = set()
         around = targetPoint.getAround()
+        tmpBoard = deepcopy(self.board)
+        tmpBoard[targetPoint.x][targetPoint.y] = self.player
         for point in around:
-            if self.board[point.x][point.y] != self.player and self.board[point.x][point.y] != 0:
+            if tmpBoard[point.x][point.y] != self.player and tmpBoard[point.x][point.y] != 0:
                 if len(goBlocks) == 0:
-                    goBlocks.add(GoBlock(point, self.board))
-                flag = 1
+                    goBlocks.add(GoBlock(point, tmpBoard))
+                containCheck = 1
                 for block in goBlocks:
                     if block.contain(point):
-                        flag = 0
-                if flag:
-                    goBlocks.add(GoBlock(point, self.board))
-        tmpBoard = self.board
+                        containCheck = 0
+                if containCheck:
+                    goBlocks.add(GoBlock(point, tmpBoard))
+
         for block in goBlocks:
             if block.getQi() == 0:
-                flag = 1
                 for point in block.block:
                     tmpBoard[point.x][point.y] = 0
-        if tmpBoard == self.preBoard and flag == 1:
-            flag = 2
-        else:
-            self.preBoard = deepcopy(self.board)
-            for i in range(self.boardSize):
-                for j in range(self.boardSize):
-                    self.board[i][j] = tmpBoard[i][j]
-            del tmpBoard
-        return flag
+
+        return tmpBoard
 
     def loadFromBoard(self, f):
         line = f.readline()
@@ -123,6 +117,12 @@ class Point(object):
         else:
             return self.__hash__() == other.__hash__()
 
+    def __str__(self):
+        return 'x:{:}  y:{:}'.format(self.x, self.y)
+
+    def __repr__(self):
+        return self.__str__()
+
 
 class GoBlock(object):
     def __init__(self, beginPoint, board):
@@ -155,9 +155,7 @@ class GoBlock(object):
                 newY = nowPoint.y + dy[i]
                 if self.check(newX, newY) and self.board[newX][newY] == self.color:
                     newPoint = Point(newX, newY, self.beginPoint.boardSize)
-                    if newPoint in self.block:
-                        del newPoint
-                    else:
+                    if newPoint not in self.block:
                         Q.put(newPoint)
                         self.block.append(newPoint)
 
@@ -174,3 +172,12 @@ class GoBlock(object):
                     if nowQi not in qi:
                         qi.append(nowQi)
         return len(qi)
+
+    def __str__(self):
+        reStr = ''
+        for point in self.block:
+            reStr += point.__str__() + '\n'
+        return reStr
+
+    def __repr__(self):
+        return self.__str__()

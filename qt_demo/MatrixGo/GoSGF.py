@@ -30,7 +30,9 @@ class GoSGF(object):
             letter = 'a'
             letterToNumber[chr(ord(letter) + i)] = i
         for step in srcSteps:
-            self.steps.append(Step(step, letterToNumber))
+            tmpStep = Step()
+            tmpStep.initFromSGF(step, letterToNumber)
+            self.steps.append(tmpStep)
         self.len = len(self.steps)
 
     def show(self):
@@ -49,13 +51,29 @@ class GoSGF(object):
 
 
 class Step(object):
-    def __init__(self, srcString, letterToNumber):
+    def __init__(self):
+        self.player = None
+        self.x = None
+        self.y = None
+
+    def check(self):
+        assert self.player is not None
+        assert self.x is not None
+        assert self.y is not None
+        assert self.player == 'B' or self.player == 'W'
+        assert 0 <= self.x <= 18 and 0 <= self.y <= 18
+
+    def initFromSGF(self, srcString, letterToNumber):
         self.player = srcString[0]
         x = srcString[3]
         y = srcString[2]
         if 'a' <= x <= 'z' and 'a' <= y <= 'z':
             self.x = letterToNumber[srcString[3]]
             self.y = letterToNumber[srcString[2]]
-        else:
-            self.x = None
-            self.y = None
+        # self.check()
+
+    def initFromCommandLine(self, x, y, player):
+        self.player = player
+        self.x = x
+        self.y = y
+        # self.check()
