@@ -12,6 +12,10 @@ class Game(object):
         # player 1 -- black  2 -- white
         self.player = player
 
+    def initHandCap(self, handCapSteps, numOfStep):
+        for i in range(numOfStep - 1):
+            self.board[handCapSteps[i].x][handCapSteps[i].y] = 1
+
     def move(self, step):
         if not((step.player == 'B' and self.player == 1) or (step.player == 'W' and self.player == 2)):
             return False

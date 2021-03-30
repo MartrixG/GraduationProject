@@ -1,10 +1,14 @@
-from qt_demo.MatrixGo import GoSGF, GoGame
+from MatrixGo import GoSGF, GoGame
 
 
 def loadSGF():
-    with open('D:/GraduationProject/data/jie.sgf', encoding='utf-8', errors='ignore') as f:
-        sgf = GoSGF.GoSGF(f)
+    with open('data/Pro/9p.sgf', encoding='utf-8', errors='ignore') as f:
+        text = f.readlines()
+        sgf = GoSGF.GoSGF(text[448])
         board = GoGame.Game()
+        if sgf.HA != 0:
+            sgf.nowStep += sgf.HA - 1
+            board.initHandCap(sgf.steps, sgf.HA)
         while sgf.haveNextStep():
             step = sgf.getNextStep()
             if board.move(step):
@@ -39,4 +43,4 @@ def boardText():
 
 
 if __name__ == '__main__':
-    commandLine()
+    loadSGF()

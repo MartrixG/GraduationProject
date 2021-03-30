@@ -1,11 +1,12 @@
 class GoSGF(object):
     def __init__(self, f):
         self.len = None
-        self.fileContext = f.readline()
+        self.fileContext = f
         self.gameInformation = self.fileContext[2:-1].split(';')
         self.RU = None
         self.RE = None
         self.KM = None
+        self.HA = None
         self.nowStep = 0
         self.steps = []
         self.initGlobalInformation()
@@ -19,17 +20,27 @@ class GoSGF(object):
         RUPos = globalInformation.find('RU')
         REPos = globalInformation.find('RE')
         KMPos = globalInformation.find('KM')
+        HAPos = globalInformation.find('HA')
         self.RU = globalInformation[RUPos + 3:RUPos + 4] if RUPos != -1 else None
         self.RE = globalInformation[REPos + 3:REPos + 4] if REPos != -1 else None
         self.KM = float(globalInformation[KMPos + 3:KMPos + 4]) if KMPos != -1 else None
+        self.HA = int(globalInformation[HAPos + 3:HAPos + 4])
 
     def initSteps(self):
-        srcSteps = self.gameInformation[1:]
         letterToNumber = {}
         for i in range(19):
             letter = 'a'
             letterToNumber[chr(ord(letter) + i)] = i
-        for step in srcSteps:
+        if self.HA != 0:
+            handCap = self.gameInformation[1]
+            for i in range(self.HA):
+                capStr = 'B['
+                tmpStep = Step()
+                tmpStep.initFromSGF(capStr + handCap[3 + 4 * i] + handCap[4 + 4 * i], letterToNumber)
+                self.steps.append(tmpStep)
+        bias = 1 + (0 if self.HA == 0 else 1)
+        for i in range(len(self.gameInformation) - bias):
+            step = self.gameInformation[i + bias]
             tmpStep = Step()
             tmpStep.initFromSGF(step, letterToNumber)
             self.steps.append(tmpStep)
