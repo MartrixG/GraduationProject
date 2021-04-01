@@ -2,9 +2,9 @@ from MatrixGo import GoSGF, GoGame
 
 
 def loadSGF():
-    with open('data/Pro/9p.sgf', encoding='utf-8', errors='ignore') as f:
+    with open('data/test.sgf', encoding='utf-8', errors='ignore') as f:
         text = f.readlines()
-        sgf = GoSGF.GoSGF(text[448])
+        sgf = GoSGF.GoSGF(text[0])
         board = GoGame.Game()
         if sgf.HA != 0:
             sgf.nowStep += sgf.HA - 1
