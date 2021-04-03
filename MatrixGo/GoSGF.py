@@ -1,3 +1,5 @@
+from MatrixGo.GoGame import Point
+
 class GoSGF(object):
     def __init__(self, f):
         self.len = None
@@ -82,6 +84,12 @@ class Step(object):
             self.x = letterToNumber[srcString[3]]
             self.y = letterToNumber[srcString[2]]
         # self.check()
+
+    def initFromArgs(self, player, point):
+        if not isinstance(point, Point):
+            return False
+        self.player = player
+        self.x, self.y = point.x, point.y
 
     def initFromCommandLine(self, x, y, player):
         self.player = player
