@@ -5,15 +5,16 @@ def loadSGF():
     with open('data/test.sgf', encoding='utf-8', errors='ignore') as f:
         text = f.readlines()
         sgf = GoSGF.GoSGF(text[0])
-        board = GoGame.Game()
+        game = GoGame.Game()
         if sgf.HA != 0:
             sgf.nowStep += sgf.HA - 1
-            board.initHandCap(sgf.steps, sgf.HA)
+            game.initHandCap(sgf.steps, sgf.HA)
         while sgf.haveNextStep():
             step = sgf.getNextStep()
-            if board.move(step):
+            if game.moveAnalyze(step):
+                game.move()
                 print(sgf.nowStep)
-                print(board)
+                print(game)
             else:
                 break
 

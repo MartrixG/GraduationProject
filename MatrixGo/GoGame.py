@@ -40,48 +40,58 @@ points = [[Point(i, j, 19) for j in range(19)] for i in range(19)]
 
 class Game(object):
     def __init__(self, player=1):
+        # player 1 -- black  2 -- white
+        self.player = player
         self.boardSize = 19
         self.steps = []
         self.numOfStep = 0
         self.board = [[0 for _ in range(self.boardSize)] for _ in range(self.boardSize)]
-        self.preBoard = deepcopy(self.board)
-        # player 1 -- black  2 -- white
-        self.player = player
+        self.historyBoard = [deepcopy(self.board)]
+        # next step
+        self.nextStep = None
+        self.targetBlock = None
+        self.newBoard = None
 
     def initHandCap(self, handCapSteps, numOfStep):
         for i in range(numOfStep - 1):
             self.board[handCapSteps[i].x][handCapSteps[i].y] = 1
 
-    def move(self, step):
-        if not((step.player == 'B' and self.player == 1) or (step.player == 'W' and self.player == 2)):
-            return False
+    def redo(self):
+        self.numOfStep -= 1
+        self.steps.pop()
+        self.board = self.historyBoard[-1]
+        self.historyBoard.pop()
+        self.player = 1 if self.player == 2 else 2
+
+    def moveAnalyze(self, step):
         x, y = step.x, step.y
-        targetPoint = points[x][y]
-        if self.board[x][y] == 0 and self.legalCheck(targetPoint):
-            self.player = 1 if self.player == 2 else 2
-            self.steps.append(step)
-            self.numOfStep += 1
-            return True
-        else:
+        # player check
+        if not((step.player == 'B' and self.player == 1) or (step.player == 'W' and self.player == 2)):
+            print('Now step player is illegal.')
+            return False
+        # location check
+        if self.board[x][y] != 0:
             print('Illegal location.')
             return False
+        # ko check
+        self.newBoard = self.getPickUpBlock(points[x][y])
+        if self.newBoard == self.historyBoard[-1]:
+            print('Ko illegal.')
+            return False
+        # qi check
+        self.targetBlock = GoBlock(points[x][y], self.newBoard)
+        if self.targetBlock.getQi() == 0:
+            print('Illegal location.')
+            return False
+        self.nextStep = step
+        return True
 
-    def legalCheck(self, targetPoint):
-        # tmpBoard = self.getPickUpBlock(targetPoint)
-        goBlocks, tmpBoard = self.getPickUpBlock(targetPoint)
-        if len(goBlocks) > 0:
-            for block in goBlocks:
-                for point in block.block:
-                    tmpBoard[point.x][point.y] = 0
-        if tmpBoard == self.preBoard:
-            return False
-        targetBlock = GoBlock(targetPoint, tmpBoard)
-        if targetBlock.getQi() != 0:
-            self.preBoard = self.board
-            self.board = tmpBoard
-            return True
-        else:
-            return False
+    def move(self):
+        self.player = 1 if self.player == 2 else 2
+        self.historyBoard.append(self.board)
+        self.board = self.newBoard
+        self.steps.append(self.nextStep)
+        self.numOfStep += 1
 
     def getPickUpBlock(self, targetPoint):
         goBlocks = set()
@@ -98,12 +108,12 @@ class Game(object):
                         containCheck = 0
                 if containCheck:
                     goBlocks.add(GoBlock(point, tmpBoard))
-
-        deadBlocks = []
         for block in goBlocks:
             if block.getQi() == 0:
-                deadBlocks.append(block)
-        return deadBlocks, tmpBoard
+                for piece in block.pieces:
+                    tmpBoard[piece.x][piece.y] = 0
+
+        return tmpBoard
 
     def loadFromBoard(self, f):
         line = f.readline()
@@ -137,15 +147,16 @@ class Game(object):
 
 class GoBlock(object):
     def __init__(self, beginPoint, board):
-        self.block = []
+        self.pieces = []
         self.beginPoint = beginPoint
         self.color = board[beginPoint.x][beginPoint.y]
         self.board = board
-        self.qi = 0
+        self.qiPoint = []
+        self.qi = -1
         self.findLinkedBlock()
 
     def contain(self, point):
-        return self.block.__contains__(point)
+        return self.pieces.__contains__(point)
 
     def check(self, x, y):
         if 0 <= x <= self.beginPoint.boardSize - 1 and 0 <= y <= self.beginPoint.boardSize - 1:
@@ -156,7 +167,7 @@ class GoBlock(object):
     def findLinkedBlock(self):
         Q = queue.Queue()
         Q.put(self.beginPoint)
-        self.block.append(self.beginPoint)
+        self.pieces.append(self.beginPoint)
         dx = [0, 0, 1, -1]
         dy = [1, -1, 0, 0]
         while not Q.empty():
@@ -166,27 +177,27 @@ class GoBlock(object):
                 newY = nowPoint.y + dy[i]
                 if self.check(newX, newY) and self.board[newX][newY] == self.color:
                     newPoint = points[newX][newY]
-                    if newPoint not in self.block:
+                    if newPoint not in self.pieces:
                         Q.put(newPoint)
-                        self.block.append(newPoint)
+                        self.pieces.append(newPoint)
 
     def getQi(self):
-        qi = []
         dx = [0, 0, 1, -1]
         dy = [1, -1, 0, 0]
-        for point in self.block:
+        for point in self.pieces:
             for i in range(4):
                 newX = point.x + dx[i]
                 newY = point.y + dy[i]
                 if self.check(newX, newY) and self.board[newX][newY] == 0:
                     nowQi = points[newX][newY]
-                    if nowQi not in qi:
-                        qi.append(nowQi)
-        return len(qi)
+                    if nowQi not in self.qiPoint:
+                        self.qiPoint.append(nowQi)
+        self.qi = len(self.qiPoint)
+        return self.qi
 
     def __str__(self):
         reStr = ''
-        for point in self.block:
+        for point in self.pieces:
             reStr += point.__str__() + '\n'
         return reStr
 
