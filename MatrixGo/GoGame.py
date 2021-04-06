@@ -67,21 +67,21 @@ class Game(object):
         x, y = step.x, step.y
         # player check
         if not((step.player == 'B' and self.player == 1) or (step.player == 'W' and self.player == 2)):
-            print('Now step player is illegal.')
+            # print('Now step player is illegal.')
             return False
         # location check
         if self.board[x][y] != 0:
-            print('Illegal location.')
+            # print('Illegal location.')
             return False
         # ko check
         self.newBoard = self.getPickUpBlock(points[x][y])
         if self.newBoard == self.historyBoard[-1]:
-            print('Ko illegal.')
+            # print('Ko illegal.')
             return False
         # qi check
         self.targetBlock = GoBlock(points[x][y], self.newBoard)
         if self.targetBlock.getQi() == 0:
-            print('Illegal location.')
+            # print('Illegal location.')
             return False
         self.nextStep = step
         return True

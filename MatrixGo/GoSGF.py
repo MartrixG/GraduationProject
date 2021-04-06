@@ -1,5 +1,6 @@
 from MatrixGo.GoGame import Point
 
+
 class GoSGF(object):
     def __init__(self, f):
         self.len = None
@@ -96,3 +97,9 @@ class Step(object):
         self.x = x
         self.y = y
         # self.check()
+
+    def __str__(self):
+        return str(self.x) + ' ' + str(self.y)
+
+    def __repr__(self):
+        return self.__str__()

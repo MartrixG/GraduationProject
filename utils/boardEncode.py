@@ -1,15 +1,20 @@
 from MatrixGo import GoSGF, GoGame
+from time import time
 
 
 class BoardState(object):
     def __init__(self, game):
         self.game = game
         self.state = []
-        for i in range(47):
+        for i in range(45):
             if i == 3:
                 self.state.append([[1] * 19 for _ in range(19)])
             else:
                 self.state.append([[0] * 19 for _ in range(19)])
+        if game.player == 1:
+            self.state.append([[1] * 19 for _ in range(19)])
+        else:
+            self.state.append([[0] * 19 for _ in range(19)])
 
         self.initColor()
         self.initTurnSince()
@@ -106,11 +111,15 @@ def loadSgf(fileName):
             if game.moveAnalyze(step):
                 game.move()
                 tmpState = BoardState(game)
-                print(game.nextStep)
-                print(game)
+
+                # print(step)
+                # print(game)
             else:
                 break
 
 
 if __name__ == '__main__':
+    begin = time()
     loadSgf('../data/test.sgf')
+    end = time()
+    print(end - begin)
