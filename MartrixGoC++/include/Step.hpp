@@ -6,17 +6,20 @@
 #define MARTRIXGOC_STEP_HPP
 
 #include <string>
-#include "ostream"
+#include <ostream>
 #include "Point.hpp"
 
-class Step
-{
+class Step {
 public:
-    int player, x, y;
+    int x, y, player;
+
     explicit Step(std::string srcString);
-    Step(int player, Point& point);
-    friend std::ostream& operator<<(std::ostream& out, const Step& o)
-    {
+
+    Step(int player, Point *point);
+
+    Step(int x, int y, int player);
+
+    friend std::ostream &operator<<(std::ostream &out, const Step &o) {
         out << o.x << " " << o.y;
         return out;
     }

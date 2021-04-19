@@ -13,6 +13,10 @@ public:
         this->f1 = f1;
         this->f2 = f2;
     }
+    friend std::ostream& operator<<(std::ostream& out, const bbb& o) {
+        out << "x: " << o.f1 << " y: " << o.f2;
+        return out;
+    }
 };
 
 class aaa
@@ -31,26 +35,21 @@ aaa test = aaa(1, &s);
 */
 int main()
 {
+    //bbb b1(1, 2), b2(3, 4), b3(5, 6), b4(7, 8);
     /*
-    std::vector<aaa> b;
-    b.push_back(test);
-    b.emplace_back(test);
-    std::cout << b[0].a1 << " " << b[1].a1 << std::endl;
-    test.a1 = 2;
-    b.push_back(test);
-    std::cout << b[0].a1 << " " << b[1].a1 << " " << b[2].a1 << std::endl;
-    std::cout << &b[0] << " " << &b[1] << " " << &b[2] << " " << &test;
-     */
-    vector_2d(Point) points(BOARD_SIZE);
-    Point::pointsInit(points);
+    vector_2d(Point) allBoardPoints(BOARD_SIZE);
+    Point::pointsInit(allBoardPoints);
     for(int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
-            std::cout << points[i][j] << ":" << std::endl;
-            for (auto point : Point::getAround(points[i][j], points)) {
+            std::cout << allBoardPoints[i][j] << ":" << std::endl;
+            for (auto point : Point::getAround(allBoardPoints[i][j], allBoardPoints)) {
                 std::cout << *point << " ";
                 std::cout << " ";
             }
             std::cout << std::endl;
         }
     }
+     */
+    Point::test();
+    GoBlock::test();
 }

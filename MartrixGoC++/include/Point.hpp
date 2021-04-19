@@ -10,17 +10,22 @@
 
 #define vector_2d(type) std::vector<std::vector<type>>
 
-class Point
-{
+class Point {
 public:
     int x, y, boardSize;
+
     Point(int x, int y, int boardSize);
-    static std::vector<Point *> getAround(Point &nowPoint, vector_2d(Point) &points);
-    static void pointsInit(vector_2d(Point) &points);
-    friend std::ostream& operator<<(std::ostream& out, const Point& o) {
+
+    static void getAround(Point *nowPoint, vector_2d(Point*) &allBoardPoints, std::vector<Point *> &aroundPoints);
+
+    static void pointsInit(vector_2d(Point*) &allBoardPoints);
+
+    friend std::ostream &operator<<(std::ostream &out, const Point &o) {
         out << "x: " << o.x << " y: " << o.y;
         return out;
     }
+
+    static void test();
 };
 
 #endif //MARTRIXGOC___POINT_H
