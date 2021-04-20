@@ -7,34 +7,42 @@
 
 #include <cassert>
 
-Point::Point(int x, int y, int boardSize) {
+Point::Point(int x, int y, int boardSize)
+{
     this->x = x;
     this->y = y;
     this->boardSize = boardSize;
 }
 
-void Point::getAround(Point *nowPoint, vector_2d(Point*) &allBoardPoints, std::vector<Point *> &aroundPoints) {
+void Point::getAround(Point *nowPoint, vector_2d(Point*) &allBoardPoints, std::vector<Point *> &aroundPoints)
+{
     int dx[4] = {0, 0, -1, 1};
     int dy[4] = {-1, 1, 0, 0};
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 4; i++)
+    {
         int newX = nowPoint->x + dx[i];
         int newY = nowPoint->y + dy[i];
-        if (newX >= 0 && newX < nowPoint->boardSize && newY >= 0 && newY < nowPoint->boardSize) {
+        if (newX >= 0 && newX < nowPoint->boardSize && newY >= 0 && newY < nowPoint->boardSize)
+        {
             aroundPoints.push_back(allBoardPoints[newX][newY]);
         }
     }
 }
 
-void Point::pointsInit(vector_2d(Point*) &allBoardPoints) {
-    for (int i = 0; i < BOARD_SIZE; i++) {
+void Point::pointsInit(vector_2d(Point*) &allBoardPoints)
+{
+    for (int i = 0; i < BOARD_SIZE; i++)
+    {
         std::vector<Point> tmp;
-        for (int j = 0; j < BOARD_SIZE; j++) {
+        for (int j = 0; j < BOARD_SIZE; j++)
+        {
             allBoardPoints[i].push_back(new Point(i, j, BOARD_SIZE));
         }
     }
 }
 
-void Point::test() {
+void Point::test()
+{
     /*   0 1 2
      * 0 x x x
      * 1 x x x
@@ -44,15 +52,19 @@ void Point::test() {
      */
     vector_2d(Point*) allBoardPoints(BOARD_SIZE);
     Point::pointsInit(allBoardPoints);
-    for (int i = 0; i < 19; i++) {
-        for (int j = 0; j < 19; j++) {
+    for (int i = 0; i < 19; i++)
+    {
+        for (int j = 0; j < 19; j++)
+        {
             assert(allBoardPoints[i][j]->x == i);
             assert(allBoardPoints[i][j]->y == j);
         }
     }
     Point *testMatrix[3][3];
-    for (int i = 0; i < 3; i++) {
-        for (int j = 0; j < 3; j++) {
+    for (int i = 0; i < 3; i++)
+    {
+        for (int j = 0; j < 3; j++)
+        {
             testMatrix[i][j] = allBoardPoints[i][j];
         }
     }

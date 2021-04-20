@@ -10,7 +10,8 @@
 
 #define vector_2d(type) std::vector<std::vector<type>>
 
-class Point {
+class Point
+{
 public:
     int x, y, boardSize;
 
@@ -20,7 +21,8 @@ public:
 
     static void pointsInit(vector_2d(Point*) &allBoardPoints);
 
-    friend std::ostream &operator<<(std::ostream &out, const Point &o) {
+    friend std::ostream &operator<<(std::ostream &out, const Point &o)
+    {
         out << "x: " << o.x << " y: " << o.y;
         return out;
     }

@@ -13,7 +13,8 @@
 
 const int BOARD_SIZE = 19;
 
-class Game {
+class Game
+{
 public:
     int player;
     int boardSize = BOARD_SIZE;

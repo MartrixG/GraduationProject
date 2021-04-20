@@ -9,7 +9,8 @@
 #include <ostream>
 #include "Point.hpp"
 
-class Step {
+class Step
+{
 public:
     int x, y, player;
 
@@ -19,7 +20,8 @@ public:
 
     Step(int x, int y, int player);
 
-    friend std::ostream &operator<<(std::ostream &out, const Step &o) {
+    friend std::ostream &operator<<(std::ostream &out, const Step &o)
+    {
         out << o.x << " " << o.y;
         return out;
     }

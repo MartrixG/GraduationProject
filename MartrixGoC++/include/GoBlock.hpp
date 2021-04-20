@@ -9,7 +9,8 @@
 #include <vector>
 #include "Point.hpp"
 
-class GoBlock {
+class GoBlock
+{
 public:
     std::set<Point *> pieces = std::set<Point *>();
     std::set<Point *> qiPoint = std::set<Point *>();
