@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.19)
 project(MartrixGoC++)
 
+set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++")
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS -g)
 set(CMAKE_CXX_FLAGS -Wall)
