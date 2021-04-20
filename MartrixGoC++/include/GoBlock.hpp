@@ -19,15 +19,17 @@ public:
     int color = -1;
     int qi = -1;
 
-    bool check(int x, int y);
+    bool check(int x, int y) const;
 
     GoBlock(Point *beginPoint, vector_2d(int) &board, vector_2d(Point*) &allBoardPoints);
+
+    void update(Point * beginPoint, vector_2d(int) &board, vector_2d(Point*) &allBoardPoints);
 
     void findLinkedBlock(vector_2d(Point*) &allBoardPoints);
 
     int getQi(vector_2d(Point*) &allBoardPoints);
 
-    bool contain(Point *point);
+    bool contain(Point *point) const;
 
     static void test();
 };

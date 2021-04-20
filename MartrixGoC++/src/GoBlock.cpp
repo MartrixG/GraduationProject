@@ -6,9 +6,9 @@
 
 #include <cassert>
 
-bool GoBlock::check(int x, int y)
+bool GoBlock::check(int x, int y) const
 {
-    return x >= 0 && x <= this->beginPoint->boardSize && y >= 0 && y <= this->beginPoint->boardSize;
+    return x >= 0 && x < this->beginPoint->boardSize && y >= 0 && y < this->beginPoint->boardSize;
 }
 
 GoBlock::GoBlock(Point *beginPoint, vector_2d(int) &board, vector_2d(Point*) &allBoardPoints)
@@ -19,8 +19,19 @@ GoBlock::GoBlock(Point *beginPoint, vector_2d(int) &board, vector_2d(Point*) &al
     this->findLinkedBlock(allBoardPoints);
 }
 
+void GoBlock::update(Point *newBeginPoint, vector_2d(int) &newBoard, vector_2d(Point*) &allBoardPoints)
+{
+    this->board = newBoard;
+    this->beginPoint = newBeginPoint;
+    this->color = newBoard[newBeginPoint->x][newBeginPoint->y];
+    this->qi = -1;
+    this->findLinkedBlock(allBoardPoints);
+}
+
 void GoBlock::findLinkedBlock(vector_2d(Point*) &allBoardPoints)
 {
+    this->pieces.clear();
+    this->qiPoint.clear();
     std::queue<Point *> Q;
     Q.push(this->beginPoint);
     this->pieces.insert(this->beginPoint);
@@ -71,7 +82,7 @@ int GoBlock::getQi(vector_2d(Point*) &allBoardPoints)
     return this->qi;
 }
 
-bool GoBlock::contain(Point *point)
+bool GoBlock::contain(Point *point) const
 {
     return this->pieces.count(point) == 1;
 }
