@@ -22,7 +22,7 @@ public:
 
     friend std::ostream &operator<<(std::ostream &out, const Step &o)
     {
-        out << o.x << " " << o.y;
+        out << o.x << " " << o.y << std::endl;
         return out;
     }
 };
