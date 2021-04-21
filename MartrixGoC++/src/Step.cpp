@@ -2,12 +2,12 @@
 // Created by 11409 on 2021/4/17.
 #include "Step.hpp"
 
-Step::Step(std::string srcString)
+Step::Step(char player, char x, char y)
 {
-    this->player = srcString[0] == 'B' ? 1 : 2;
-    char strX = srcString[3];
-    char strY = srcString[2];
-    if (strX >= 'a' && strX <= 'z' && strY >= 'a' && strY <= 'z')
+    this->player = player == 'B' ? BLACK_PLAYER : WHITE_PLAYER;
+    char strX = x;
+    char strY = y;
+    if (strX >= 'a' && strX <= 't' && strY >= 'a' && strY <= 't')
     {
         this->x = x - 'a';
         this->y = y - 'a';

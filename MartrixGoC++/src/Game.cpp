@@ -15,11 +15,10 @@ Game::Game(vector_2d(Point*) &points)
 
 void Game::initHandCap(std::vector<Step *> &handCapSteps)
 {
-    for (auto step : handCapSteps)
+    for (auto &step : handCapSteps)
     {
-        this->newBoard[step->x][step->y] = 1;
+        this->newBoard[step->x][step->y] = BLACK_PLAYER;
     }
-    this->player = this->player == 2 ? 1 : 2;
     this->move();
 }
 
@@ -29,7 +28,7 @@ void Game::redo()
     this->board.assign(this->historyBoard.back().begin(), this->historyBoard.back().end());
     this->newBoard.assign(this->board.begin(), this->board.end());
     this->historyBoard.pop_back();
-    this->player = this->player == 2 ? 1 : 2;
+    this->player = this->player == WHITE_PLAYER ? BLACK_PLAYER : WHITE_PLAYER;
 }
 
 bool Game::moveAnalyze(Step *step)
@@ -70,7 +69,7 @@ bool Game::moveAnalyze(Step *step)
 
 void Game::move()
 {
-    this->player = this->player == 2 ? 1 : 2;
+    this->player = this->player == WHITE_PLAYER ? BLACK_PLAYER: WHITE_PLAYER;
     this->historyBoard.push_back(this->board);
     this->board.assign(this->newBoard.begin(), this->newBoard.end());
 }
@@ -85,12 +84,12 @@ void Game::getPickUpBlock(Point *targetPoint, vector_2d(int) &processBoard)
     {
         if (processBoard[point->x][point->y] != this->player && processBoard[point->x][point->y] != 0)
         {
-            int containCheck = 1;
+            bool containCheck = true;
             for (auto &block : nearGoBlocks)
             {
                 if (block->contain(point))
                 {
-                    containCheck = 0;
+                    containCheck = false;
                 }
             }
             if (containCheck)
@@ -118,12 +117,12 @@ void Game::getPickUpBlock(Point *targetPoint, vector_2d(int) &processBoard)
 
 void Game::loadFromBoard(const std::string& fileName, int nowPlayer)
 {
-    this->player = nowPlayer == 2 ? 1 : 2;
+    this->player = nowPlayer == WHITE_PLAYER ? BLACK_PLAYER : WHITE_PLAYER;
     std::ifstream inFile;
     inFile.open(fileName);
-    for(int i=0;i<19;i++)
+    for(int i=0;i<BOARD_SIZE;i++)
     {
-        for(int j=0;j<19;j++)
+        for(int j=0;j<BOARD_SIZE;j++)
         {
             inFile >> this->newBoard[i][j];
         }

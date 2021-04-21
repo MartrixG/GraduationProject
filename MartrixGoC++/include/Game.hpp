@@ -18,7 +18,7 @@ const int BOARD_SIZE = 19;
 class Game
 {
 public:
-    int player = 1;
+    int player = BLACK_PLAYER;
     int boardSize = BOARD_SIZE;
     vector_2d(Point*) allBoardPoints;
     std::vector<Step *> steps = std::vector<Step *>();
@@ -47,23 +47,23 @@ public:
     friend void operator<<(std::ostream &out, const Game &o)
     {
         std::cout << " ";
-        for(int i = 0; i < 19; i++)
+        for(int i = 0; i < BOARD_SIZE; i++)
         {
             std::cout << " " << char('a' + i);
         }
         std::cout << std::endl;
-        for(int i = 0; i < 19; i++)
+        for(int i = 0; i < BOARD_SIZE; i++)
         {
             std::cout << char('a' + i) << " ";
-            for(int j = 0; j < 19; j++)
+            for(int j = 0; j < BOARD_SIZE; j++)
             {
                 switch (o.board[i][j])
                 {
                     case 0:
                         std::cout << "  ";break;
-                    case 1:
+                    case BLACK_PLAYER:
                         std::cout << "x ";break;
-                    case 2:
+                    case WHITE_PLAYER:
                         std::cout << "o ";break;
                 }
             }

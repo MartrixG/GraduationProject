@@ -9,12 +9,15 @@
 #include <ostream>
 #include "Point.hpp"
 
+const int BLACK_PLAYER = 1;
+const int WHITE_PLAYER = 2;
+
 class Step
 {
 public:
     int x, y, player;
 
-    explicit Step(std::string srcString);
+    explicit Step(char player, char x, char y);
 
     Step(int player, Point *point);
 
