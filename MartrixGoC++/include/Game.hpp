@@ -32,7 +32,7 @@ public:
 
     explicit Game(vector_2d(Point*) &points);
 
-    void initHandCap(std::vector<Step *> &handCapSteps);
+    void initHandCap(std::vector<Step *> &handCapSteps, int numOfHandCap);
 
     void redo();
 
@@ -40,7 +40,7 @@ public:
 
     void move();
 
-    void getPickUpBlock(Point *targetPoint, vector_2d(int) &processBoard);
+    void getPickUpBlock(Point *targetPoint, vector_2d(int) &processBoard) const;
 
     void loadFromBoard(const std::string& fileName, int player);
 
@@ -60,7 +60,7 @@ public:
                 switch (o.board[i][j])
                 {
                     case 0:
-                        std::cout << "  ";break;
+                        std::cout << ". ";break;
                     case BLACK_PLAYER:
                         std::cout << "x ";break;
                     case WHITE_PLAYER:

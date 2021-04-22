@@ -13,11 +13,11 @@ Game::Game(vector_2d(Point*) &points)
     this->allBoardPoints = points;
 }
 
-void Game::initHandCap(std::vector<Step *> &handCapSteps)
+void Game::initHandCap(std::vector<Step *> &handCapSteps, int numOfHandCap)
 {
-    for (auto &step : handCapSteps)
+    for (int i = 0; i < numOfHandCap; i++)
     {
-        this->newBoard[step->x][step->y] = BLACK_PLAYER;
+        this->newBoard[handCapSteps[i]->x][handCapSteps[i]->y] = BLACK_PLAYER;
     }
     this->move();
 }
@@ -44,7 +44,7 @@ bool Game::moveAnalyze(Step *step)
     }
     this->tmpBoard.assign(this->newBoard.begin(), this->newBoard.end());
     this->getPickUpBlock(this->allBoardPoints[x][y], this->newBoard);
-    if(this->newBoard == this->historyBoard.back())
+    if(!this->historyBoard.empty() && this->newBoard == this->historyBoard.back())
     {
         this->newBoard.swap(this->tmpBoard);
         return false;
@@ -57,7 +57,7 @@ bool Game::moveAnalyze(Step *step)
     {
         this->targetBlock->update(this->allBoardPoints[x][y], this->newBoard, this->allBoardPoints);
     }
-    if(this->targetBlock->getQi(this->allBoardPoints) == 0)
+    if(this->targetBlock->getQi(this->newBoard, this->allBoardPoints) == 0)
     {
         this->newBoard.swap(this->tmpBoard);
         return false;
@@ -74,7 +74,7 @@ void Game::move()
     this->board.assign(this->newBoard.begin(), this->newBoard.end());
 }
 
-void Game::getPickUpBlock(Point *targetPoint, vector_2d(int) &processBoard)
+void Game::getPickUpBlock(Point *targetPoint, vector_2d(int) &processBoard) const
 {
     std::set<GoBlock *> nearGoBlocks;
     std::vector<Point *> around;
@@ -100,7 +100,7 @@ void Game::getPickUpBlock(Point *targetPoint, vector_2d(int) &processBoard)
     }
     for (auto &block : nearGoBlocks)
     {
-        if (block->getQi(this->allBoardPoints) == 0)
+        if (block->getQi(processBoard, this->allBoardPoints) == 0)
         {
             for (auto &piece : block->pieces)
             {
