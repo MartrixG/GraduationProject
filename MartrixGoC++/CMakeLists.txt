@@ -3,11 +3,11 @@ project(MartrixGoC++)
 
 set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++")
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_FLAGS -g)
 set(CMAKE_CXX_FLAGS -Wall)
-# set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
-# 调试时开启这个命令
-SET(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_CXX_FLAGS_DEBUG   "-g -Wall" )
+set(CMAKE_CXX_FLAGS_RELEASE "-O2 -Wall")
+
+SET(CMAKE_BUILD_TYPE "Debug")
 
 include_directories(${CMAKE_CURRENT_LIST_DIR}/include)
 
