@@ -14,24 +14,29 @@ class GoBlock
 public:
     std::set<Point *> pieces = std::set<Point *>();
     std::set<Point *> qiPoint = std::set<Point *>();
-    std::vector<std::vector<int>> board;
     Point *beginPoint = nullptr;
     int color = -1;
     int qi = -1;
 
     bool check(int x, int y) const;
 
-    GoBlock(Point *beginPoint, vector_2d(int) &board, vector_2d(Point*) &allBoardPoints);
+    GoBlock(Point *beginPoint,const vector_2d(int) &board, const vector_2d(Point*) &allBoardPoints);
 
-    void update(Point * beginPoint, vector_2d(int) &board, vector_2d(Point*) &allBoardPoints);
+    void update(Point * beginPoint, const vector_2d(int) &board, const vector_2d(Point*) &allBoardPoints);
 
-    void findLinkedBlock(vector_2d(Point*) &allBoardPoints);
+    void findLinkedBlock(const vector_2d(int) &board, const vector_2d(Point*) &allBoardPoints);
 
-    int getQi(vector_2d(Point*) &allBoardPoints);
+    int getQi(const vector_2d(int) &board, const vector_2d(Point*) &allBoardPoints);
 
     bool contain(Point *point) const;
 
     static void test();
+
+    ~GoBlock()
+    {
+        this->pieces.clear();
+        this->qiPoint.clear();
+    }
 };
 
 #endif //MARTRIXGOC_GOBLOCK_HPP

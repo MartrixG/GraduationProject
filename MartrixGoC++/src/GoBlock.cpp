@@ -11,24 +11,22 @@ bool GoBlock::check(int x, int y) const
     return x >= 0 && x < this->beginPoint->boardSize && y >= 0 && y < this->beginPoint->boardSize;
 }
 
-GoBlock::GoBlock(Point *beginPoint, vector_2d(int) &board, vector_2d(Point*) &allBoardPoints)
+GoBlock::GoBlock(Point *beginPoint,const vector_2d(int) &board, const vector_2d(Point*) &allBoardPoints)
 {
-    this->board = board;
     this->beginPoint = beginPoint;
     this->color = board[beginPoint->x][beginPoint->y];
-    this->findLinkedBlock(allBoardPoints);
+    this->findLinkedBlock(board, allBoardPoints);
 }
 
-void GoBlock::update(Point *newBeginPoint, vector_2d(int) &newBoard, vector_2d(Point*) &allBoardPoints)
+void GoBlock::update(Point *newBeginPoint, const vector_2d(int) &board, const vector_2d(Point*) &allBoardPoints)
 {
-    this->board = newBoard;
     this->beginPoint = newBeginPoint;
-    this->color = newBoard[newBeginPoint->x][newBeginPoint->y];
+    this->color = board[newBeginPoint->x][newBeginPoint->y];
     this->qi = -1;
-    this->findLinkedBlock(allBoardPoints);
+    this->findLinkedBlock(board, allBoardPoints);
 }
 
-void GoBlock::findLinkedBlock(vector_2d(Point*) &allBoardPoints)
+void GoBlock::findLinkedBlock(const vector_2d(int) &board, const vector_2d(Point*) &allBoardPoints)
 {
     this->pieces.clear();
     this->qiPoint.clear();
@@ -45,7 +43,7 @@ void GoBlock::findLinkedBlock(vector_2d(Point*) &allBoardPoints)
         {
             int newX = nowPoint->x + dx[i];
             int newY = nowPoint->y + dy[i];
-            if (this->check(newX, newY) && this->board[newX][newY] == this->color)
+            if (this->check(newX, newY) && board[newX][newY] == this->color)
             {
                 Point *newPoint = allBoardPoints[newX][newY];
                 if (this->pieces.find(newPoint) == this->pieces.end())
@@ -58,7 +56,7 @@ void GoBlock::findLinkedBlock(vector_2d(Point*) &allBoardPoints)
     }
 }
 
-int GoBlock::getQi(vector_2d(Point*) &allBoardPoints)
+int GoBlock::getQi(const vector_2d(int) &board, const vector_2d(Point*) &allBoardPoints)
 {
     for (auto &point : this->pieces)
     {
@@ -68,7 +66,7 @@ int GoBlock::getQi(vector_2d(Point*) &allBoardPoints)
         {
             int newX = aroundPoint->x;
             int newY = aroundPoint->y;
-            if (this->board[newX][newY] == 0)
+            if (board[newX][newY] == 0)
             {
                 Point *nowQi = allBoardPoints[newX][newY];
                 if (this->qiPoint.find(nowQi) == this->qiPoint.end())
@@ -132,7 +130,7 @@ void GoBlock::test()
     assert(w1Block.count(allBoardPoints[1][3]) == 1);
     assert(w1Block.count(allBoardPoints[1][4]) == 1);
     assert(w1Block.count(allBoardPoints[2][2]) == 1);
-    assert(w1.getQi(allBoardPoints) == 5);
+    assert(w1.getQi(testBoard, allBoardPoints) == 5);
     //black 1
     GoBlock b1(allBoardPoints[1][1], testBoard, allBoardPoints);
     blockPieces = b1.pieces;
@@ -140,7 +138,7 @@ void GoBlock::test()
     assert(b1Block.count(allBoardPoints[1][1]) == 1);
     assert(b1Block.count(allBoardPoints[2][0]) == 1);
     assert(b1Block.count(allBoardPoints[2][1]) == 1);
-    assert(b1.getQi(allBoardPoints) == 4);
+    assert(b1.getQi(testBoard, allBoardPoints) == 4);
     //black 2
     GoBlock b2(allBoardPoints[3][3], testBoard, allBoardPoints);
     blockPieces = b2.pieces;
@@ -149,13 +147,13 @@ void GoBlock::test()
     assert(b2Block.count(allBoardPoints[3][2]) == 1);
     assert(b2Block.count(allBoardPoints[3][3]) == 1);
     assert(b2Block.count(allBoardPoints[4][3]) == 1);
-    assert(b2.getQi(allBoardPoints) == 6);
+    assert(b2.getQi(testBoard, allBoardPoints) == 6);
     //black 3
     GoBlock b3(allBoardPoints[4][1], testBoard, allBoardPoints);
     blockPieces = b3.pieces;
     std::set<Point *> b3Block(blockPieces.begin(), blockPieces.end());
     assert(b3Block.count(allBoardPoints[4][1]) == 1);
-    assert(b3.getQi(allBoardPoints) == 4);
+    assert(b3.getQi(testBoard, allBoardPoints) == 4);
 }
 //
 

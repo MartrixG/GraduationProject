@@ -17,7 +17,7 @@ public:
 
     Point(int x, int y, int boardSize);
 
-    static void getAround(Point *nowPoint, vector_2d(Point*) &allBoardPoints, std::vector<Point *> &aroundPoints);
+    static void getAround(Point *nowPoint, const vector_2d(Point*) &allBoardPoints, std::vector<Point *> &aroundPoints);
 
     static void pointsInit(vector_2d(Point*) &allBoardPoints);
 

@@ -15,6 +15,7 @@ const int Y_BIAS            = 3;
 const int INFORMATION_BIAS  = 3;
 const int INFORMATION_START = 2;
 const int INFORMATION_END   = 3;
+const int HAND_CAP_BIAS     = 4;
 
 class GoSGF
 {
@@ -26,7 +27,7 @@ public:
 
     explicit GoSGF(std::string &file);
     void show();
-    bool haveNextStep();
+    bool haveNextStep() const;
     void getNextStep(Step* nextStep);
 };
 #endif //MARTRIXGOC_GOSGF_H

@@ -14,7 +14,7 @@ Point::Point(int x, int y, int boardSize)
     this->boardSize = boardSize;
 }
 
-void Point::getAround(Point *nowPoint, vector_2d(Point*) &allBoardPoints, std::vector<Point *> &aroundPoints)
+void Point::getAround(Point *nowPoint, const vector_2d(Point*) &allBoardPoints, std::vector<Point *> &aroundPoints)
 {
     int dx[4] = {0, 0, -1, 1};
     int dy[4] = {-1, 1, 0, 0};
