@@ -25,7 +25,8 @@ public:
 
     friend std::ostream &operator<<(std::ostream &out, const Step &o)
     {
-        out << o.x << " " << o.y << std::endl;
+        out << (o.player == BLACK_PLAYER ? "B " : "W ");
+        out <<  char('a' + o.x) << char('a' + o.y);
         return out;
     }
 };
