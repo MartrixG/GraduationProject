@@ -3,6 +3,8 @@
 #include "App.hpp"
 #include "Point.hpp"
 #include "Game.hpp"
+#include <sys/time.h>
+#include <unistd.h>
 
 enum argsEnum
 {
@@ -26,11 +28,12 @@ void testCode()
 
 int main(int argc, char *argv[])
 {
+    //struct timeval start, end;
+    //gettimeofday(&start, nullptr);
     initArgs();
     if (argsTransform.find(argv[1]) == argsTransform.end())
     {
         std::cout << "Can not find arg: " << argv[1] << '\n';
-        system("pause");
         return 0;
     }
     switch (argsTransform[argv[1]])
@@ -53,5 +56,6 @@ int main(int argc, char *argv[])
             testCode();
             break;
     }
-    system("pause");
+    //gettimeofday(&end, nullptr);
+    //std::cout << end.tv_usec - start.tv_usec;
 }
