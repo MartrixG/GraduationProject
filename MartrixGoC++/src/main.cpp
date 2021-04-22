@@ -1,55 +1,49 @@
+#include <map>
 #include <iostream>
-#include <vector>
+#include "App.hpp"
 #include "Point.hpp"
 #include "Game.hpp"
-#include "GoBlock.hpp"
-/*
-class bbb
-{
-public:
-    int f1, f2;
-    bbb(int f1, int f2)
-    {
-        this->f1 = f1;
-        this->f2 = f2;
-    }
-    friend std::ostream& operator<<(std::ostream& out, const bbb& o) {
-        out << "x: " << o.f1 << " y: " << o.f2;
-        return out;
-    }
-};
 
-class aaa
+enum argsEnum{loadSgf, analyze, test, commandLine};
+std::map<std::string, int> argsTransform;
+void initArgs()
 {
-public:
-    int a1;
-    bbb* a2;
-    aaa(int x, bbb* y)
-    {
-        this->a1 = x;
-        this->a2 = y;
-    }
-};
-bbb s = bbb(1, 2);
-aaa test = aaa(1, &s);
-*/
-int main()
+    argsTransform["loadSgf"] = loadSgf;
+    argsTransform["analyze"] = analyze;
+    argsTransform["test"] = test;
+    argsTransform["commandLine"] = commandLine;
+}
+
+void testCode()
 {
-    //bbb b1(1, 2), b2(3, 4), b3(5, 6), b4(7, 8);
-    /*
-    vector_2d(Point) allBoardPoints(BOARD_SIZE);
-    Point::pointsInit(allBoardPoints);
-    for(int i = 0; i < 3; i++) {
-        for (int j = 0; j < 3; j++) {
-            std::cout << allBoardPoints[i][j] << ":" << std::endl;
-            for (auto point : Point::getAround(allBoardPoints[i][j], allBoardPoints)) {
-                std::cout << *point << " ";
-                std::cout << " ";
-            }
-            std::cout << std::endl;
-        }
-    }
-     */
-    Point::test();
     GoBlock::test();
+    Point::test();
+}
+
+int main(int argc, char* argv[])
+{
+    initArgs();
+    if(argsTransform.find(argv[1]) == argsTransform.end())
+    {
+        std::cout << "Can not find arg: " << argv[1] << '\n';
+        system("pause");
+        return 0;
+    }
+    switch(argsTransform[argv[1]])
+    {
+        case loadSgf:
+            if(argc < 3)
+            {
+                std::cout << "load sgf must have a file.";
+                break;
+            }
+            Application::loadSGF(argv[2]);break;
+        case analyze:
+            Application::gameInformationAnalyze();break;
+        case commandLine:
+            Application::commandLine();break;
+        case test:
+            testCode();break;
+    }
+    system("pause");
 }
