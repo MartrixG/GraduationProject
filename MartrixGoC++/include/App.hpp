@@ -8,8 +8,10 @@
 class Application
 {
 public:
-    static void loadSGF(char* fileName);
+    static void loadSGF(char *fileName);
+
     static void gameInformationAnalyze();
+
     static void commandLine();
 };
 

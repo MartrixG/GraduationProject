@@ -1,5 +1,7 @@
 //
 // Created by 11409 on 2021/4/17.
+//
+
 #include "Step.hpp"
 
 Step::Step(char player, char x, char y)
@@ -27,5 +29,3 @@ Step::Step(int x, int y, int player)
     this->x = x;
     this->y = y;
 }
-//
-

@@ -1,5 +1,7 @@
 //
 // Created by 11409 on 2021/4/17.
+//
+
 #include <set>
 #include <queue>
 #include "GoBlock.hpp"
@@ -11,7 +13,7 @@ bool GoBlock::check(int x, int y) const
     return x >= 0 && x < this->beginPoint->boardSize && y >= 0 && y < this->beginPoint->boardSize;
 }
 
-GoBlock::GoBlock(Point *beginPoint,const vector_2d(int) &board, const vector_2d(Point*) &allBoardPoints)
+GoBlock::GoBlock(Point *beginPoint, const vector_2d(int) &board, const vector_2d(Point*) &allBoardPoints)
 {
     this->beginPoint = beginPoint;
     this->color = board[beginPoint->x][beginPoint->y];
@@ -155,5 +157,3 @@ void GoBlock::test()
     assert(b3Block.count(allBoardPoints[4][1]) == 1);
     assert(b3.getQi(testBoard, allBoardPoints) == 4);
 }
-//
-

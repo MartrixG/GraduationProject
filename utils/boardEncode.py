@@ -83,7 +83,7 @@ class BoardState(object):
         """
         whether a move is legal
         layer(1) : 44(layer[44][i][j] is 1 means the point(i, j) is legal to move)
-        qi after this move is played(one-hot encode, 8 layer)
+        qi after this move is played(one-hot encode, 8 layer)!!!!!!!!!!!!!!!!!!!!!!!!!(特判是否填眼)
         layer(8) : 36 - 43(layer[k][i][j] is 1 means move to point(i, j) would have k - 35 liberties)
         """
         if not isinstance(self.game, GoGame.Game):

@@ -1,5 +1,7 @@
 //
 // Created by 11409 on 2021/4/17.
+//
+
 #include <set>
 #include <iostream>
 #include <fstream>
@@ -34,30 +36,29 @@ void Game::redo()
 bool Game::moveAnalyze(Step *step)
 {
     int x = step->x, y = step->y;
-    if(step->player != this->player)
+    if (step->player != this->player)
     {
         return false;
     }
-    if(this->board[x][y] != 0)
+    if (this->board[x][y] != 0)
     {
         return false;
     }
     this->tmpBoard.assign(this->newBoard.begin(), this->newBoard.end());
     this->getPickUpBlock(this->allBoardPoints[x][y], this->newBoard);
-    if(!this->historyBoard.empty() && this->newBoard == this->historyBoard.back())
+    if (!this->historyBoard.empty() && this->newBoard == this->historyBoard.back())
     {
         this->newBoard.swap(this->tmpBoard);
         return false;
     }
-    if(this->targetBlock == nullptr)
+    if (this->targetBlock == nullptr)
     {
         this->targetBlock = new GoBlock(allBoardPoints[x][y], this->newBoard, this->allBoardPoints);
-    }
-    else
+    } else
     {
         this->targetBlock->update(this->allBoardPoints[x][y], this->newBoard, this->allBoardPoints);
     }
-    if(this->targetBlock->getQi(this->newBoard, this->allBoardPoints) == 0)
+    if (this->targetBlock->getQi(this->newBoard, this->allBoardPoints) == 0)
     {
         this->newBoard.swap(this->tmpBoard);
         return false;
@@ -69,7 +70,7 @@ bool Game::moveAnalyze(Step *step)
 
 void Game::move()
 {
-    this->player = this->player == WHITE_PLAYER ? BLACK_PLAYER: WHITE_PLAYER;
+    this->player = this->player == WHITE_PLAYER ? BLACK_PLAYER : WHITE_PLAYER;
     this->historyBoard.push_back(this->board);
     this->board.assign(this->newBoard.begin(), this->newBoard.end());
 }
@@ -115,14 +116,14 @@ void Game::getPickUpBlock(Point *targetPoint, vector_2d(int) &processBoard) cons
     }
 }
 
-void Game::loadFromBoard(const std::string& fileName, int nowPlayer)
+void Game::loadFromBoard(const std::string &fileName, int nowPlayer)
 {
     this->player = nowPlayer == WHITE_PLAYER ? BLACK_PLAYER : WHITE_PLAYER;
     std::ifstream inFile;
     inFile.open(fileName);
-    for(int i=0;i<BOARD_SIZE;i++)
+    for (int i = 0; i < BOARD_SIZE; i++)
     {
-        for(int j=0;j<BOARD_SIZE;j++)
+        for (int j = 0; j < BOARD_SIZE; j++)
         {
             inFile >> this->newBoard[i][j];
         }
@@ -130,5 +131,3 @@ void Game::loadFromBoard(const std::string& fileName, int nowPlayer)
     inFile.close();
     this->move();
 }
-//
-

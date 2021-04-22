@@ -42,29 +42,32 @@ public:
 
     void getPickUpBlock(Point *targetPoint, vector_2d(int) &processBoard) const;
 
-    void loadFromBoard(const std::string& fileName, int player);
+    void loadFromBoard(const std::string &fileName, int player);
 
     friend void operator<<(std::ostream &out, const Game &o)
     {
         std::cout << " ";
-        for(int i = 0; i < BOARD_SIZE; i++)
+        for (int i = 0; i < BOARD_SIZE; i++)
         {
             std::cout << " " << char('a' + i);
         }
         std::cout << std::endl;
-        for(int i = 0; i < BOARD_SIZE; i++)
+        for (int i = 0; i < BOARD_SIZE; i++)
         {
             std::cout << char('a' + i) << " ";
-            for(int j = 0; j < BOARD_SIZE; j++)
+            for (int j = 0; j < BOARD_SIZE; j++)
             {
                 switch (o.board[i][j])
                 {
                     case 0:
-                        std::cout << ". ";break;
+                        std::cout << ". ";
+                        break;
                     case BLACK_PLAYER:
-                        std::cout << "x ";break;
+                        std::cout << "x ";
+                        break;
                     case WHITE_PLAYER:
-                        std::cout << "o ";break;
+                        std::cout << "o ";
+                        break;
                 }
             }
             std::cout << '\n';

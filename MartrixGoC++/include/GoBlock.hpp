@@ -20,9 +20,9 @@ public:
 
     bool check(int x, int y) const;
 
-    GoBlock(Point *beginPoint,const vector_2d(int) &board, const vector_2d(Point*) &allBoardPoints);
+    GoBlock(Point *beginPoint, const vector_2d(int) &board, const vector_2d(Point*) &allBoardPoints);
 
-    void update(Point * beginPoint, const vector_2d(int) &board, const vector_2d(Point*) &allBoardPoints);
+    void update(Point *beginPoint, const vector_2d(int) &board, const vector_2d(Point*) &allBoardPoints);
 
     void findLinkedBlock(const vector_2d(int) &board, const vector_2d(Point*) &allBoardPoints);
 

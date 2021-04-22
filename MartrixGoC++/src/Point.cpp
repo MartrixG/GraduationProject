@@ -1,10 +1,10 @@
 //
 // Created by 11409 on 2021/4/17.
 //
+
 #include <vector>
 #include "Point.hpp"
 #include "Game.hpp"
-
 #include <cassert>
 
 Point::Point(int x, int y, int boardSize)

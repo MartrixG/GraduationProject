@@ -36,7 +36,7 @@ GoSGF::GoSGF(std::string &srcFileContext)
             if (this->gameInformation[i] == '[')
             { numOfHandCap++; }
         }
-        for(int i = 0; i < numOfHandCap; i++)
+        for (int i = 0; i < numOfHandCap; i++)
         {
             this->steps.push_back(new Step('B',
                                            this->gameInformation[afterABPos + i * HAND_CAP_BIAS + 2],
@@ -57,7 +57,7 @@ void GoSGF::show()
     std::cout << "Rule :\t" << this->RU << std::endl;
     std::cout << "result :\t" << (this->RE == BLACK_PLAYER ? "B" : "W") << std::endl;
     std::cout << "hand cap :\t" << this->HA << std::endl;
-    for(auto &step : this->steps)
+    for (auto &step : this->steps)
     {
         std::cout << (BLACK_PLAYER == step->player ? "B " : "W ") << *step;
     }
@@ -65,16 +65,16 @@ void GoSGF::show()
 
 bool GoSGF::haveNextStep() const
 {
-    if(this->nowStep == this->steps.size())
+    if (this->nowStep == this->steps.size())
     {
         return false;
-    }else
+    } else
     {
         return true;
     }
 }
 
-void GoSGF::getNextStep(Step* &nextStep)
+void GoSGF::getNextStep(Step *&nextStep)
 {
     nextStep = this->steps[this->nowStep];
     this->nowStep++;
