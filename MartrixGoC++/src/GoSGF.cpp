@@ -25,7 +25,7 @@ GoSGF::GoSGF(std::string &srcFileContext)
     {
         int afterABPos = int(this->gameInformation.find("AB")) + 2;
         int numOfHandCap = 0;
-        for (int i = afterABPos; i < this->gameInformation.size(); i++)
+        for (int i = afterABPos; i < int(this->gameInformation.size()); i++)
         {
             if (this->gameInformation[i] == ';')
             {
@@ -65,7 +65,7 @@ void GoSGF::show()
 
 bool GoSGF::haveNextStep() const
 {
-    if (this->nowStep == this->steps.size())
+    if (this->nowStep == int(this->steps.size()))
     {
         return false;
     } else
