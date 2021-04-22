@@ -28,6 +28,6 @@ public:
     explicit GoSGF(std::string &file);
     void show();
     bool haveNextStep() const;
-    void getNextStep(Step* nextStep);
+    void getNextStep(Step* &nextStep);
 };
 #endif //MARTRIXGOC_GOSGF_H
