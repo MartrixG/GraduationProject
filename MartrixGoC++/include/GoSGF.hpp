@@ -23,7 +23,7 @@ public:
     std::string RU, fileContext, gameInformation;
     int RE, HA;
     int nowStep;
-    std::vector<Step *> steps;
+    std::vector<Step*> steps;
 
     explicit GoSGF(std::string &file);
 
@@ -31,7 +31,7 @@ public:
 
     bool haveNextStep() const;
 
-    void getNextStep(Step *&nextStep);
+    void getNextStep(Step*&nextStep);
 };
 
 #endif //MARTRIXGOC_GOSGF_H

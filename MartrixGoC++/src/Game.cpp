@@ -16,7 +16,7 @@ Game::Game(vector_2d(Point*) &points)
     this->targetBlock = new GoBlock();
 }
 
-void Game::initHandCap(std::vector<Step *> &handCapSteps, int numOfHandCap)
+void Game::initHandCap(std::vector<Step*> &handCapSteps, int numOfHandCap)
 {
     for (int i = 0; i < numOfHandCap; i++)
     {
@@ -33,7 +33,7 @@ void Game::redo()
     this->player = this->player == WHITE_PLAYER ? BLACK_PLAYER : WHITE_PLAYER;
 }
 
-bool Game::moveAnalyze(Step *step)
+bool Game::moveAnalyze(Step* step)
 {
     int x = step->x, y = step->y;
     if (step->player != this->player)
@@ -69,10 +69,10 @@ void Game::move()
     this->board.assign(this->newBoard.begin(), this->newBoard.end());
 }
 
-void Game::getPickUpBlock(Point *targetPoint, vector_2d(int) &processBoard) const
+void Game::getPickUpBlock(Point* targetPoint, vector_2d(int) &processBoard) const
 {
-    std::set<GoBlock *> nearGoBlocks;
-    std::vector<Point *> around;
+    std::set<GoBlock*> nearGoBlocks;
+    std::vector<Point*> around;
     Point::getAround(targetPoint, this->allBoardPoints, around);
     processBoard[targetPoint->x][targetPoint->y] = this->player;
     for (auto &point :around)

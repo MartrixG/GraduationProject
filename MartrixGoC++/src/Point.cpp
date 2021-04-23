@@ -14,7 +14,7 @@ Point::Point(int x, int y, int boardSize)
     this->boardSize = boardSize;
 }
 
-void Point::getAround(Point *nowPoint, const vector_2d(Point*) &allBoardPoints, std::vector<Point *> &aroundPoints)
+void Point::getAround(Point* nowPoint, const vector_2d(Point*) &allBoardPoints, std::vector<Point*> &aroundPoints)
 {
     int dx[4] = {0, 0, -1, 1};
     int dy[4] = {-1, 1, 0, 0};
@@ -29,7 +29,7 @@ void Point::getAround(Point *nowPoint, const vector_2d(Point*) &allBoardPoints, 
     }
 }
 
-void Point::getDiagonal(Point *nowPoint, const vector_2d(Point*) &allBoardPoints, std::vector<Point *> &diagonalPoints)
+void Point::getDiagonal(Point* nowPoint, const vector_2d(Point*) &allBoardPoints, std::vector<Point*> &diagonalPoints)
 {
     int dx[4] = {-1, -1, 1, 1};
     int dy[4] = {-1, 1, -1, 1};
@@ -75,7 +75,7 @@ void Point::test()
             assert(allBoardPoints[i][j]->y == j);
         }
     }
-    Point *testMatrix[3][3];
+    Point* testMatrix[3][3];
     for (int i = 0; i < 3; i++)
     {
         for (int j = 0; j < 3; j++)
@@ -83,13 +83,13 @@ void Point::test()
             testMatrix[i][j] = allBoardPoints[i][j];
         }
     }
-    std::vector<Point *> around1, around2, around3, around4;
+    std::vector<Point*> around1, around2, around3, around4;
     Point::getAround(testMatrix[0][0], allBoardPoints, around1);
     Point::getAround(testMatrix[0][1], allBoardPoints, around2);
     Point::getAround(testMatrix[1][0], allBoardPoints, around3);
     Point::getAround(testMatrix[1][1], allBoardPoints, around4);
 
-    std::vector<Point *> diagonal1, diagonal2, diagonal3, diagonal4;
+    std::vector<Point*> diagonal1, diagonal2, diagonal3, diagonal4;
     Point::getDiagonal(testMatrix[0][0], allBoardPoints, diagonal1);
     Point::getDiagonal(testMatrix[0][1], allBoardPoints, diagonal2);
     Point::getDiagonal(testMatrix[1][0], allBoardPoints, diagonal3);

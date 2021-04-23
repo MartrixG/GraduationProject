@@ -21,25 +21,25 @@ public:
     int player = BLACK_PLAYER;
     int boardSize = BOARD_SIZE;
     vector_2d(Point*) allBoardPoints;
-    std::vector<Step *> steps = std::vector<Step *>();
+    std::vector<Step*> steps = std::vector<Step*>();
     vector_2d(int) board = vector_2d(int)(BOARD_SIZE, std::vector<int>(BOARD_SIZE));
     std::vector<vector_2d(int)> historyBoard = std::vector<vector_2d(int)>();
     vector_2d(int) newBoard = vector_2d(int)(BOARD_SIZE, std::vector<int>(BOARD_SIZE));
-    Step *nextStep = nullptr;
-    GoBlock *targetBlock = nullptr;
+    Step* nextStep = nullptr;
+    GoBlock* targetBlock = nullptr;
 
 
     explicit Game(vector_2d(Point*) &points);
 
-    void initHandCap(std::vector<Step *> &handCapSteps, int numOfHandCap);
+    void initHandCap(std::vector<Step*> &handCapSteps, int numOfHandCap);
 
     void redo();
 
-    bool moveAnalyze(Step *Step);
+    bool moveAnalyze(Step* Step);
 
     void move();
 
-    void getPickUpBlock(Point *targetPoint, vector_2d(int) &processBoard) const;
+    void getPickUpBlock(Point* targetPoint, vector_2d(int) &processBoard) const;
 
     void loadFromBoard(const std::string &fileName, int player);
 

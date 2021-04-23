@@ -25,7 +25,7 @@ void testCode()
     Point::test();
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     clock_t start = std::clock();
     initArgs();

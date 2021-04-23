@@ -74,7 +74,7 @@ bool GoSGF::haveNextStep() const
     }
 }
 
-void GoSGF::getNextStep(Step *&nextStep)
+void GoSGF::getNextStep(Step*&nextStep)
 {
     nextStep = this->steps[this->nowStep];
     this->nowStep++;

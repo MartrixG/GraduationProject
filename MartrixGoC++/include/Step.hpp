@@ -19,7 +19,7 @@ public:
 
     explicit Step(char player, char x, char y);
 
-    Step(int player, Point *point);
+    Step(int player, Point* point);
 
     Step(int x, int y, int player);
 

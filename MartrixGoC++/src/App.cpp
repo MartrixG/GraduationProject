@@ -13,7 +13,7 @@
 void Application::loadSGF(int argc, char* argv[])
 {
     // read sgf file
-    if(argc < 3)
+    if (argc < 3)
     {
         std::cout << "need file name";
         return;
@@ -35,7 +35,7 @@ void Application::loadSGF(int argc, char* argv[])
     }
     while (sgf.haveNextStep())
     {
-        Step *step = nullptr;
+        Step* step = nullptr;
         sgf.getNextStep(step);
         std::cout << "No." << sgf.nowStep - sgf.HA << "(" << *step << ")\n";
         if (game.moveAnalyze(step))
@@ -49,7 +49,7 @@ void Application::loadSGF(int argc, char* argv[])
 void Application::makeData(int argc, char* argv[])
 {
     // arg analyze
-    if(argc < 4)
+    if (argc < 4)
     {
         std::cout << "need file name";
         return;
@@ -62,14 +62,14 @@ void Application::makeData(int argc, char* argv[])
     std::string fileContext;
     int chosenNumberOfLine;
     chosenNumberOfLine = strtol(argv[3], new char*, 10);
-    if(chosenNumberOfLine == 0)
+    if (chosenNumberOfLine == 0)
     {
-        while(std::getline(fileStick, fileContext))
+        while (std::getline(fileStick, fileContext))
         {
             gameInformationAnalyze(allBoardPoints, fileContext);
         }
     }
-    while(chosenNumberOfLine != 0)
+    while (chosenNumberOfLine != 0)
     {
         chosenNumberOfLine--;
         std::getline(fileStick, fileContext);
@@ -91,7 +91,7 @@ void Application::gameInformationAnalyze(vector_2d(Point*) allBoardPoints, std::
     // step by step
     while (sgf.haveNextStep())
     {
-        Step *step = nullptr;
+        Step* step = nullptr;
         sgf.getNextStep(step);
         if (game.moveAnalyze(step))
         {
@@ -122,7 +122,7 @@ void Application::commandLine(int argc, char* argv[])
         }
         x--;
         y--;
-        Step *nextStep = new Step(player, allBoardPoints[x][y]);
+        Step* nextStep = new Step(player, allBoardPoints[x][y]);
         if (game.moveAnalyze(nextStep))
         {
             game.move();

@@ -16,7 +16,7 @@ Step::Step(char player, char x, char y)
     }
 }
 
-Step::Step(int player, Point *point)
+Step::Step(int player, Point* point)
 {
     this->player = player;
     this->x = point->x;

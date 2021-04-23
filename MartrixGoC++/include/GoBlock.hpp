@@ -12,9 +12,9 @@
 class GoBlock
 {
 public:
-    std::set<Point *> pieces = std::set<Point *>();
-    std::set<Point *> qiPoint = std::set<Point *>();
-    Point *beginPoint = nullptr;
+    std::set<Point*> pieces = std::set<Point*>();
+    std::set<Point*> qiPoint = std::set<Point*>();
+    Point* beginPoint = nullptr;
     int color = -1;
     int qi = -1;
 
@@ -22,15 +22,15 @@ public:
 
     GoBlock();
 
-    GoBlock(Point *beginPoint, const vector_2d(int) &board, const vector_2d(Point*) &allBoardPoints);
+    GoBlock(Point* beginPoint, const vector_2d(int) &board, const vector_2d(Point*) &allBoardPoints);
 
-    void update(Point *beginPoint, const vector_2d(int) &board, const vector_2d(Point*) &allBoardPoints);
+    void update(Point* beginPoint, const vector_2d(int) &board, const vector_2d(Point*) &allBoardPoints);
 
     void findLinkedBlock(const vector_2d(int) &board, const vector_2d(Point*) &allBoardPoints);
 
     int getQi(const vector_2d(int) &board, const vector_2d(Point*) &allBoardPoints);
 
-    bool contain(Point *point) const;
+    bool contain(Point* point) const;
 
     static void test();
 
