@@ -25,7 +25,6 @@ public:
     vector_2d(int) board = vector_2d(int)(BOARD_SIZE, std::vector<int>(BOARD_SIZE));
     std::vector<vector_2d(int)> historyBoard = std::vector<vector_2d(int)>();
     vector_2d(int) newBoard = vector_2d(int)(BOARD_SIZE, std::vector<int>(BOARD_SIZE));
-    vector_2d(int) tmpBoard = vector_2d(int)(BOARD_SIZE, std::vector<int>(BOARD_SIZE));
     Step *nextStep = nullptr;
     GoBlock *targetBlock = nullptr;
 

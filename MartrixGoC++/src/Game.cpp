@@ -45,17 +45,17 @@ bool Game::moveAnalyze(Step *step)
     {
         return false;
     }
-    this->tmpBoard.assign(this->newBoard.begin(), this->newBoard.end());
+    this->newBoard.assign(this->board.begin(), this->board.end());
     this->getPickUpBlock(this->allBoardPoints[x][y], this->newBoard);
     if (!this->historyBoard.empty() && this->newBoard == this->historyBoard.back())
     {
-        this->newBoard.swap(this->tmpBoard);
+        this->newBoard.assign(this->board.begin(), this->board.end());
         return false;
     }
     this->targetBlock->update(this->allBoardPoints[x][y], this->newBoard, this->allBoardPoints);
     if (this->targetBlock->getQi(this->newBoard, this->allBoardPoints) == 0)
     {
-        this->newBoard.swap(this->tmpBoard);
+        this->newBoard.assign(this->board.begin(), this->board.end());
         return false;
     }
     this->nextStep = step;
