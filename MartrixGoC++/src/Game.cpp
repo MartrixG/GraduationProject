@@ -20,9 +20,8 @@ void Game::initHandCap(std::vector<Step *> &handCapSteps, int numOfHandCap)
 {
     for (int i = 0; i < numOfHandCap; i++)
     {
-        this->newBoard[handCapSteps[i]->x][handCapSteps[i]->y] = BLACK_PLAYER;
+        this->board[handCapSteps[i]->x][handCapSteps[i]->y] = BLACK_PLAYER;
     }
-    this->move();
 }
 
 void Game::redo()

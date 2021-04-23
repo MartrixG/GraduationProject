@@ -30,8 +30,8 @@ void Application::loadSGF(int argc, char* argv[])
 
     if (sgf.HA != 0)
     {
-        sgf.nowStep += sgf.HA;
-        game.initHandCap(sgf.steps, sgf.HA);
+        sgf.nowStep += sgf.HA - 1;
+        game.initHandCap(sgf.steps, sgf.HA - 1);
     }
     while (sgf.haveNextStep())
     {
@@ -85,8 +85,8 @@ void Application::gameInformationAnalyze(vector_2d(Point*) allBoardPoints, std::
     // handCap
     if (sgf.HA != 0)
     {
-        sgf.nowStep += sgf.HA;
-        game.initHandCap(sgf.steps, sgf.HA);
+        sgf.nowStep += sgf.HA - 1;
+        game.initHandCap(sgf.steps, sgf.HA - 1);
     }
     // step by step
     while (sgf.haveNextStep())
