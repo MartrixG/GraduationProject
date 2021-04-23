@@ -5,12 +5,16 @@
 #ifndef MARTRIXGOC_APP_HPP
 #define MARTRIXGOC_APP_HPP
 
+#include "Point.hpp"
+
 class Application
 {
 public:
     static void loadSGF(int argc, char* argv[]);
 
-    static void gameInformationAnalyze(int argc, char* argv[]);
+    static void makeData(int argc, char* argv[]);
+
+    static void gameInformationAnalyze(vector_2d(Point*) allBoardPoints, std::string fileContext);
 
     static void commandLine(int argc, char* argv[]);
 };
