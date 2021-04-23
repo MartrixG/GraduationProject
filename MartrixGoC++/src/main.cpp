@@ -3,20 +3,19 @@
 #include "App.hpp"
 #include "Point.hpp"
 #include "Game.hpp"
-#include "BoardEncode.hpp"
 #include <sys/time.h>
 #include <unistd.h>
 
 enum argsEnum
 {
-    loadSgf, analyze, test, commandLine
+    loadSgf, makeData, test, commandLine
 };
 std::map<std::string, int> argsTransform;
 
 void initArgs()
 {
     argsTransform["loadSgf"] = loadSgf;
-    argsTransform["analyze"] = analyze;
+    argsTransform["makeData"] = makeData;
     argsTransform["test"] = test;
     argsTransform["commandLine"] = commandLine;
 }
@@ -24,13 +23,13 @@ void initArgs()
 void testCode()
 {
     GoBlock::test();
-    // Point::test();
+    Point::test();
 }
 
 int main(int argc, char *argv[])
 {
-    //struct timeval start, end;
-    //gettimeofday(&start, nullptr);
+    struct timeval start, end;
+    gettimeofday(&start, nullptr);
     initArgs();
     if (argsTransform.find(argv[1]) == argsTransform.end())
     {
@@ -42,8 +41,8 @@ int main(int argc, char *argv[])
         case loadSgf:
             Application::loadSGF(argc, argv);
             break;
-        case analyze:
-            Application::gameInformationAnalyze(argc, argv);
+        case makeData:
+            Application::makeData(argc, argv);
             break;
         case commandLine:
             Application::commandLine(argc, argv);
@@ -52,6 +51,6 @@ int main(int argc, char *argv[])
             testCode();
             break;
     }
-    //gettimeofday(&end, nullptr);
-    //std::cout << end.tv_usec - start.tv_usec;
+    gettimeofday(&end, nullptr);
+    std::cout << end.tv_usec - start.tv_usec;
 }
