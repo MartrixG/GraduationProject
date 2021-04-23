@@ -8,11 +8,11 @@
 class Application
 {
 public:
-    static void loadSGF(char *fileName);
+    static void loadSGF(int argc, char* argv[]);
 
-    static void gameInformationAnalyze();
+    static void gameInformationAnalyze(int argc, char* argv[]);
 
-    static void commandLine();
+    static void commandLine(int argc, char* argv[]);
 };
 
 #endif //MARTRIXGOC_APP_HPP

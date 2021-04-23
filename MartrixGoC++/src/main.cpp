@@ -3,6 +3,7 @@
 #include "App.hpp"
 #include "Point.hpp"
 #include "Game.hpp"
+#include "BoardEncode.hpp"
 #include <sys/time.h>
 #include <unistd.h>
 
@@ -23,7 +24,7 @@ void initArgs()
 void testCode()
 {
     GoBlock::test();
-    Point::test();
+    // Point::test();
 }
 
 int main(int argc, char *argv[])
@@ -39,18 +40,13 @@ int main(int argc, char *argv[])
     switch (argsTransform[argv[1]])
     {
         case loadSgf:
-            if (argc < 3)
-            {
-                std::cout << "load sgf must have a file.";
-                break;
-            }
-            Application::loadSGF(argv[2]);
+            Application::loadSGF(argc, argv);
             break;
         case analyze:
-            Application::gameInformationAnalyze();
+            Application::gameInformationAnalyze(argc, argv);
             break;
         case commandLine:
-            Application::commandLine();
+            Application::commandLine(argc, argv);
             break;
         case test:
             testCode();
