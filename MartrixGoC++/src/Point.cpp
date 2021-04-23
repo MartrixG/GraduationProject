@@ -29,6 +29,21 @@ void Point::getAround(Point *nowPoint, const vector_2d(Point*) &allBoardPoints, 
     }
 }
 
+void Point::getDiagonal(Point *nowPoint, const vector_2d(Point*) &allBoardPoints, std::vector<Point *> &diagonalPoints)
+{
+    int dx[4] = {-1, -1, 1, 1};
+    int dy[4] = {-1, 1, -1, 1};
+    for (int i = 0; i < 4; i++)
+    {
+        int newX = nowPoint->x + dx[i];
+        int newY = nowPoint->y + dy[i];
+        if (newX >= 0 && newX < nowPoint->boardSize && newY >= 0 && newY < nowPoint->boardSize)
+        {
+            diagonalPoints.push_back(allBoardPoints[newX][newY]);
+        }
+    }
+}
+
 void Point::pointsInit(vector_2d(Point*) &allBoardPoints)
 {
     for (int i = 0; i < BOARD_SIZE; i++)
@@ -73,20 +88,35 @@ void Point::test()
     Point::getAround(testMatrix[0][1], allBoardPoints, around2);
     Point::getAround(testMatrix[1][0], allBoardPoints, around3);
     Point::getAround(testMatrix[1][1], allBoardPoints, around4);
+
+    std::vector<Point *> diagonal1, diagonal2, diagonal3, diagonal4;
+    Point::getDiagonal(testMatrix[0][0], allBoardPoints, diagonal1);
+    Point::getDiagonal(testMatrix[0][1], allBoardPoints, diagonal2);
+    Point::getDiagonal(testMatrix[1][0], allBoardPoints, diagonal3);
+    Point::getDiagonal(testMatrix[1][1], allBoardPoints, diagonal4);
     //test 00
     assert(testMatrix[0][1] == around1[0]);
     assert(testMatrix[1][0] == around1[1]);
+    assert(testMatrix[1][1] == diagonal1[0]);
     //test 01
     assert(testMatrix[0][0] == around2[0]);
     assert(testMatrix[0][2] == around2[1]);
     assert(testMatrix[1][1] == around2[2]);
+    assert(testMatrix[1][0] == diagonal2[0]);
+    assert(testMatrix[1][2] == diagonal2[1]);
     //test 10
     assert(testMatrix[1][1] == around3[0]);
     assert(testMatrix[0][0] == around3[1]);
     assert(testMatrix[2][0] == around3[2]);
+    assert(testMatrix[0][1] == diagonal3[0]);
+    assert(testMatrix[2][1] == diagonal3[1]);
     //test 11
     assert(testMatrix[1][0] == around4[0]);
     assert(testMatrix[1][2] == around4[1]);
     assert(testMatrix[0][1] == around4[2]);
     assert(testMatrix[2][1] == around4[3]);
+    assert(testMatrix[0][0] == diagonal4[0]);
+    assert(testMatrix[0][2] == diagonal4[1]);
+    assert(testMatrix[2][0] == diagonal4[2]);
+    assert(testMatrix[2][2] == diagonal4[3]);
 }

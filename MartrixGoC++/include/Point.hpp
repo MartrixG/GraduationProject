@@ -19,6 +19,8 @@ public:
 
     static void getAround(Point *nowPoint, const vector_2d(Point*) &allBoardPoints, std::vector<Point *> &aroundPoints);
 
+    static void getDiagonal(Point *nowPoint, const vector_2d(Point*) &allBoardPoints, std::vector<Point *> &diagonalPoints);
+
     static void pointsInit(vector_2d(Point*) &allBoardPoints);
 
     friend std::ostream &operator<<(std::ostream &out, const Point &o)
