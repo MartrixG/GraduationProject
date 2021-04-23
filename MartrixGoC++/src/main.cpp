@@ -1,10 +1,9 @@
 #include <map>
 #include <iostream>
+#include <ctime>
 #include "App.hpp"
 #include "Point.hpp"
 #include "Game.hpp"
-#include <sys/time.h>
-#include <unistd.h>
 
 enum argsEnum
 {
@@ -28,8 +27,7 @@ void testCode()
 
 int main(int argc, char *argv[])
 {
-    struct timeval start, end;
-    gettimeofday(&start, nullptr);
+    clock_t start = std::clock();
     initArgs();
     if (argsTransform.find(argv[1]) == argsTransform.end())
     {
@@ -51,6 +49,6 @@ int main(int argc, char *argv[])
             testCode();
             break;
     }
-    gettimeofday(&end, nullptr);
-    std::cout << end.tv_usec - start.tv_usec;
+    clock_t end = std::clock();
+    std::cout << end - start;
 }
