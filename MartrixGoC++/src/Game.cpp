@@ -13,6 +13,7 @@
 Game::Game(vector_2d(Point*) &points)
 {
     this->allBoardPoints = points;
+    this->targetBlock = new GoBlock();
 }
 
 void Game::initHandCap(std::vector<Step *> &handCapSteps, int numOfHandCap)
@@ -51,13 +52,7 @@ bool Game::moveAnalyze(Step *step)
         this->newBoard.swap(this->tmpBoard);
         return false;
     }
-    if (this->targetBlock == nullptr)
-    {
-        this->targetBlock = new GoBlock(allBoardPoints[x][y], this->newBoard, this->allBoardPoints);
-    } else
-    {
-        this->targetBlock->update(this->allBoardPoints[x][y], this->newBoard, this->allBoardPoints);
-    }
+    this->targetBlock->update(this->allBoardPoints[x][y], this->newBoard, this->allBoardPoints);
     if (this->targetBlock->getQi(this->newBoard, this->allBoardPoints) == 0)
     {
         this->newBoard.swap(this->tmpBoard);

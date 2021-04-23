@@ -20,6 +20,8 @@ public:
 
     bool check(int x, int y) const;
 
+    GoBlock();
+
     GoBlock(Point *beginPoint, const vector_2d(int) &board, const vector_2d(Point*) &allBoardPoints);
 
     void update(Point *beginPoint, const vector_2d(int) &board, const vector_2d(Point*) &allBoardPoints);

@@ -13,6 +13,8 @@ bool GoBlock::check(int x, int y) const
     return x >= 0 && x < this->beginPoint->boardSize && y >= 0 && y < this->beginPoint->boardSize;
 }
 
+GoBlock::GoBlock() = default;
+
 GoBlock::GoBlock(Point *beginPoint, const vector_2d(int) &board, const vector_2d(Point*) &allBoardPoints)
 {
     this->beginPoint = beginPoint;
