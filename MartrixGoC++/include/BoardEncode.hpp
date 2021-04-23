@@ -123,7 +123,7 @@ static void boardEncode(Game &game, const std::string &fileName)
                 if(!eyeFlag)
                 {
                     state[5][i][j] = 1;
-                    int qi = game.targetBlock->getQi(game.board, game.allBoardPoints);
+                    int qi = game.targetBlock->getQi(game.newBoard, game.allBoardPoints);
                     qi = qi > 8 ? 8 : qi;
                     state[6][i][j] = char(qi);
                 }
