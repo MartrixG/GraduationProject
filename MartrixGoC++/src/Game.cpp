@@ -58,13 +58,13 @@ bool Game::moveAnalyze(Step *step)
         this->newBoard.swap(this->tmpBoard);
         return false;
     }
-    this->steps.push_back(step);
     this->nextStep = step;
     return true;
 }
 
 void Game::move()
 {
+    this->steps.push_back(this->nextStep);
     this->player = this->player == WHITE_PLAYER ? BLACK_PLAYER : WHITE_PLAYER;
     this->historyBoard.push_back(this->board);
     this->board.assign(this->newBoard.begin(), this->newBoard.end());
