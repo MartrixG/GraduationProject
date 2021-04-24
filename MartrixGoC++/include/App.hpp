@@ -5,6 +5,8 @@
 #ifndef MARTRIXGOC_APP_HPP
 #define MARTRIXGOC_APP_HPP
 
+#include <iostream>
+#include <fstream>
 #include "Point.hpp"
 
 class Application
@@ -14,7 +16,7 @@ public:
 
     static void makeData(int argc, char* argv[]);
 
-    static void gameInformationAnalyze(vector_2d(Point*) allBoardPoints, std::string fileContext);
+    static void gameInformationAnalyze(vector_2d(Point*) &allBoardPoints, std::string &srcSgf, std::ofstream &featureFileStream);
 
     static void commandLine(int argc, char* argv[]);
 };

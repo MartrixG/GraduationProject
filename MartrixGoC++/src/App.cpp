@@ -5,6 +5,7 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <iomanip>
 #include "Game.hpp"
 #include "GoSGF.hpp"
 #include "App.hpp"
@@ -49,39 +50,51 @@ void Application::loadSGF(int argc, char* argv[])
 void Application::makeData(int argc, char* argv[])
 {
     // arg analyze
-    if (argc < 4)
+    if (argc < 5)
     {
-        std::cout << "need file name";
+        std::cout << "need file name or file line";
         return;
     }
     // init points
     vector_2d(Point*) allBoardPoints(BOARD_SIZE);
     Point::pointsInit(allBoardPoints);
     // read sgf file
-    std::fstream fileStick(argv[2]);
-    std::string fileContext;
+    std::ifstream srcFileStream(argv[2], std::ios::in);
+    std::string featureFileName = argv[3];
+    featureFileName += "/feature.txt";
+    std::ofstream featureFileStream(featureFileName, std::ios::out);
+    std::string srcSgf;
     int chosenNumberOfLine;
-    chosenNumberOfLine = strtol(argv[3], new char*, 10);
+    char* _;
+    chosenNumberOfLine = strtol(argv[4], &_, 10);
+    int line = 0, lines = 482;
     if (chosenNumberOfLine == 0)
     {
-        while (std::getline(fileStick, fileContext))
+        while (std::getline(srcFileStream, srcSgf))
         {
-            gameInformationAnalyze(allBoardPoints, fileContext);
+            gameInformationAnalyze(allBoardPoints, srcSgf, featureFileStream);
+            line++;
+            std::cout << std::left << std::setw(3) << line << "/ " << lines << '\n';
         }
     }
-    while (chosenNumberOfLine != 0)
+    else
     {
-        chosenNumberOfLine--;
-        std::getline(fileStick, fileContext);
+        while (chosenNumberOfLine != 0)
+        {
+            chosenNumberOfLine--;
+            std::getline(srcFileStream, srcSgf);
+        }
+        gameInformationAnalyze(allBoardPoints, srcSgf, featureFileStream);
     }
-    gameInformationAnalyze(allBoardPoints, fileContext);
+    srcFileStream.close();
+    featureFileStream.close();
 }
 
-void Application::gameInformationAnalyze(vector_2d(Point*) allBoardPoints, std::string fileContext)
+void Application::gameInformationAnalyze(vector_2d(Point*) &allBoardPoints, std::string &srcSgf, std::ofstream &featureFileStream)
 {
     // init go game
     Game game = Game(allBoardPoints);
-    GoSGF sgf(fileContext);
+    GoSGF sgf(srcSgf);
     // handCap
     if (sgf.HA != 0)
     {
@@ -89,17 +102,18 @@ void Application::gameInformationAnalyze(vector_2d(Point*) allBoardPoints, std::
         game.initHandCap(sgf.steps, sgf.HA - 1);
     }
     // step by step
-    while (sgf.haveNextStep())
+    Step* step = nullptr;
+    sgf.getNextStep(step);
+    do
     {
-        Step* step = nullptr;
-        sgf.getNextStep(step);
         if (game.moveAnalyze(step))
         {
             game.move();
-            boardEncode(game, "aaa");
-            //std::cout << sgf.nowStep << std::endl;
+            boardEncode(game, featureFileStream);
         }
-    }
+        sgf.getNextStep(step);
+        featureFileStream << *step << '\n';
+    } while (sgf.haveNextStep());
 }
 
 void Application::commandLine(int argc, char* argv[])

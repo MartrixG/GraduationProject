@@ -6,11 +6,13 @@
 #define MARTRIXGOC_BOARDENCODE_HPP
 
 #include <cstring>
+#include <iostream>
+#include <fstream>
 #include "Game.hpp"
 
-static void boardEncode(Game &game, const std::string &fileName)
+static char boardEncode(Game &game, std::ofstream &featureFileStream)
 {
-    char state[7][BOARD_SIZE][BOARD_SIZE];
+    int state[7][BOARD_SIZE][BOARD_SIZE];
     memset(state, 0, sizeof(state));
     //color
     //layer:0 0:empty 1:black 2:white
@@ -18,7 +20,7 @@ static void boardEncode(Game &game, const std::string &fileName)
     {
         for (int j = 0; j < BOARD_SIZE; j++)
         {
-            state[0][i][j] = char(game.board[i][j]);
+            state[0][i][j] = game.board[i][j];
         }
     }
     //turn
@@ -35,7 +37,7 @@ static void boardEncode(Game &game, const std::string &fileName)
         {
             if (game.historyBoard[game.historyBoard.size() - epoch][i][j] != 0)
             {
-                state[1][i][j] = char(epoch + 1);
+                state[1][i][j] = epoch + 1;
             }
         }
     }
@@ -63,15 +65,15 @@ static void boardEncode(Game &game, const std::string &fileName)
                     tmpBoard[x][y] = 1;
                     qi = qi > 8 ? 8 : qi;
                     blockSize = blockSize > 8 ? 8 : blockSize;
-                    state[2][x][y] = char(qi);
+                    state[2][x][y] = qi;
                     if (qi == 1)
                     {
                         if (game.board[x][y] != game.player)
                         {
-                            state[3][x][y] = char(blockSize);
+                            state[3][x][y] = blockSize;
                         } else
                         {
-                            state[4][x][y] = char(blockSize);
+                            state[4][x][y] = blockSize;
                         }
                     }
                 }
@@ -114,7 +116,7 @@ static void boardEncode(Game &game, const std::string &fileName)
                             count++;
                         }
                     }
-                    if (count == int(diagonal.size() - 1))
+                    if (count != int(diagonal.size() - 1))
                     {
                         eyeFlag = false;
                     }
@@ -124,11 +126,22 @@ static void boardEncode(Game &game, const std::string &fileName)
                     state[5][i][j] = 1;
                     int qi = game.targetBlock->getQi(game.newBoard, game.allBoardPoints);
                     qi = qi > 8 ? 8 : qi;
-                    state[6][i][j] = char(qi);
+                    state[6][i][j] = qi;
                 }
             }
         }
     }
+    for(auto & i : state)
+    {
+        for(auto & j : i)
+        {
+            for(auto & k : j)
+            {
+                featureFileStream << k;
+            }
+        }
+    }
+    featureFileStream << ',';
 }
 
 #endif //MARTRIXGOC_BOARDENCODE_HPP
