@@ -19,7 +19,7 @@ void initArgs()
     argsTransform["commandLine"] = commandLine;
 }
 
-void testCode()
+void testCode(int argc, char* argv[])
 {
     GoBlock::test();
     Point::test();
@@ -46,7 +46,7 @@ int main(int argc, char* argv[])
             Application::commandLine(argc, argv);
             break;
         case test:
-            testCode();
+            testCode(argc, argv);
             break;
     }
     clock_t end = std::clock();

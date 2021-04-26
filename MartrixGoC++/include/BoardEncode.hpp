@@ -10,7 +10,7 @@
 #include <fstream>
 #include "Game.hpp"
 
-static char boardEncode(Game &game, std::ofstream &featureFileStream)
+static void boardEncode(Game &game, std::ofstream &featureFileStream)
 {
     int state[7][BOARD_SIZE][BOARD_SIZE];
     memset(state, 0, sizeof(state));
@@ -141,7 +141,7 @@ static char boardEncode(Game &game, std::ofstream &featureFileStream)
             }
         }
     }
-    featureFileStream << ',';
+    featureFileStream << '\n';
 }
 
 #endif //MARTRIXGOC_BOARDENCODE_HPP

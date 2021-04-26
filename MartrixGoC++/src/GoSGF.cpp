@@ -4,7 +4,6 @@
 
 #include "GoSGF.hpp"
 #include <iostream>
-#include <fstream>
 
 GoSGF::GoSGF(std::string &srcFileContext)
 {
@@ -15,12 +14,7 @@ GoSGF::GoSGF(std::string &srcFileContext)
     char tmpPlayer = this->gameInformation[this->gameInformation.find("RE") + INFORMATION_BIAS];
     this->RE = tmpPlayer == 'B' ? BLACK_PLAYER : WHITE_PLAYER;
     this->HA = this->gameInformation[this->gameInformation.find("HA") + INFORMATION_BIAS] - '0';
-    int numOfSteps = 0, startOfStep = int(this->gameInformation.find(';')), bias = 0;
-    for (auto &c : this->gameInformation)
-    {
-        if (c == ';')
-        { numOfSteps++; }
-    }
+    int startOfStep = int(this->gameInformation.find(';'));
     if (this->HA > 1)
     {
         int afterABPos = int(this->gameInformation.find("AB")) + 2;
@@ -30,7 +24,6 @@ GoSGF::GoSGF(std::string &srcFileContext)
             if (this->gameInformation[i] == ';')
             {
                 startOfStep = i;
-                numOfSteps--;
                 break;
             }
             if (this->gameInformation[i] == '[')
@@ -43,12 +36,31 @@ GoSGF::GoSGF(std::string &srcFileContext)
                                            this->gameInformation[afterABPos + i * HAND_CAP_BIAS + 1]));
         }
     }
-    for (int i = 0; i < numOfSteps; i++)
+    bool comment = false;
+    int length = int(this->gameInformation.size());
+    for (int i = startOfStep; i < length; i++)
     {
-        this->steps.push_back(new Step(this->gameInformation[startOfStep + bias + PLAYER_BIAS],
-                                       this->gameInformation[startOfStep + bias + X_BIAS],
-                                       this->gameInformation[startOfStep + bias + Y_BIAS]));
-        bias += STEP_STR_LENGTH;
+        char c = this->gameInformation[i];
+        if (comment && c != ']')
+        { continue; }
+        switch (c)
+        {
+            case 'C':
+                comment = true;
+                break;
+            case ']':
+            {
+                if (comment)
+                { comment = false; }
+                break;
+            }
+            case 'W':
+            case 'B':
+                this->steps.push_back(new Step(c, this->gameInformation[i + X_BIAS], this->gameInformation[i + Y_BIAS]));
+                break;
+            default:
+                break;
+        }
     }
 }
 

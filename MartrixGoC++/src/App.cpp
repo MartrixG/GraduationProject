@@ -44,6 +44,10 @@ void Application::loadSGF(int argc, char* argv[])
             game.move();
             std::cout << game;
         }
+        else
+        {
+            break;
+        }
     }
 }
 
@@ -60,21 +64,24 @@ void Application::makeData(int argc, char* argv[])
     Point::pointsInit(allBoardPoints);
     // read sgf file
     std::ifstream srcFileStream(argv[2], std::ios::in);
-    std::string featureFileName = argv[3];
+    // process feature file, label file
+    std::string featureFileName = argv[3], labelFileName = argv[3];
     featureFileName += "/feature.txt";
+    labelFileName += "/label.txt";
     std::ofstream featureFileStream(featureFileName, std::ios::out);
+    std::ofstream labelFileStream(labelFileName, std::ios::out);
     std::string srcSgf;
     int chosenNumberOfLine;
     char* _;
     chosenNumberOfLine = strtol(argv[4], &_, 10);
-    int line = 0, lines = 482;
+    int line = 0, lines = 9348;
     if (chosenNumberOfLine == 0)
     {
         while (std::getline(srcFileStream, srcSgf))
         {
-            gameInformationAnalyze(allBoardPoints, srcSgf, featureFileStream);
+            gameInformationAnalyze(allBoardPoints, srcSgf, featureFileStream, labelFileStream);
             line++;
-            std::cout << std::left << std::setw(3) << line << "/ " << lines << '\n';
+            std::cout << std::left << std::setw(4) << line << "/ " << lines << '\n';
         }
     }
     else
@@ -84,13 +91,13 @@ void Application::makeData(int argc, char* argv[])
             chosenNumberOfLine--;
             std::getline(srcFileStream, srcSgf);
         }
-        gameInformationAnalyze(allBoardPoints, srcSgf, featureFileStream);
+        gameInformationAnalyze(allBoardPoints, srcSgf, featureFileStream, labelFileStream);
     }
     srcFileStream.close();
     featureFileStream.close();
 }
 
-void Application::gameInformationAnalyze(vector_2d(Point*) &allBoardPoints, std::string &srcSgf, std::ofstream &featureFileStream)
+void Application::gameInformationAnalyze(vector_2d(Point*) &allBoardPoints, std::string &srcSgf, std::ofstream &featureFileStream, std::ofstream &labelFileStream)
 {
     // init go game
     Game game = Game(allBoardPoints);
@@ -111,8 +118,12 @@ void Application::gameInformationAnalyze(vector_2d(Point*) &allBoardPoints, std:
             game.move();
             boardEncode(game, featureFileStream);
         }
+        else
+        {
+            break;
+        }
         sgf.getNextStep(step);
-        featureFileStream << *step << '\n';
+        labelFileStream << *step << '\n';
     } while (sgf.haveNextStep());
 }
 
