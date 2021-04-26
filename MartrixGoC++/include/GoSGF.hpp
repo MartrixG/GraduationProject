@@ -10,8 +10,8 @@
 
 const int STEP_STR_LENGTH = 6;
 const int PLAYER_BIAS = 1;
-const int X_BIAS = 4;
-const int Y_BIAS = 3;
+const int X_BIAS = 3;
+const int Y_BIAS = 2;
 const int INFORMATION_BIAS = 3;
 const int INFORMATION_START = 2;
 const int INFORMATION_END = 3;
