@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31205.134
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MartrixGoUI", "MartrixGoUI\MartrixGoUI.csproj", "{4314E4BB-EF84-43B4-8395-7BDD473CF991}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4314E4BB-EF84-43B4-8395-7BDD473CF991}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4314E4BB-EF84-43B4-8395-7BDD473CF991}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4314E4BB-EF84-43B4-8395-7BDD473CF991}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4314E4BB-EF84-43B4-8395-7BDD473CF991}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7A5E985A-23FE-434D-BECF-D96F6C061A35}
+	EndGlobalSection
+EndGlobal
