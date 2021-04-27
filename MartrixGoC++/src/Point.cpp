@@ -2,16 +2,18 @@
 // Created by 11409 on 2021/4/17.
 //
 
-#include <vector>
+#include <random>
+#include <chrono>
 #include "Point.hpp"
 #include "Game.hpp"
 #include <cassert>
 
-Point::Point(int x, int y, int boardSize)
+Point::Point(int x, int y, int boardSize, long long hash)
 {
     this->x = x;
     this->y = y;
     this->boardSize = boardSize;
+    this->zobristHash = hash;
 }
 
 void Point::getAround(Point* nowPoint, const vector_2d(Point*) &allBoardPoints, std::vector<Point*> &aroundPoints)
@@ -46,12 +48,15 @@ void Point::getDiagonal(Point* nowPoint, const vector_2d(Point*) &allBoardPoints
 
 void Point::pointsInit(vector_2d(Point*) &allBoardPoints)
 {
+    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+    std::mt19937_64 rand_num(seed);
+    std::uniform_int_distribution<long long> dist(0, 0x7fffffffffffffff);
     for (int i = 0; i < BOARD_SIZE; i++)
     {
         std::vector<Point> tmp;
         for (int j = 0; j < BOARD_SIZE; j++)
         {
-            allBoardPoints[i].push_back(new Point(i, j, BOARD_SIZE));
+            allBoardPoints[i].push_back(new Point(i, j, BOARD_SIZE, dist(rand_num)));
         }
     }
 }
@@ -119,4 +124,11 @@ void Point::test()
     assert(testMatrix[0][2] == diagonal4[1]);
     assert(testMatrix[2][0] == diagonal4[2]);
     assert(testMatrix[2][2] == diagonal4[3]);
+    for(int i = 0; i < BOARD_SIZE; i++)
+    {
+        for(int j = 0; j < BOARD_SIZE; j++)
+        {
+            std::cout << allBoardPoints[i][j]->zobristHash << '\n';
+        }
+    }
 }

@@ -14,8 +14,9 @@ class Point
 {
 public:
     int x, y, boardSize;
+    unsigned long long zobristHash;
 
-    Point(int x, int y, int boardSize);
+    Point(int x, int y, int boardSize, long long hash);
 
     static void getAround(Point* nowPoint, const vector_2d(Point*) &allBoardPoints, std::vector<Point*> &aroundPoints);
 
