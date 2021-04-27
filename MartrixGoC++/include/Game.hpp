@@ -23,8 +23,11 @@ public:
     vector_2d(Point*) allBoardPoints;
     std::vector<Step*> steps = std::vector<Step*>();
     vector_2d(int) board = vector_2d(int)(BOARD_SIZE, std::vector<int>(BOARD_SIZE));
+    long long boardZobristHash = 0;
     std::vector<vector_2d(int)> historyBoard = std::vector<vector_2d(int)>();
+    std::set<long long> historyZobristHash = std::set<long long>();
     vector_2d(int) newBoard = vector_2d(int)(BOARD_SIZE, std::vector<int>(BOARD_SIZE));
+    long long newBoardZobristHash = 0;
     Step* nextStep = nullptr;
     GoBlock* targetBlock = nullptr;
 
@@ -39,7 +42,7 @@ public:
 
     void move();
 
-    void getPickUpBlock(Point* targetPoint, vector_2d(int) &processBoard) const;
+    void getPickUpBlock(Point* targetPoint);
 
     void loadFromBoard(const std::string &fileName, int player);
 

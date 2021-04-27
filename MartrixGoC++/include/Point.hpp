@@ -14,7 +14,7 @@ class Point
 {
 public:
     int x, y, boardSize;
-    unsigned long long zobristHash;
+    long long zobristHash;
 
     Point(int x, int y, int boardSize, long long hash);
 

@@ -45,16 +45,15 @@ bool Game::moveAnalyze(Step* step)
         return false;
     }
     this->newBoard.assign(this->board.begin(), this->board.end());
-    this->getPickUpBlock(this->allBoardPoints[x][y], this->newBoard);
-    if (!this->historyBoard.empty() && this->newBoard == this->historyBoard.back())
-    {
-        this->newBoard.assign(this->board.begin(), this->board.end());
-        return false;
-    }
+    this->newBoardZobristHash = this->boardZobristHash;
+    this->getPickUpBlock(this->allBoardPoints[x][y]);
     this->targetBlock->update(this->allBoardPoints[x][y], this->newBoard, this->allBoardPoints);
     if (this->targetBlock->getQi(this->newBoard, this->allBoardPoints) == 0)
     {
-        this->newBoard.assign(this->board.begin(), this->board.end());
+        return false;
+    }
+    if (this->historyZobristHash.find(this->newBoardZobristHash) != this->historyZobristHash.end())
+    {
         return false;
     }
     this->nextStep = step;
@@ -66,18 +65,21 @@ void Game::move()
     this->steps.push_back(this->nextStep);
     this->player = this->player == WHITE_PLAYER ? BLACK_PLAYER : WHITE_PLAYER;
     this->historyBoard.push_back(this->board);
+    this->historyZobristHash.insert(this->boardZobristHash);
     this->board.assign(this->newBoard.begin(), this->newBoard.end());
+    this->boardZobristHash = this->newBoardZobristHash;
 }
 
-void Game::getPickUpBlock(Point* targetPoint, vector_2d(int) &processBoard) const
+void Game::getPickUpBlock(Point* targetPoint)
 {
     std::set<GoBlock*> nearGoBlocks;
     std::vector<Point*> around;
     Point::getAround(targetPoint, this->allBoardPoints, around);
-    processBoard[targetPoint->x][targetPoint->y] = this->player;
+    this->newBoard[targetPoint->x][targetPoint->y] = this->player;
+    this->newBoardZobristHash ^= targetPoint->zobristHash;
     for (auto &point :around)
     {
-        if (processBoard[point->x][point->y] != this->player && processBoard[point->x][point->y] != 0)
+        if (this->newBoard[point->x][point->y] != this->player && this->newBoard[point->x][point->y] != 0)
         {
             bool containCheck = true;
             for (auto &block : nearGoBlocks)
@@ -89,17 +91,18 @@ void Game::getPickUpBlock(Point* targetPoint, vector_2d(int) &processBoard) cons
             }
             if (containCheck)
             {
-                nearGoBlocks.insert(new GoBlock(point, processBoard, this->allBoardPoints));
+                nearGoBlocks.insert(new GoBlock(point, this->newBoard, this->allBoardPoints));
             }
         }
     }
     for (auto &block : nearGoBlocks)
     {
-        if (block->getQi(processBoard, this->allBoardPoints) == 0)
+        if (block->getQi(this->newBoard, this->allBoardPoints) == 0)
         {
             for (auto &piece : block->pieces)
             {
-                processBoard[piece->x][piece->y] = 0;
+                this->newBoard[piece->x][piece->y] = 0;
+                this->newBoardZobristHash ^= piece->zobristHash;
             }
         }
     }
@@ -112,7 +115,7 @@ void Game::getPickUpBlock(Point* targetPoint, vector_2d(int) &processBoard) cons
 
 void Game::loadFromBoard(const std::string &fileName, int nowPlayer)
 {
-    this->player = nowPlayer == WHITE_PLAYER ? BLACK_PLAYER : WHITE_PLAYER;
+    this->player = nowPlayer;
     std::ifstream inFile;
     inFile.open(fileName);
     for (int i = 0; i < BOARD_SIZE; i++)
@@ -120,6 +123,7 @@ void Game::loadFromBoard(const std::string &fileName, int nowPlayer)
         for (int j = 0; j < BOARD_SIZE; j++)
         {
             inFile >> this->newBoard[i][j];
+            this->newBoardZobristHash ^= this->allBoardPoints[i][j]->zobristHash;
         }
     }
     inFile.close();

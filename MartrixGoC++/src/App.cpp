@@ -133,9 +133,10 @@ void Application::commandLine(int argc, char* argv[])
     vector_2d(Point*) allBoardPoints(BOARD_SIZE);
     Point::pointsInit(allBoardPoints);
     Game game = Game(allBoardPoints);
+    game.loadFromBoard(argv[2], BLACK_PLAYER);
 
     int player = game.player == WHITE_PLAYER ? BLACK_PLAYER : WHITE_PLAYER;
-    std::cout << "game start.\n";
+    std::cout << "game start.\n" << game;
     while (true)
     {
         player = player == WHITE_PLAYER ? BLACK_PLAYER : WHITE_PLAYER;

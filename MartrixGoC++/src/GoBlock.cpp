@@ -62,9 +62,10 @@ void GoBlock::findLinkedBlock(const vector_2d(int) &board, const vector_2d(Point
 
 int GoBlock::getQi(const vector_2d(int) &board, const vector_2d(Point*) &allBoardPoints)
 {
+    std::vector<Point*> around;
     for (auto &point : this->pieces)
     {
-        std::vector<Point*> around;
+        around.clear();
         Point::getAround(point, allBoardPoints, around);
         for (auto &aroundPoint : around)
         {
