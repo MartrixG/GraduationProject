@@ -40,11 +40,15 @@ public:
 
     bool moveAnalyze(Step* Step);
 
-    void move();
+    void move(bool handCapFlag);
 
     void getPickUpBlock(Point* targetPoint);
 
-    void loadFromBoard(const std::string &fileName, int player);
+    void loadFromBoardFile(const std::string &fileName, int gapPlayer);
+
+    void loadFromBoard(const std::string &boardCode, int gapPlayer);
+
+    void boardStrEncode(char* boardStr);
 
     friend void operator<<(std::ostream &out, const Game &o)
     {

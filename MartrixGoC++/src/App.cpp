@@ -6,6 +6,7 @@
 #include <iostream>
 #include <fstream>
 #include <iomanip>
+#include <winsock.h>
 #include "Game.hpp"
 #include "GoSGF.hpp"
 #include "App.hpp"
@@ -41,10 +42,9 @@ void Application::loadSGF(int argc, char* argv[])
         std::cout << "No." << sgf.nowStep - sgf.HA << "(" << *step << ")\n";
         if (game.moveAnalyze(step))
         {
-            game.move();
+            game.move(false);
             std::cout << game;
-        }
-        else
+        } else
         {
             break;
         }
@@ -83,8 +83,7 @@ void Application::makeData(int argc, char* argv[])
             line++;
             std::cout << std::left << std::setw(4) << line << "/ " << lines << '\n';
         }
-    }
-    else
+    } else
     {
         while (chosenNumberOfLine != 0)
         {
@@ -97,7 +96,8 @@ void Application::makeData(int argc, char* argv[])
     featureFileStream.close();
 }
 
-void Application::gameInformationAnalyze(vector_2d(Point*) &allBoardPoints, std::string &srcSgf, std::ofstream &featureFileStream, std::ofstream &labelFileStream)
+void Application::gameInformationAnalyze(vector_2d(Point*) &allBoardPoints, std::string &srcSgf,
+                                         std::ofstream &featureFileStream, std::ofstream &labelFileStream)
 {
     // init go game
     Game game = Game(allBoardPoints);
@@ -115,10 +115,9 @@ void Application::gameInformationAnalyze(vector_2d(Point*) &allBoardPoints, std:
     {
         if (game.moveAnalyze(step))
         {
-            game.move();
+            game.move(false);
             boardEncode(game, featureFileStream);
-        }
-        else
+        } else
         {
             break;
         }
@@ -133,7 +132,7 @@ void Application::commandLine(int argc, char* argv[])
     vector_2d(Point*) allBoardPoints(BOARD_SIZE);
     Point::pointsInit(allBoardPoints);
     Game game = Game(allBoardPoints);
-    game.loadFromBoard(argv[2], BLACK_PLAYER);
+    game.loadFromBoardFile(argv[2], BLACK_PLAYER);
 
     int player = game.player == WHITE_PLAYER ? BLACK_PLAYER : WHITE_PLAYER;
     std::cout << "game start.\n" << game;
@@ -151,7 +150,7 @@ void Application::commandLine(int argc, char* argv[])
         Step* nextStep = new Step(player, allBoardPoints[x][y]);
         if (game.moveAnalyze(nextStep))
         {
-            game.move();
+            game.move(false);
             std::cout << *game.nextStep << std::endl << game;
         } else
         {
@@ -160,4 +159,113 @@ void Application::commandLine(int argc, char* argv[])
             player = player == WHITE_PLAYER ? BLACK_PLAYER : WHITE_PLAYER;
         }
     }
+}
+
+bool initSocket(SOCKET &serverSocket, char* ipAddr, char* port)
+{
+    WSAData wsaData{};
+    int err;
+    err = WSAStartup(MAKEWORD(2, 2), &wsaData);
+    if (err != 0)
+    { return false; }
+    serverSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    sockaddr_in serverAddr{};
+    memset(&serverAddr, 0, sizeof(serverAddr));
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_addr.s_addr = inet_addr(ipAddr);
+    int portNumber;
+    char* _;
+    portNumber = strtol(port, &_, 10);
+    serverAddr.sin_port = htons(portNumber);
+    err = bind(serverSocket, (SOCKADDR*) &serverAddr, sizeof(serverAddr));
+    if (err != 0)
+    { return false; }
+    return true;
+}
+
+bool initMove(Game &game, const std::string& stepStr)
+{
+    int len = int(stepStr.length());
+    int pos = 0;
+    for(int i = 1; i < len; i++)
+    {
+        pos *= 10;
+        pos += stepStr[i] - '0';
+    }
+    int x = pos / 19, y = pos % 19;
+    Step* nextStep = new Step(game.player, game.allBoardPoints[x][y]);
+    if(game.moveAnalyze(nextStep))
+    {
+        game.move(false);
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+void Application::uiSocket(int argc, char** argv)
+{
+    if (argc != 4)
+    {
+        std::cout << "arg number is invalid.";
+        return;
+    }
+    // init server socket
+    SOCKET serverSocket;
+    if (!initSocket(serverSocket, argv[2], argv[3]))
+    {
+        std::cout << "init socket failed.\n";
+        return;
+    }
+    else
+    {
+        std::cout << "init socket success.\n";
+    }
+    // listening
+    listen(serverSocket, 5);
+
+    // init client socket
+    sockaddr_in clientAddr{};
+    int clientAddrSize = sizeof(clientAddr);
+
+    // catch connect
+    SOCKET clientSocket = accept(serverSocket, (SOCKADDR*) &clientAddr, &clientAddrSize);
+    std::cout << "connect start. client addr:" << clientAddr.sin_port << '\n';
+
+    // init go game
+    vector_2d(Point*) allBoardPoints(BOARD_SIZE);
+    Point::pointsInit(allBoardPoints);
+    Game game = Game(allBoardPoints);
+
+    char srcMessage[1024];
+    std::string message;
+    memset(srcMessage, 0, sizeof(srcMessage));
+
+    while (true)
+    {
+        recv(clientSocket, srcMessage, 1024, 0);
+        message.clear();
+        message = srcMessage;
+        switch (srcMessage[0])
+        {
+            case 'c':
+                goto close;
+            case 'b':
+                game.loadFromBoard(message, WHITE_PLAYER);
+                break;
+            case 's':
+                initMove(game, message);
+                break;
+            default:
+                break;
+        }
+        game.boardStrEncode(srcMessage);
+        send(clientSocket, srcMessage, 1024, 0);
+    }
+    close:
+    closesocket(clientSocket);
+    closesocket(serverSocket);
+    WSACleanup();
 }

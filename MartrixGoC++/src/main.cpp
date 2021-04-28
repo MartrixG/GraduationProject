@@ -7,7 +7,7 @@
 
 enum argsEnum
 {
-    loadSgf, makeData, test, commandLine
+    loadSgf, makeData, test, commandLine, ui
 };
 std::map<std::string, int> argsTransform;
 
@@ -17,6 +17,7 @@ void initArgs()
     argsTransform["makeData"] = makeData;
     argsTransform["test"] = test;
     argsTransform["commandLine"] = commandLine;
+    argsTransform["ui"] = ui;
 }
 
 void testCode(int argc, char* argv[])
@@ -44,6 +45,9 @@ int main(int argc, char* argv[])
             break;
         case commandLine:
             Application::commandLine(argc, argv);
+            break;
+        case ui:
+            Application::uiSocket(argc, argv);
             break;
         case test:
             testCode(argc, argv);

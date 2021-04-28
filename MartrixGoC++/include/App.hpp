@@ -20,6 +20,8 @@ public:
                                        std::ofstream &featureFileStream, std::ofstream&labelFileStream);
 
     static void commandLine(int argc, char* argv[]);
+
+    static void uiSocket(int argc, char* argv[]);
 };
 
 #endif //MARTRIXGOC_APP_HPP

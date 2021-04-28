@@ -60,9 +60,12 @@ bool Game::moveAnalyze(Step* step)
     return true;
 }
 
-void Game::move()
+void Game::move(bool handCapFlag)
 {
-    this->steps.push_back(this->nextStep);
+    if(!handCapFlag)
+    {
+        this->steps.push_back(this->nextStep);
+    }
     this->player = this->player == WHITE_PLAYER ? BLACK_PLAYER : WHITE_PLAYER;
     this->historyBoard.push_back(this->board);
     this->historyZobristHash.insert(this->boardZobristHash);
@@ -113,9 +116,9 @@ void Game::getPickUpBlock(Point* targetPoint)
     }
 }
 
-void Game::loadFromBoard(const std::string &fileName, int nowPlayer)
+void Game::loadFromBoardFile(const std::string &fileName, int gapPlayer)
 {
-    this->player = nowPlayer;
+    this->player = gapPlayer;
     std::ifstream inFile;
     inFile.open(fileName);
     for (int i = 0; i < BOARD_SIZE; i++)
@@ -123,9 +126,42 @@ void Game::loadFromBoard(const std::string &fileName, int nowPlayer)
         for (int j = 0; j < BOARD_SIZE; j++)
         {
             inFile >> this->newBoard[i][j];
-            this->newBoardZobristHash ^= this->allBoardPoints[i][j]->zobristHash;
+            if(this->newBoard[i][j] != 0)
+            {
+                this->newBoardZobristHash ^= this->allBoardPoints[i][j]->zobristHash;
+            }
         }
     }
     inFile.close();
-    this->move();
+    this->move(true);
+}
+
+void Game::loadFromBoard(const std::string &boardCode, int gapPlayer)
+{
+    this->player = gapPlayer;
+    for(int i = 0; i < BOARD_SIZE; i++)
+    {
+        for(int j = 0; j < BOARD_SIZE; j++)
+        {
+            this->newBoard[i][j] = boardCode[i * BOARD_SIZE + j + 1] - '0';
+            if(this->newBoard[i][j] != 0)
+            {
+                this->newBoardZobristHash ^= this->allBoardPoints[i][j]->zobristHash;
+            }
+        }
+    }
+    this->move(true);
+}
+
+void Game::boardStrEncode(char* boardStr)
+{
+    boardStr[0] = char(this->player + '0');
+    for(int i = 0; i < BOARD_SIZE; i++)
+    {
+        for(int j = 0; j < BOARD_SIZE; j++)
+        {
+            boardStr[i * 19 + j + 1] = char(this->board[i][j] + '0');
+        }
+    }
+    boardStr[BOARD_SIZE * BOARD_SIZE + 1] = '\0';
 }
