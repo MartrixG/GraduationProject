@@ -69,6 +69,8 @@ void Game::move(bool handCapFlag)
     this->player = this->player == WHITE_PLAYER ? BLACK_PLAYER : WHITE_PLAYER;
     this->historyBoard.push_back(this->board);
     this->historyZobristHash.insert(this->boardZobristHash);
+        // 其他棋块的气的处理
+    // 合并本颜色的棋块
     this->board.assign(this->newBoard.begin(), this->newBoard.end());
     this->boardZobristHash = this->newBoardZobristHash;
 }
@@ -106,6 +108,7 @@ void Game::getPickUpBlock(Point* targetPoint)
             {
                 this->newBoard[piece->x][piece->y] = 0;
                 this->newBoardZobristHash ^= piece->zobristHash;
+                    // 可以把围棋块的哈希值也存起来
             }
         }
     }

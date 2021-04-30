@@ -8,6 +8,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <map>
 #include "Step.hpp"
 #include "GoBlock.hpp"
 #include "Point.hpp"
@@ -25,18 +26,18 @@ public:
     vector_2d(int) board = vector_2d(int)(BOARD_SIZE, std::vector<int>(BOARD_SIZE));
     long long boardZobristHash = 0;
     std::vector<vector_2d(int)> historyBoard = std::vector<vector_2d(int)>();
-    std::set<long long> historyZobristHash = std::set<long long>();
+    std::unordered_set<long long> historyZobristHash = std::unordered_set<long long>();
     vector_2d(int) newBoard = vector_2d(int)(BOARD_SIZE, std::vector<int>(BOARD_SIZE));
     long long newBoardZobristHash = 0;
     Step* nextStep = nullptr;
     GoBlock* targetBlock = nullptr;
-
+    std::vector<GoBlock*> removingBlock = std::vector<GoBlock*>();
+    std::map<Point*, GoBlock*> pointBlockMap = std::map<Point*, GoBlock*>();
 
     explicit Game(vector_2d(Point*) &points);
 
     void initHandCap(std::vector<Step*> &handCapSteps, int numOfHandCap);
 
-    void redo();
 
     bool moveAnalyze(Step* Step);
 

@@ -2,92 +2,96 @@
 // Created by 11409 on 2021/4/17.
 //
 
-#include <set>
-#include <queue>
 #include "GoBlock.hpp"
 
 #include <cassert>
 
-bool GoBlock::check(int x, int y) const
-{
-    return x >= 0 && x < this->beginPoint->boardSize && y >= 0 && y < this->beginPoint->boardSize;
-}
-
 GoBlock::GoBlock() = default;
 
-GoBlock::GoBlock(Point* beginPoint, const vector_2d(int) &board, const vector_2d(Point*) &allBoardPoints)
+GoBlock::GoBlock(Point* beginPoint, int pointColor, const std::vector<Point*> &aroundPoint, const vector_2d(int)& board)
 {
-    this->beginPoint = beginPoint;
-    this->color = board[beginPoint->x][beginPoint->y];
-    this->findLinkedBlock(board, allBoardPoints);
+    this->color = pointColor;
+    this->points.insert(beginPoint);
+    for(auto &point : aroundPoint)
+    {
+        if(board[point->x][point->y] == 0)
+        {
+            this->qiPoints.insert(point);
+        }
+        this->nearPoints.insert(point);
+    }
 }
 
-void GoBlock::update(Point* newBeginPoint, const vector_2d(int) &board, const vector_2d(Point*) &allBoardPoints)
+void GoBlock::update(GoBlock* otherBlock)
 {
-    this->beginPoint = newBeginPoint;
-    this->color = board[newBeginPoint->x][newBeginPoint->y];
-    this->qi = -1;
-    this->findLinkedBlock(board, allBoardPoints);
+    this->clear();
+    this->points.insert(otherBlock->points.begin(), otherBlock->points.end());
+    this->qiPoints.insert(otherBlock->qiPoints.begin(), otherBlock->qiPoints.end());
+    this->nearPoints.insert(otherBlock->nearPoints.begin(), otherBlock->nearPoints.end());
+    this->color = otherBlock->color;
 }
 
-void GoBlock::findLinkedBlock(const vector_2d(int) &board, const vector_2d(Point*) &allBoardPoints)
+void GoBlock::merge(Point* linkPointSelf, Point* linkPointOther, GoBlock* otherBlock)
 {
-    this->pieces.clear();
-    this->qiPoint.clear();
-    std::queue<Point*> Q;
-    Q.push(this->beginPoint);
-    this->pieces.insert(this->beginPoint);
+    this->points.insert(otherBlock->points.begin(), otherBlock->points.end());
+    this->qiPoints.insert(otherBlock->qiPoints.begin(), otherBlock->qiPoints.end());
+    this->qiPoints.erase(linkPointSelf);
+    this->nearPoints.insert(otherBlock->nearPoints.begin(), otherBlock->nearPoints.end());
+    this->nearPoints.erase(linkPointOther);
+    this->nearPoints.erase(linkPointSelf);
+}
+
+void GoBlock::addPoint(Point* linkPoint, const vector_2d(int) &board, const vector_2d(Point*) &allBoardPoints)
+{
+    this->points.insert(linkPoint);
+    this->nearPoints.erase(linkPoint);
+    this->qiPoints.erase(linkPoint);
     int dx[4] = {0, 0, -1, 1};
     int dy[4] = {-1, 1, 0, 0};
-    while (!Q.empty())
+    for(int i = 0; i < 4; i++)
     {
-        Point* nowPoint = Q.front();
-        Q.pop();
-        for (int i = 0; i < 4; i++)
+        int newX = linkPoint->x + dx[i];
+        int newY = linkPoint->y + dy[i];
+        if(newX >= 0 && newX < linkPoint->boardSize && newY >= 0 && newY < linkPoint->boardSize)
         {
-            int newX = nowPoint->x + dx[i];
-            int newY = nowPoint->y + dy[i];
-            if (this->check(newX, newY) && board[newX][newY] == this->color)
+            if(board[newX][newY] == 0)
             {
-                Point* newPoint = allBoardPoints[newX][newY];
-                if (this->pieces.find(newPoint) == this->pieces.end())
-                {
-                    Q.push(newPoint);
-                    this->pieces.insert(newPoint);
-                }
+                this->addQi(allBoardPoints[newX][newY]);
+            }
+            if(this->points.count(allBoardPoints[newX][newY]) != 1)
+            {
+                this->nearPoints.insert(allBoardPoints[newX][newY]);
             }
         }
     }
 }
 
-int GoBlock::getQi(const vector_2d(int) &board, const vector_2d(Point*) &allBoardPoints)
+void GoBlock::removeQi(Point* targetPoint)
 {
-    std::vector<Point*> around;
-    for (auto &point : this->pieces)
-    {
-        around.clear();
-        Point::getAround(point, allBoardPoints, around);
-        for (auto &aroundPoint : around)
-        {
-            int newX = aroundPoint->x;
-            int newY = aroundPoint->y;
-            if (board[newX][newY] == 0)
-            {
-                Point* nowQi = allBoardPoints[newX][newY];
-                if (this->qiPoint.find(nowQi) == this->qiPoint.end())
-                {
-                    this->qiPoint.insert(nowQi);
-                }
-            }
-        }
-    }
-    this->qi = int(this->qiPoint.size());
-    return this->qi;
+    this->qiPoints.erase(targetPoint);;
+}
+
+void GoBlock::addQi(Point* targetPoint)
+{
+    this->qiPoints.insert(targetPoint);
+}
+
+int GoBlock::getQi() const
+{
+    return int(this->qiPoints.size());
 }
 
 bool GoBlock::contain(Point* point) const
 {
-    return this->pieces.count(point) == 1;
+    return this->points.count(point) == 1;
+}
+
+void GoBlock::clear()
+{
+    this->points.clear();
+    this->qiPoints.clear();
+    this->nearPoints.clear();
+    this->color = -1;
 }
 
 void GoBlock::test()
@@ -113,50 +117,53 @@ void GoBlock::test()
             line.push_back(0);
         }
     }
-    testBoard[0][2] = 2;
-    testBoard[1][2] = 2;
-    testBoard[1][3] = 2;
-    testBoard[1][4] = 2;
-    testBoard[2][2] = 2;
-    testBoard[1][1] = 1;
-    testBoard[2][0] = 1;
-    testBoard[2][1] = 1;
-    testBoard[2][3] = 1;
+    int dx[4] = {0, 0, -1, 1};
+    int dy[4] = {-1, 1, 0, 0};
+
+    std::vector<Point*> around;
+
     testBoard[3][2] = 1;
+    around.clear();
+    Point::getAround(allBoardPoints[3][2], allBoardPoints, around);
+    GoBlock block1(allBoardPoints[3][2], 1, around, testBoard);
+    std::cout << block1;
+    std::cout << '\n';
+
     testBoard[3][3] = 1;
-    testBoard[4][3] = 1;
-    testBoard[4][1] = 1;
-    //white 1
-    GoBlock w1(allBoardPoints[0][2], testBoard, allBoardPoints);
-    auto blockPieces = w1.pieces;
-    std::set<Point*> w1Block(blockPieces.begin(), blockPieces.end());
-    assert(w1Block.count(allBoardPoints[0][2]) == 1);
-    assert(w1Block.count(allBoardPoints[1][2]) == 1);
-    assert(w1Block.count(allBoardPoints[1][3]) == 1);
-    assert(w1Block.count(allBoardPoints[1][4]) == 1);
-    assert(w1Block.count(allBoardPoints[2][2]) == 1);
-    assert(w1.getQi(testBoard, allBoardPoints) == 5);
-    //black 1
-    GoBlock b1(allBoardPoints[1][1], testBoard, allBoardPoints);
-    blockPieces = b1.pieces;
-    std::set<Point*> b1Block(blockPieces.begin(), blockPieces.end());
-    assert(b1Block.count(allBoardPoints[1][1]) == 1);
-    assert(b1Block.count(allBoardPoints[2][0]) == 1);
-    assert(b1Block.count(allBoardPoints[2][1]) == 1);
-    assert(b1.getQi(testBoard, allBoardPoints) == 4);
-    //black 2
-    GoBlock b2(allBoardPoints[3][3], testBoard, allBoardPoints);
-    blockPieces = b2.pieces;
-    std::set<Point*> b2Block(blockPieces.begin(), blockPieces.end());
-    assert(b2Block.count(allBoardPoints[2][3]) == 1);
-    assert(b2Block.count(allBoardPoints[3][2]) == 1);
-    assert(b2Block.count(allBoardPoints[3][3]) == 1);
-    assert(b2Block.count(allBoardPoints[4][3]) == 1);
-    assert(b2.getQi(testBoard, allBoardPoints) == 6);
-    //black 3
-    GoBlock b3(allBoardPoints[4][1], testBoard, allBoardPoints);
-    blockPieces = b3.pieces;
-    std::set<Point*> b3Block(blockPieces.begin(), blockPieces.end());
-    assert(b3Block.count(allBoardPoints[4][1]) == 1);
-    assert(b3.getQi(testBoard, allBoardPoints) == 4);
+    block1.addPoint(allBoardPoints[3][3], testBoard, allBoardPoints);
+    std::cout << block1;
+    std::cout << '\n';
+
+    testBoard[3][5] = 1;
+    around.clear();
+    Point::getAround(allBoardPoints[3][5], allBoardPoints, around);
+    GoBlock block2(allBoardPoints[3][5], 1, around, testBoard);
+    std::cout << block2;
+    std::cout << '\n';
+
+    testBoard[3][6] = 1;
+    block2.addPoint(allBoardPoints[3][6], testBoard, allBoardPoints);
+    std::cout << block2;
+    std::cout << '\n';
+
+    testBoard[2][4] = 1;
+    around.clear();
+    Point::getAround(allBoardPoints[2][4], allBoardPoints, around);
+    GoBlock block3(allBoardPoints[2][4], 1, around, testBoard);
+    std::cout << block3;
+    std::cout << '\n';
+    testBoard[1][4] = 1;
+    block3.addPoint(allBoardPoints[1][4], testBoard, allBoardPoints);
+    std::cout << block3;
+    std::cout << '\n';
+
+    block3.addPoint(allBoardPoints[3][4], testBoard, allBoardPoints);
+    std::cout << block3;
+    std::cout << '\n';
+    block3.merge(allBoardPoints[3][4], allBoardPoints[3][5], &block2);
+    std::cout << block3;
+    std::cout << '\n';
+    block3.merge(allBoardPoints[3][4], allBoardPoints[3][3], &block1);
+    std::cout << block3;
+    std::cout << '\n';
 }
