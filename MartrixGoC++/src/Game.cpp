@@ -18,19 +18,13 @@ Game::Game(vector_2d(Point*) &points)
 
 void Game::initHandCap(std::vector<Step*> &handCapSteps, int numOfHandCap)
 {
+    int x, y;
     for (int i = 0; i < numOfHandCap; i++)
     {
-        this->board[handCapSteps[i]->x][handCapSteps[i]->y] = BLACK_PLAYER;
+        x = handCapSteps[i]->x;
+        y = handCapSteps[i]->y;
+        this->board[x][y] = BLACK_PLAYER;
     }
-}
-
-void Game::redo()
-{
-    this->steps.pop_back();
-    this->board.assign(this->historyBoard.back().begin(), this->historyBoard.back().end());
-    this->newBoard.assign(this->board.begin(), this->board.end());
-    this->historyBoard.pop_back();
-    this->player = this->player == WHITE_PLAYER ? BLACK_PLAYER : WHITE_PLAYER;
 }
 
 bool Game::moveAnalyze(Step* step)
@@ -44,11 +38,10 @@ bool Game::moveAnalyze(Step* step)
     {
         return false;
     }
-    this->newBoard.assign(this->board.begin(), this->board.end());
+//    this->newBoard.assign(this->board.begin(), this->board.end());
     this->newBoardZobristHash = this->boardZobristHash;
     this->getPickUpBlock(this->allBoardPoints[x][y]);
-    this->targetBlock->update(this->allBoardPoints[x][y], this->newBoard, this->allBoardPoints);
-    if (this->targetBlock->getQi(this->newBoard, this->allBoardPoints) == 0)
+    if (this->targetBlock->getQi() == 0)
     {
         return false;
     }
@@ -69,7 +62,14 @@ void Game::move(bool handCapFlag)
     this->player = this->player == WHITE_PLAYER ? BLACK_PLAYER : WHITE_PLAYER;
     this->historyBoard.push_back(this->board);
     this->historyZobristHash.insert(this->boardZobristHash);
+    for(auto &block : this->removingBlock)
+    {
+        for(auto &point : block->points)
+        {
+            this->board[point->x][point->y] = 0;
+        }
         // 其他棋块的气的处理
+    }
     // 合并本颜色的棋块
     this->board.assign(this->newBoard.begin(), this->newBoard.end());
     this->boardZobristHash = this->newBoardZobristHash;
@@ -77,45 +77,50 @@ void Game::move(bool handCapFlag)
 
 void Game::getPickUpBlock(Point* targetPoint)
 {
-    std::set<GoBlock*> nearGoBlocks;
     std::vector<Point*> around;
     Point::getAround(targetPoint, this->allBoardPoints, around);
-    this->newBoard[targetPoint->x][targetPoint->y] = this->player;
+//    this->newBoard[targetPoint->x][targetPoint->y] = player;
     this->newBoardZobristHash ^= targetPoint->zobristHash;
+
+    int isolatedFlag = true;
     for (auto &point :around)
     {
-        if (this->newBoard[point->x][point->y] != this->player && this->newBoard[point->x][point->y] != 0)
+        if (this->board[point->x][point->y] != 0)
         {
-            bool containCheck = true;
-            for (auto &block : nearGoBlocks)
+            auto nearBlock = this->pointBlockMap[point];
+            if(this->board[point->x][point->y] == player)
             {
-                if (block->contain(point))
+                if(isolatedFlag)
                 {
-                    containCheck = false;
+                    this->targetBlock->update(nearBlock);
+                    this->targetBlock->addPoint(targetPoint, this->board, this->allBoardPoints);
+                    isolatedFlag = false;
+                }
+                else
+                {
+                    this->targetBlock->merge(targetPoint, point, nearBlock);
                 }
             }
-            if (containCheck)
+            else
             {
-                nearGoBlocks.insert(new GoBlock(point, this->newBoard, this->allBoardPoints));
-            }
-        }
-    }
-    for (auto &block : nearGoBlocks)
-    {
-        if (block->getQi(this->newBoard, this->allBoardPoints) == 0)
-        {
-            for (auto &piece : block->pieces)
-            {
-                this->newBoard[piece->x][piece->y] = 0;
-                this->newBoardZobristHash ^= piece->zobristHash;
+                nearBlock->removeQi(targetPoint);
+                if(nearBlock->getQi() == 0)
+                {
+                    removingBlock.push_back(nearBlock);
                     // 可以把围棋块的哈希值也存起来
+                    for(auto &opponentPoint : nearBlock->points)
+                    {
+//                        this->newBoard[opponentPoint->x][opponentPoint->y] = 0;
+                        this->newBoardZobristHash ^= opponentPoint->zobristHash;
+                    }
+                }
             }
         }
     }
-    //delete
-    for (auto &block : nearGoBlocks)
+    if(isolatedFlag)
     {
-        delete block;
+        this->targetBlock = new GoBlock(targetPoint, this->player, around, this->board);
+        this->pointBlockMap[targetPoint] = this->targetBlock;
     }
 }
 
