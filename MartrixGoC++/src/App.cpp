@@ -42,7 +42,7 @@ void Application::loadSGF(int argc, char* argv[])
         std::cout << "No." << sgf.nowStep - sgf.HA << "(" << *step << ")\n";
         if (game.moveAnalyze(step))
         {
-            game.move(false);
+            game.move();
             std::cout << game;
         } else
         {
@@ -115,7 +115,7 @@ void Application::gameInformationAnalyze(vector_2d(Point*) &allBoardPoints, std:
     {
         if (game.moveAnalyze(step))
         {
-            game.move(false);
+            game.move();
             boardEncode(game, featureFileStream);
         } else
         {
@@ -150,7 +150,7 @@ void Application::commandLine(int argc, char* argv[])
         Step* nextStep = new Step(player, allBoardPoints[x][y]);
         if (game.moveAnalyze(nextStep))
         {
-            game.move(false);
+            game.move();
             std::cout << *game.nextStep << std::endl << game;
         } else
         {
@@ -196,7 +196,7 @@ bool initMove(Game &game, const std::string& stepStr)
     Step* nextStep = new Step(game.player, game.allBoardPoints[x][y]);
     if(game.moveAnalyze(nextStep))
     {
-        game.move(false);
+        game.move();
         return true;
     }
     else
@@ -253,7 +253,7 @@ void Application::uiSocket(int argc, char** argv)
             case 'c':
                 goto close;
             case 'b':
-                game.loadFromBoard(message, WHITE_PLAYER);
+                //game.loadFromBoardStr(message, WHITE_PLAYER);
                 break;
             case 's':
                 initMove(game, message);

@@ -2,7 +2,6 @@
 // Created by 11409 on 2021/4/17.
 //
 
-#include <set>
 #include <iostream>
 #include <fstream>
 #include "Game.hpp"
@@ -14,17 +13,42 @@ Game::Game(vector_2d(Point*) &points)
 {
     this->allBoardPoints = points;
     this->targetBlock = new GoBlock();
+    this->historyZobristHash.insert(0);
 }
 
 void Game::initHandCap(std::vector<Step*> &handCapSteps, int numOfHandCap)
 {
-    int x, y;
+    this->historyBoard.push_back(this->board);
     for (int i = 0; i < numOfHandCap; i++)
     {
-        x = handCapSteps[i]->x;
-        y = handCapSteps[i]->y;
-        this->board[x][y] = BLACK_PLAYER;
+        int x = handCapSteps[i]->x, y = handCapSteps[i]->y;
+        this->getPickUpBlock(this->allBoardPoints[x][y]);
+        this->board[x][y] = player;
+        if(this->mergedBlock.empty())
+        {
+            this->pointBlockMap[this->allBoardPoints[x][y]] = this->targetBlock;
+            this->targetBlock = new GoBlock();
+        }
+        else
+        {
+            GoBlock* startBlock = *this->mergedBlock.begin();
+            startBlock->clear();
+            startBlock->update(this->targetBlock);
+            this->pointBlockMap[this->allBoardPoints[x][y]] = startBlock;
+            for(auto &block : this->mergedBlock)
+            {
+                if(block != startBlock)
+                {
+                    for (auto &point : block->points)
+                    {
+                        this->pointBlockMap[point] = startBlock;
+                    }
+                    delete block;
+                }
+            }
+        }
     }
+    this->boardZobristHash = this->newBoardZobristHash;
 }
 
 bool Game::moveAnalyze(Step* step)
@@ -38,10 +62,9 @@ bool Game::moveAnalyze(Step* step)
     {
         return false;
     }
-//    this->newBoard.assign(this->board.begin(), this->board.end());
     this->newBoardZobristHash = this->boardZobristHash;
     this->getPickUpBlock(this->allBoardPoints[x][y]);
-    if (this->targetBlock->getQi() == 0)
+    if (this->targetBlock->getQi() == 0 && !pickUpFlag)
     {
         return false;
     }
@@ -53,34 +76,77 @@ bool Game::moveAnalyze(Step* step)
     return true;
 }
 
-void Game::move(bool handCapFlag)
+void Game::move()
 {
-    if(!handCapFlag)
-    {
-        this->steps.push_back(this->nextStep);
-    }
+    this->steps.push_back(this->nextStep);
+    Point* targetPoint = this->allBoardPoints[this->nextStep->x][this->nextStep->y];
+
+    this->board[targetPoint->x][targetPoint->y] = player;
     this->player = this->player == WHITE_PLAYER ? BLACK_PLAYER : WHITE_PLAYER;
     this->historyBoard.push_back(this->board);
-    this->historyZobristHash.insert(this->boardZobristHash);
-    for(auto &block : this->removingBlock)
-    {
-        for(auto &point : block->points)
-        {
-            this->board[point->x][point->y] = 0;
-        }
-        // 其他棋块的气的处理
-    }
-    // 合并本颜色的棋块
-    this->board.assign(this->newBoard.begin(), this->newBoard.end());
+    this->historyZobristHash.insert(this->newBoardZobristHash);
     this->boardZobristHash = this->newBoardZobristHash;
+    // board update
+
+    // self point update
+    if(this->mergedBlock.empty())
+    {
+        this->pointBlockMap[targetPoint] = this->targetBlock;
+        this->targetBlock = new GoBlock();
+    }
+    else
+    {
+        GoBlock* startBlock = *this->mergedBlock.begin();
+        startBlock->clear();
+        startBlock->update(this->targetBlock);
+        this->pointBlockMap[targetPoint] = startBlock;
+        for(auto &block : this->mergedBlock)
+        {
+            if(block != startBlock)
+            {
+                for (auto &point : block->points)
+                {
+                    this->pointBlockMap[point] = startBlock;
+                }
+                delete block;
+            }
+        }
+    }
+
+    // opponent update
+    std::vector<Point*> around;
+    for(auto &block : this->opponentBlock)
+    {
+        block->removeQi(targetPoint);
+        if (block->getQi() == 0)
+        {
+            for (auto &point : block->points)
+            {
+                around.clear();
+                Point::getAround(point, this->allBoardPoints, around);
+                for (auto &aroundPoint : around)
+                {
+                    if (this->board[aroundPoint->x][aroundPoint->y] + player == BLACK_PLAYER + WHITE_PLAYER)
+                    {
+                        this->pointBlockMap[aroundPoint]->addQi(point);
+                    }
+                }
+                this->board[point->x][point->y] = 0;
+            }
+            delete block;
+        }
+    }
 }
 
 void Game::getPickUpBlock(Point* targetPoint)
 {
     std::vector<Point*> around;
     Point::getAround(targetPoint, this->allBoardPoints, around);
-//    this->newBoard[targetPoint->x][targetPoint->y] = player;
     this->newBoardZobristHash ^= targetPoint->zobristHash;
+    this->pickUpFlag = false;
+
+    this->mergedBlock.clear();
+    this->opponentBlock.clear();
 
     int isolatedFlag = true;
     for (auto &point :around)
@@ -90,27 +156,28 @@ void Game::getPickUpBlock(Point* targetPoint)
             auto nearBlock = this->pointBlockMap[point];
             if(this->board[point->x][point->y] == player)
             {
+                this->mergedBlock.insert(nearBlock);
                 if(isolatedFlag)
                 {
+                    this->targetBlock->clear();
                     this->targetBlock->update(nearBlock);
                     this->targetBlock->addPoint(targetPoint, this->board, this->allBoardPoints);
                     isolatedFlag = false;
                 }
                 else
                 {
-                    this->targetBlock->merge(targetPoint, point, nearBlock);
+                    this->targetBlock->merge(targetPoint, nearBlock);
                 }
             }
             else
             {
-                nearBlock->removeQi(targetPoint);
-                if(nearBlock->getQi() == 0)
+                this->opponentBlock.insert(nearBlock);
+                if(nearBlock->getQi() - 1 == 0)
                 {
-                    removingBlock.push_back(nearBlock);
+                    this->pickUpFlag = true;
                     // 可以把围棋块的哈希值也存起来
                     for(auto &opponentPoint : nearBlock->points)
                     {
-//                        this->newBoard[opponentPoint->x][opponentPoint->y] = 0;
                         this->newBoardZobristHash ^= opponentPoint->zobristHash;
                     }
                 }
@@ -119,8 +186,8 @@ void Game::getPickUpBlock(Point* targetPoint)
     }
     if(isolatedFlag)
     {
-        this->targetBlock = new GoBlock(targetPoint, this->player, around, this->board);
-        this->pointBlockMap[targetPoint] = this->targetBlock;
+        this->targetBlock->clear();
+        this->targetBlock->update(targetPoint, this->player, around, this->board);
     }
 }
 
@@ -141,16 +208,21 @@ void Game::loadFromBoardFile(const std::string &fileName, int gapPlayer)
         }
     }
     inFile.close();
-    this->move(true);
+    this->move();
 }
 
-void Game::loadFromBoard(const std::string &boardCode, int gapPlayer)
+void Game::loadFromBoardStr(const std::string &boardCode, int gapPlayer)
 {
+    //BFS
     this->player = gapPlayer;
     for(int i = 0; i < BOARD_SIZE; i++)
     {
         for(int j = 0; j < BOARD_SIZE; j++)
         {
+            if(boardCode[i * BOARD_SIZE + j + 1] - '0' != 0)
+            {
+                //Step* step = new S
+            }
             this->newBoard[i][j] = boardCode[i * BOARD_SIZE + j + 1] - '0';
             if(this->newBoard[i][j] != 0)
             {
@@ -158,7 +230,7 @@ void Game::loadFromBoard(const std::string &boardCode, int gapPlayer)
             }
         }
     }
-    this->move(true);
+    this->move();
 }
 
 void Game::boardStrEncode(char* boardStr)

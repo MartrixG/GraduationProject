@@ -29,7 +29,7 @@ static void boardEncode(Game &game, std::ofstream &featureFileStream)
     int length = int(steps->size()), epoch = std::min(7, length);
     for (int i = 0; i < epoch; i++)
     {
-        state[1][(*steps)[length - i - 1]->x][(*steps)[length - i - 1]->y] = char(i + 1);
+        state[1][(*steps)[length - i - 1]->x][(*steps)[length - i - 1]->y] = i + 1;
     }
     for (int i = 0; i < BOARD_SIZE; i++)
     {
@@ -44,37 +44,29 @@ static void boardEncode(Game &game, std::ofstream &featureFileStream)
     //qi
     //layer:2 state[x][y] = k, (x, y) has k liberties
     //capture
-    //layer:3 state[x][y] = k, (x, y)'block has k pieces of opponent would be captured
+    //layer:3 state[x][y] = k, (x, y)'block has k points of opponent would be captured
     //selfAtari
-    //layer:4 state[x][y] = k, (x, y)'block has k pieces of own would be captured
-    int tmpBoard[BOARD_SIZE][BOARD_SIZE];
-    memset(tmpBoard, 0, sizeof(tmpBoard));
+    //layer:4 state[x][y] = k, (x, y)'block has k points of own would be captured
     auto targetBlock = GoBlock();
     for (int i = 0; i < BOARD_SIZE; i++)
     {
         for (int j = 0; j < BOARD_SIZE; j++)
         {
-            if (tmpBoard[i][j] == 0 && game.board[i][j] != 0)
+            if (game.board[i][j] != 0)
             {
-                targetBlock.update(game.allBoardPoints[i][j], game.board, game.allBoardPoints);
-                int qi = targetBlock.getQi(game.board, game.allBoardPoints);
-                int blockSize = int(targetBlock.pieces.size());
-                for (auto &pieces : targetBlock.pieces)
+                int qi = game.pointBlockMap[game.allBoardPoints[i][j]]->getQi();
+                int blockSize = game.pointBlockMap[game.allBoardPoints[i][j]]->getSize();
+                qi = qi > 8 ? 8 : qi;
+                blockSize = blockSize > 8 ? 8 : blockSize;
+                state[2][i][j] = qi;
+                if (qi == 1)
                 {
-                    int x = pieces->x, y = pieces->y;
-                    tmpBoard[x][y] = 1;
-                    qi = qi > 8 ? 8 : qi;
-                    blockSize = blockSize > 8 ? 8 : blockSize;
-                    state[2][x][y] = qi;
-                    if (qi == 1)
+                    if (game.board[i][j] != game.player)
                     {
-                        if (game.board[x][y] != game.player)
-                        {
-                            state[3][x][y] = blockSize;
-                        } else
-                        {
-                            state[4][x][y] = blockSize;
-                        }
+                        state[3][i][j] = blockSize;
+                    } else
+                    {
+                        state[4][i][j] = blockSize;
                     }
                 }
             }
@@ -124,7 +116,7 @@ static void boardEncode(Game &game, std::ofstream &featureFileStream)
                 if (!eyeFlag)
                 {
                     state[5][i][j] = 1;
-                    int qi = game.targetBlock->getQi(game.newBoard, game.allBoardPoints);
+                    int qi = game.targetBlock->getQi();
                     qi = qi > 8 ? 8 : qi;
                     state[6][i][j] = qi;
                 }

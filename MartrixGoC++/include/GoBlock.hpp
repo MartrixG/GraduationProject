@@ -14,16 +14,15 @@ class GoBlock
 public:
     std::unordered_set<Point*> points = std::unordered_set<Point*>();
     std::unordered_set<Point*> qiPoints = std::unordered_set<Point*>();
-    std::unordered_set<Point*> nearPoints = std::unordered_set<Point*>();
     int color = -1;
 
     GoBlock();
 
-    GoBlock(Point* beginPoint, int pointColor, const std::vector<Point*> &aroundPoint, const vector_2d(int)& board);
-
     void update(GoBlock* otherBlock);
 
-    void merge(Point* linkPointSelf, Point* linkPointOther, GoBlock* otherBlock);
+    void update(Point* beginPoint, int pointColor, const std::vector<Point*> &aroundPoint, const vector_2d(int)& board);
+
+    void merge(Point* linkPointSelf, GoBlock* otherBlock);
 
     void addPoint(Point* linkPoint, const vector_2d(int)& board, const vector_2d(Point*) &allBoardPoints);
 
@@ -33,7 +32,7 @@ public:
 
     int getQi() const;
 
-    bool contain(Point* point) const;
+    int getSize() const;
 
     void clear();
 
@@ -98,34 +97,6 @@ public:
                         std::cout << ". ";
                         break;
                     case 2:
-                        std::cout << "x ";
-                        board[i][j] = 0;
-                        break;
-                }
-            }
-            std::cout << '\n';
-        }
-        for(auto &point : o.nearPoints)
-        {
-            board[point->x][point->y] = 3;
-        }
-        std::cout << "near\n" << " ";
-        for (int i = 0; i < 19; i++)
-        {
-            std::cout << " " << char('a' + i);
-        }
-        std::cout << std::endl;
-        for (int i = 0; i < 19; i++)
-        {
-            std::cout << char('a' + i) << " ";
-            for (int j = 0; j < 19; j++)
-            {
-                switch (board[i][j])
-                {
-                    case 0:
-                        std::cout << ". ";
-                        break;
-                    case 3:
                         std::cout << "x ";
                         board[i][j] = 0;
                         break;
