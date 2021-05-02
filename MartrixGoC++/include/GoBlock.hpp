@@ -52,7 +52,11 @@ public:
         {
             board[point->x][point->y] = 1;
         }
-        std::cout << "point\n" << " ";
+        for(auto &point : o.qiPoints)
+        {
+            board[point->x][point->y] = 2;
+        }
+        std::cout << "point and qi\n" << " ";
         for (int i = 0; i < 19; i++)
         {
             std::cout << " " << char('a' + i);
@@ -70,35 +74,9 @@ public:
                         break;
                     case 1:
                         std::cout << "x ";
-                        board[i][j] = 0;
-                        break;
-                }
-            }
-            std::cout << '\n';
-        }
-        for(auto &point : o.qiPoints)
-        {
-            board[point->x][point->y] = 2;
-        }
-        std::cout << "qi\n" << " ";
-        for (int i = 0; i < 19; i++)
-        {
-            std::cout << " " << char('a' + i);
-        }
-        std::cout << std::endl;
-        for (int i = 0; i < 19; i++)
-        {
-            std::cout << char('a' + i) << " ";
-            for (int j = 0; j < 19; j++)
-            {
-                switch (board[i][j])
-                {
-                    case 0:
-                        std::cout << ". ";
                         break;
                     case 2:
-                        std::cout << "x ";
-                        board[i][j] = 0;
+                        std::cout << "o ";
                         break;
                 }
             }
