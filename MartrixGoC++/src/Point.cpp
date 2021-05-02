@@ -8,12 +8,13 @@
 #include "Game.hpp"
 #include <cassert>
 
-Point::Point(int x, int y, int boardSize, long long hash)
+Point::Point(int x, int y, int boardSize, long long blackHash, long long whiteHash)
 {
     this->x = x;
     this->y = y;
     this->boardSize = boardSize;
-    this->zobristHash = hash;
+    this->zobristHash[0] = blackHash;
+    this->zobristHash[1] = whiteHash;
 }
 
 void Point::getAround(Point* nowPoint, const vector_2d(Point*) &allBoardPoints, std::vector<Point*> &aroundPoints)
@@ -56,7 +57,7 @@ void Point::pointsInit(vector_2d(Point*) &allBoardPoints)
         std::vector<Point> tmp;
         for (int j = 0; j < BOARD_SIZE; j++)
         {
-            allBoardPoints[i].push_back(new Point(i, j, BOARD_SIZE, dist(rand_num)));
+            allBoardPoints[i].push_back(new Point(i, j, BOARD_SIZE, dist(rand_num), dist(rand_num)));
         }
     }
 }

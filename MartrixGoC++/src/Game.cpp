@@ -9,6 +9,8 @@
 #include "GoBlock.hpp"
 #include "Point.hpp"
 
+#include <algorithm>
+
 Game::Game(vector_2d(Point*) &points)
 {
     this->allBoardPoints = points;
@@ -132,6 +134,7 @@ void Game::move()
                     }
                 }
                 this->board[point->x][point->y] = 0;
+                this->pointBlockMap.erase(point);
             }
             delete block;
         }
@@ -142,7 +145,7 @@ void Game::getPickUpBlock(Point* targetPoint)
 {
     std::vector<Point*> around;
     Point::getAround(targetPoint, this->allBoardPoints, around);
-    this->newBoardZobristHash ^= targetPoint->zobristHash;
+    this->newBoardZobristHash ^= targetPoint->zobristHash[this->player - 1];
     this->pickUpFlag = false;
 
     this->mergedBlock.clear();
@@ -154,6 +157,10 @@ void Game::getPickUpBlock(Point* targetPoint)
         if (this->board[point->x][point->y] != 0)
         {
             auto nearBlock = this->pointBlockMap[point];
+            if(!(this->mergedBlock.count(nearBlock) == 0 && this->opponentBlock.count(nearBlock) == 0))
+            {
+                continue;
+            }
             if(this->board[point->x][point->y] == player)
             {
                 this->mergedBlock.insert(nearBlock);
@@ -178,7 +185,7 @@ void Game::getPickUpBlock(Point* targetPoint)
                     // 可以把围棋块的哈希值也存起来
                     for(auto &opponentPoint : nearBlock->points)
                     {
-                        this->newBoardZobristHash ^= opponentPoint->zobristHash;
+                        this->newBoardZobristHash ^= opponentPoint->zobristHash[nearBlock->color - 1];
                     }
                 }
             }
@@ -203,7 +210,7 @@ void Game::loadFromBoardFile(const std::string &fileName, int gapPlayer)
             inFile >> this->newBoard[i][j];
             if(this->newBoard[i][j] != 0)
             {
-                this->newBoardZobristHash ^= this->allBoardPoints[i][j]->zobristHash;
+                //this->newBoardZobristHash ^= this->allBoardPoints[i][j]->zobristHash;
             }
         }
     }
@@ -226,7 +233,7 @@ void Game::loadFromBoardStr(const std::string &boardCode, int gapPlayer)
             this->newBoard[i][j] = boardCode[i * BOARD_SIZE + j + 1] - '0';
             if(this->newBoard[i][j] != 0)
             {
-                this->newBoardZobristHash ^= this->allBoardPoints[i][j]->zobristHash;
+                //this->newBoardZobristHash ^= this->allBoardPoints[i][j]->zobristHash;
             }
         }
     }
