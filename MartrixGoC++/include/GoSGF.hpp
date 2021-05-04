@@ -8,8 +8,6 @@
 #include <string>
 #include "Step.hpp"
 
-const int STEP_STR_LENGTH = 6;
-const int PLAYER_BIAS = 1;
 const int X_BIAS = 3;
 const int Y_BIAS = 2;
 const int INFORMATION_BIAS = 3;
@@ -32,6 +30,8 @@ public:
     bool haveNextStep() const;
 
     void getNextStep(Step*&nextStep);
+
+    ~GoSGF();
 };
 
 #endif //MARTRIXGOC_GOSGF_H

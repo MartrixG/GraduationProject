@@ -91,3 +91,11 @@ void GoSGF::getNextStep(Step*&nextStep)
     nextStep = this->steps[this->nowStep];
     this->nowStep++;
 }
+
+GoSGF::~GoSGF()
+{
+    for(auto &step : this->steps)
+    {
+        delete step;
+    }
+}

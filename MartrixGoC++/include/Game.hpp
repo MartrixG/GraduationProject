@@ -35,8 +35,8 @@ public:
     // tmp analyze information
     vector_2d(int) newBoard = vector_2d(int)(BOARD_SIZE, std::vector<int>(BOARD_SIZE));
     long long newBoardZobristHash = 0;
-    Step* nextStep = nullptr;
-    GoBlock* targetBlock = nullptr;
+    Step* nextStep = nullptr;  GoBlock* targetBlock = nullptr;
+
     std::unordered_set<GoBlock*> opponentBlock = std::unordered_set<GoBlock*>();
     bool pickUpFlag = false;
     std::unordered_set<GoBlock*> mergedBlock = std::unordered_set<GoBlock*>();
@@ -86,6 +86,8 @@ public:
             std::cout << '\n';
         }
     }
+
+    ~Game();
 };
 
 #endif //MARTRIXGOC_GAME_HPP

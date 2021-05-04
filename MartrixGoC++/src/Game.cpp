@@ -252,3 +252,20 @@ void Game::boardStrEncode(char* boardStr)
     }
     boardStr[BOARD_SIZE * BOARD_SIZE + 1] = '\0';
 }
+
+Game::~Game()
+{
+    std::unordered_set<GoBlock*> blockSet;
+    for(auto &line : this->allBoardPoints)
+    {
+        for(auto &point : line)
+        {
+            blockSet.insert(this->pointBlockMap[point]);
+        }
+    }
+    for(auto &block : blockSet)
+    {
+        delete block;
+    }
+    delete targetBlock;
+}
