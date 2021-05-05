@@ -8,6 +8,9 @@
 #include <iostream>
 #include <fstream>
 #include "Point.hpp"
+#include "Player.hpp"
+#include "Game.hpp"
+
 
 class Application
 {
@@ -18,6 +21,8 @@ public:
 
     static void gameInformationAnalyze(vector_2d(Point*) &allBoardPoints, std::string &srcSgf,
                                        std::ofstream &featureFileStream, std::ofstream&labelFileStream);
+
+    static int gameCore(Game* game, PlayerBase* player);
 
     static void commandLine(int argc, char* argv[]);
 

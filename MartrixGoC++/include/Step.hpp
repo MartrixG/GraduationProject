@@ -29,6 +29,8 @@ public:
         out << char('a' + o.x) << char('a' + o.y);
         return out;
     }
+
+    bool operator==(const Step& o) const;
 };
 
 #endif //MARTRIXGOC_STEP_HPP

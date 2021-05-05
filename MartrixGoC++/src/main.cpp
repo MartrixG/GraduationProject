@@ -3,6 +3,7 @@
 #include <ctime>
 #include "App.hpp"
 #include "GoBlock.hpp"
+#include "Player.hpp"
 
 enum argsEnum
 {
@@ -23,25 +24,6 @@ void testCode(int argc, char* argv[])
 {
 //    GoBlock::test();
 //    Point::test();
-    std::fstream preLabel("E:/LEARNING/GraduationProject/data/train_data/label.txt");
-    std::fstream nowLabel("E:/LEARNING/GraduationProject/data/out/label.txt");
-    std::string pre, now;
-    bool flag = true;
-    int line = 0;
-    while(flag)
-    {
-        if(pre != now)
-        {
-            std::cout << line << '\n';
-            flag = false;
-        }
-        else
-        {
-            line++;
-            std::getline(preLabel, pre);
-            std::getline(nowLabel, now);
-        }
-    }
 }
 
 int main(int argc, char* argv[])

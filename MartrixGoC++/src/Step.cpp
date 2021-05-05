@@ -29,3 +29,8 @@ Step::Step(int x, int y, int player)
     this->x = x;
     this->y = y;
 }
+
+bool Step::operator==(const Step &o) const
+{
+    return this->x == o.x && this->y == o.y;
+}

@@ -21,7 +21,6 @@ class Game
 public:
     // game base information
     int player = BLACK_PLAYER;
-    int boardSize = BOARD_SIZE;
     // board points
     vector_2d(Point*) allBoardPoints;
     std::vector<Step*> steps = std::vector<Step*>();
