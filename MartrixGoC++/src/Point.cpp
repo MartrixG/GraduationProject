@@ -62,6 +62,11 @@ void Point::pointsInit(vector_2d(Point*) &allBoardPoints)
     }
 }
 
+int Point::getPos() const
+{
+    return this->x * 19 + this->y;
+}
+
 void Point::test()
 {
     /*   0 1 2
@@ -129,7 +134,8 @@ void Point::test()
     {
         for(int j = 0; j < BOARD_SIZE; j++)
         {
-            std::cout << allBoardPoints[i][j]->zobristHash << '\n';
+            std::cout << allBoardPoints[i][j]->zobristHash[0] << '\n';
+            std::cout << allBoardPoints[i][j]->zobristHash[1] << '\n';
         }
     }
 }

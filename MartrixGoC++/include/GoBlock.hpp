@@ -7,14 +7,16 @@
 
 #include <unordered_set >
 #include <iostream>
+#include <bitset>
 #include "Point.hpp"
 
 class GoBlock
 {
 public:
-    std::unordered_set<Point*> points = std::unordered_set<Point*>();
-    std::unordered_set<Point*> qiPoints = std::unordered_set<Point*>();
+    std::bitset<361> points = std::bitset<361>();
+    std::bitset<361> qiPoints = std::bitset<361>();
     int color = -1;
+    long long zobristHash = 0LL;
 
     GoBlock();
 
@@ -40,22 +42,6 @@ public:
 
     friend void operator<<(std::ostream &out, const GoBlock &o)
     {
-        int board[19][19];
-        for(auto & i : board)
-        {
-            for(int & j : i)
-            {
-                j = 0;
-            }
-        }
-        for(auto &point : o.points)
-        {
-            board[point->x][point->y] = 1;
-        }
-        for(auto &point : o.qiPoints)
-        {
-            board[point->x][point->y] = 2;
-        }
         std::cout << "point and qi\n" << " ";
         for (int i = 0; i < 19; i++)
         {
@@ -67,27 +53,21 @@ public:
             std::cout << char('a' + i) << " ";
             for (int j = 0; j < 19; j++)
             {
-                switch (board[i][j])
+                if(o.points.test(i * 19 + j))
                 {
-                    case 0:
-                        std::cout << ". ";
-                        break;
-                    case 1:
-                        std::cout << "x ";
-                        break;
-                    case 2:
-                        std::cout << "o ";
-                        break;
+                    std::cout << "x ";
+                }
+                else if(o.qiPoints.test(i * 19 + j))
+                {
+                    std::cout << "o ";
+                }
+                else
+                {
+                    std::cout << ". ";
                 }
             }
             std::cout << '\n';
         }
-    }
-
-    ~GoBlock()
-    {
-        this->points.clear();
-        this->qiPoints.clear();
     }
 };
 

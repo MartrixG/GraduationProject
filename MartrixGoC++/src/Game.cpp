@@ -9,8 +9,6 @@
 #include "GoBlock.hpp"
 #include "Point.hpp"
 
-#include <algorithm>
-
 Game::Game(vector_2d(Point*) &points)
 {
     this->allBoardPoints = points;
@@ -41,9 +39,12 @@ void Game::initHandCap(std::vector<Step*> &handCapSteps, int numOfHandCap)
             {
                 if(block != startBlock)
                 {
-                    for (auto &point : block->points)
+                    for(int j = 0; j < BOARD_SIZE * BOARD_SIZE; j++)
                     {
-                        this->pointBlockMap[point] = startBlock;
+                        if(block->points.test(j))
+                        {
+                            this->pointBlockMap[this->allBoardPoints[j / 19][j % 19]] = startBlock;
+                        }
                     }
                     delete block;
                 }
@@ -106,9 +107,12 @@ void Game::move()
         {
             if(block != startBlock)
             {
-                for (auto &point : block->points)
+                for(int i = 0; i < BOARD_SIZE * BOARD_SIZE; i++)
                 {
-                    this->pointBlockMap[point] = startBlock;
+                    if(block->points.test(i))
+                    {
+                        this->pointBlockMap[this->allBoardPoints[i / 19][i % 19]] = startBlock;
+                    }
                 }
                 delete block;
             }
@@ -122,19 +126,23 @@ void Game::move()
         block->removeQi(targetPoint);
         if (block->getQi() == 0)
         {
-            for (auto &point : block->points)
+            for (int i = 0; i < BOARD_SIZE * BOARD_SIZE; i++)
             {
-                around.clear();
-                Point::getAround(point, this->allBoardPoints, around);
-                for (auto &aroundPoint : around)
+                if(block->points.test(i))
                 {
-                    if (this->board[aroundPoint->x][aroundPoint->y] + player == BLACK_PLAYER + WHITE_PLAYER)
+                    Point* point = this->allBoardPoints[i / 19][i % 19];
+                    around.clear();
+                    Point::getAround(point, this->allBoardPoints, around);
+                    for (auto &aroundPoint : around)
                     {
-                        this->pointBlockMap[aroundPoint]->addQi(point);
+                        if (this->board[aroundPoint->x][aroundPoint->y] + player == BLACK_PLAYER + WHITE_PLAYER)
+                        {
+                            this->pointBlockMap[aroundPoint]->addQi(point);
+                        }
                     }
+                    this->board[point->x][point->y] = 0;
+                    this->pointBlockMap.erase(point);
                 }
-                this->board[point->x][point->y] = 0;
-                this->pointBlockMap.erase(point);
             }
             delete block;
         }
@@ -182,11 +190,7 @@ void Game::getPickUpBlock(Point* targetPoint)
                 if(nearBlock->getQi() - 1 == 0)
                 {
                     this->pickUpFlag = true;
-                    // 可以把围棋块的哈希值也存起来
-                    for(auto &opponentPoint : nearBlock->points)
-                    {
-                        this->newBoardZobristHash ^= opponentPoint->zobristHash[nearBlock->color - 1];
-                    }
+                    this->newBoardZobristHash ^= nearBlock->zobristHash;
                 }
             }
         }

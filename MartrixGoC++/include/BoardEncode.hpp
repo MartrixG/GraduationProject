@@ -47,7 +47,6 @@ static void boardEncode(Game &game, std::ofstream &featureFileStream)
     //layer:3 state[x][y] = k, (x, y)'block has k points of opponent would be captured
     //selfAtari
     //layer:4 state[x][y] = k, (x, y)'block has k points of own would be captured
-    auto targetBlock = GoBlock();
     for (int i = 0; i < BOARD_SIZE; i++)
     {
         for (int j = 0; j < BOARD_SIZE; j++)

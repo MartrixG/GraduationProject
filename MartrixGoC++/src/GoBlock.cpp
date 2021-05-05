@@ -6,38 +6,41 @@
 
 GoBlock::GoBlock() = default;
 
-void GoBlock::update(Point* beginPoint, int pointColor, const std::vector<Point*> &aroundPoint,
-                     const std::vector<std::vector<int>> &board)
+void GoBlock::update(Point* beginPoint, int pointColor, const std::vector<Point*> &aroundPoint, const vector_2d(int) &board)
 {
     this->color = pointColor;
-    this->points.insert(beginPoint);
+    this->points.set(beginPoint->getPos());
+    this->zobristHash = beginPoint->zobristHash[pointColor - 1];
     for(auto &point : aroundPoint)
     {
         if(board[point->x][point->y] == 0)
         {
-            this->qiPoints.insert(point);
+            this->qiPoints.set(point->getPos());
         }
     }
 }
 
 void GoBlock::update(GoBlock* otherBlock)
 {
-    this->points.insert(otherBlock->points.begin(), otherBlock->points.end());
-    this->qiPoints.insert(otherBlock->qiPoints.begin(), otherBlock->qiPoints.end());
+    this->points |= otherBlock->points;
+    this->zobristHash |= otherBlock->zobristHash;
+    this->qiPoints |= otherBlock->qiPoints;
     this->color = otherBlock->color;
 }
 
 void GoBlock::merge(Point* linkPointSelf, GoBlock* otherBlock)
 {
-    this->points.insert(otherBlock->points.begin(), otherBlock->points.end());
-    this->qiPoints.insert(otherBlock->qiPoints.begin(), otherBlock->qiPoints.end());
-    this->qiPoints.erase(linkPointSelf);
+    this->points |= otherBlock->points;
+    this->zobristHash |= otherBlock->zobristHash;
+    this->qiPoints |= otherBlock->qiPoints;
+    this->qiPoints.reset(linkPointSelf->getPos());
 }
 
 void GoBlock::addPoint(Point* linkPoint, const vector_2d(int) &board, const vector_2d(Point*) &allBoardPoints)
 {
-    this->points.insert(linkPoint);
-    this->qiPoints.erase(linkPoint);
+    this->points.set(linkPoint->getPos());
+    this->zobristHash |= linkPoint->zobristHash[this->color - 1];
+    this->qiPoints.reset(linkPoint->getPos());
     int dx[4] = {0, 0, -1, 1};
     int dy[4] = {-1, 1, 0, 0};
     for(int i = 0; i < 4; i++)
@@ -56,28 +59,29 @@ void GoBlock::addPoint(Point* linkPoint, const vector_2d(int) &board, const vect
 
 void GoBlock::removeQi(Point* targetPoint)
 {
-    this->qiPoints.erase(targetPoint);;
+    this->qiPoints.reset(targetPoint->getPos());
 }
 
 void GoBlock::addQi(Point* targetPoint)
 {
-    this->qiPoints.insert(targetPoint);
+    this->qiPoints.set(targetPoint->getPos());
 }
 
 int GoBlock::getQi() const
 {
-    return int(this->qiPoints.size());
+    return int(this->qiPoints.count());
 }
 
 int GoBlock::getSize() const
 {
-    return int(this->points.size());
+    return int(this->points.count());
 }
 
 void GoBlock::clear()
 {
-    this->points.clear();
-    this->qiPoints.clear();
+    this->points.reset();
+    this->qiPoints.reset();
+    this->zobristHash = 0LL;
     this->color = -1;
 }
 

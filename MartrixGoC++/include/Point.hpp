@@ -25,6 +25,8 @@ public:
 
     static void pointsInit(vector_2d(Point*) &allBoardPoints);
 
+    int getPos() const;
+
     friend std::ostream &operator<<(std::ostream &out, const Point &o)
     {
         out << "x: " << o.x << " y: " << o.y;
