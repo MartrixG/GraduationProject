@@ -9,6 +9,7 @@
 #include "ostream"
 
 #define vector_2d(type) std::vector<std::vector<type>>
+const int BOARD_SIZE = 19;
 
 class Point
 {

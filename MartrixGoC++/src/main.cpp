@@ -5,19 +5,22 @@
 #include "GoBlock.hpp"
 #include "Player.hpp"
 
+#include <bitset>
+
 enum argsEnum
 {
-    loadSgf, makeData, test, commandLine, ui
+    loadSgf, makeData, test, commandLine, ui, MCTS
 };
 std::map<std::string, int> argsTransform;
 
 void initArgs()
 {
-    argsTransform["loadSgf"] = loadSgf;
-    argsTransform["makeData"] = makeData;
-    argsTransform["test"] = test;
-    argsTransform["commandLine"] = commandLine;
-    argsTransform["ui"] = ui;
+    argsTransform["loadSgf"]       =  loadSgf;
+    argsTransform["makeData"]      =  makeData;
+    argsTransform["test"]          =  test;
+    argsTransform["commandLine"]   =  commandLine;
+    argsTransform["ui"]            =  ui;
+    argsTransform["MCTS"]          =  MCTS;
 }
 
 void testCode(int argc, char* argv[])
@@ -48,6 +51,9 @@ int main(int argc, char* argv[])
             break;
         case ui:
             Application::uiSocket(argc, argv);
+            break;
+        case MCTS:
+            Application::MCTSTest(argc, argv);
             break;
         case test:
             testCode(argc, argv);

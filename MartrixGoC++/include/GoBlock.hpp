@@ -13,8 +13,8 @@
 class GoBlock
 {
 public:
-    std::bitset<361> points = std::bitset<361>();
-    std::bitset<361> qiPoints = std::bitset<361>();
+    std::bitset<BOARD_SIZE * BOARD_SIZE> points = std::bitset<BOARD_SIZE * BOARD_SIZE>();
+    std::bitset<BOARD_SIZE * BOARD_SIZE> qiPoints = std::bitset<BOARD_SIZE * BOARD_SIZE>();
     int color = -1;
     long long zobristHash = 0LL;
 
@@ -43,21 +43,21 @@ public:
     friend void operator<<(std::ostream &out, const GoBlock &o)
     {
         std::cout << "point and qi\n" << " ";
-        for (int i = 0; i < 19; i++)
+        for (int i = 0; i < BOARD_SIZE; i++)
         {
             std::cout << " " << char('a' + i);
         }
         std::cout << std::endl;
-        for (int i = 0; i < 19; i++)
+        for (int i = 0; i < BOARD_SIZE; i++)
         {
             std::cout << char('a' + i) << " ";
-            for (int j = 0; j < 19; j++)
+            for (int j = 0; j < BOARD_SIZE; j++)
             {
-                if(o.points.test(i * 19 + j))
+                if(o.points.test(i * BOARD_SIZE + j))
                 {
                     std::cout << "x ";
                 }
-                else if(o.qiPoints.test(i * 19 + j))
+                else if(o.qiPoints.test(i * BOARD_SIZE + j))
                 {
                     std::cout << "o ";
                 }

@@ -8,13 +8,10 @@
 #include <vector>
 #include <string>
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #include "Step.hpp"
 #include "GoBlock.hpp"
 #include "Point.hpp"
-
-
-const int BOARD_SIZE = 19;
 
 class Game
 {
@@ -27,12 +24,11 @@ public:
     // board point information
     vector_2d(int) board = vector_2d(int)(BOARD_SIZE, std::vector<int>(BOARD_SIZE));
     long long boardZobristHash = 0;
-    std::map<Point*, GoBlock*> pointBlockMap = std::map<Point*, GoBlock*>();
+    std::unordered_map<Point*, GoBlock*> pointBlockMap = std::unordered_map<Point*, GoBlock*>();
     // history information
     std::vector<vector_2d(int)> historyBoard = std::vector<vector_2d(int)>();
     std::unordered_set<long long> historyZobristHash = std::unordered_set<long long>();
     // tmp analyze information
-    vector_2d(int) newBoard = vector_2d(int)(BOARD_SIZE, std::vector<int>(BOARD_SIZE));
     long long newBoardZobristHash = 0;
     Step* nextStep = nullptr;  GoBlock* targetBlock = nullptr;
 
@@ -50,11 +46,13 @@ public:
 
     void getPickUpBlock(Point* targetPoint);
 
-    void loadFromBoardFile(const std::string &fileName, int gapPlayer);
-
-    void loadFromBoardStr(const std::string &boardCode, int gapPlayer);
-
     void boardStrEncode(char* boardStr);
+
+    void legalMove(std::vector<int>& legalMoves, std::vector<int>& qiAfterMove, bool eyeFlag);
+
+    void copy(Game& o);
+
+    bool isEye(Point* pos, int posPlayer);
 
     friend void operator<<(std::ostream &out, const Game &o)
     {

@@ -64,7 +64,7 @@ void Point::pointsInit(vector_2d(Point*) &allBoardPoints)
 
 int Point::getPos() const
 {
-    return this->x * 19 + this->y;
+    return this->x * BOARD_SIZE + this->y;
 }
 
 void Point::test()
@@ -78,9 +78,9 @@ void Point::test()
      */
     vector_2d(Point*) allBoardPoints(BOARD_SIZE);
     Point::pointsInit(allBoardPoints);
-    for (int i = 0; i < 19; i++)
+    for (int i = 0; i < BOARD_SIZE; i++)
     {
-        for (int j = 0; j < 19; j++)
+        for (int j = 0; j < BOARD_SIZE; j++)
         {
             assert(allBoardPoints[i][j]->x == i);
             assert(allBoardPoints[i][j]->y == j);

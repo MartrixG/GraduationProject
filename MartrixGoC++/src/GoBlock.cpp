@@ -69,12 +69,12 @@ void GoBlock::addQi(Point* targetPoint)
 
 int GoBlock::getQi() const
 {
-    return int(this->qiPoints.count());
+    return (int)this->qiPoints.count();
 }
 
 int GoBlock::getSize() const
 {
-    return int(this->points.count());
+    return (int)this->points.count();
 }
 
 void GoBlock::clear()
@@ -91,12 +91,12 @@ void GoBlock::test()
      * dx[4] = {0, 0, -1, 1}
      * dy[4] = {-1, 1, 0, 0}
      */
-    vector_2d(Point*) allBoardPoints(19);
+    vector_2d(Point*) allBoardPoints(BOARD_SIZE);
     Point::pointsInit(allBoardPoints);
-    vector_2d(int) testBoard(19);
+    vector_2d(int) testBoard(BOARD_SIZE);
     for (auto &line :testBoard)
     {
-        for (int i = 0; i < 19; i++)
+        for (int i = 0; i < BOARD_SIZE; i++)
         {
             line.push_back(0);
         }

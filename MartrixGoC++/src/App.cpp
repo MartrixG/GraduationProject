@@ -219,7 +219,7 @@ bool initMove(Game &game, const std::string& stepStr)
         pos *= 10;
         pos += stepStr[i] - '0';
     }
-    int x = pos / 19, y = pos % 19;
+    int x = pos / BOARD_SIZE, y = pos % BOARD_SIZE;
     Step* nextStep = new Step(game.player, game.allBoardPoints[x][y]);
     if(game.moveAnalyze(nextStep))
     {
@@ -262,8 +262,8 @@ void Application::uiSocket(int argc, char** argv)
     memset(srcMessage, 0, sizeof(srcMessage));
 
     recv(clientSocket, srcMessage, bufSize, 0);
-    SocketPlayer* uiPlayer = nullptr;
-    MCTSPlayer* mctsPlayer = nullptr;
+    SocketPlayer* uiPlayer;
+    MCTSPlayer* mctsPlayer;
     if(srcMessage[0] == '1')
     {
         uiPlayer = new SocketPlayer(socketPlayer, black);
@@ -304,8 +304,42 @@ void Application::uiSocket(int argc, char** argv)
         game.boardStrEncode(srcMessage);
         send(clientSocket, srcMessage, bufSize, 0);
     }
-    close:
     closesocket(clientSocket);
     closesocket(serverSocket);
     WSACleanup();
+}
+
+void Application::MCTSTest(int argc, char** argv)
+{
+    vector_2d(Point*) allBoardPoints(BOARD_SIZE);
+    Point::pointsInit(allBoardPoints);
+    Game game = Game(allBoardPoints);
+
+    auto* blackPlayer = new RandomPlayer(randomPlayer, black);
+    auto* whitePlayer = new RandomPlayer(randomPlayer, white);
+
+    RandomPlayer* player = blackPlayer;
+//    std::cout << "game start.\n" << game;
+    while(true)
+    {
+        int res;
+        player->updatePlayer(&game);
+        res = gameCore(&game, player);
+        if(res == 0)
+        {
+            std::cout << "illegal position.\n";
+            player = player == blackPlayer ? whitePlayer : blackPlayer;
+        }
+        else if(res == 1)
+        {
+//            std::cout << game;
+//            std::cout << '\n';
+        }
+        else
+        {
+            std::cout << "finish.\n";
+            break;
+        }
+        player = player == blackPlayer ? whitePlayer : blackPlayer;
+    }
 }

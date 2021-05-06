@@ -3,15 +3,15 @@
 //
 
 #include <iostream>
-#include <ctime>
-#include <random>
-#include <chrono>
+#include <cstring>
 #include "Player.hpp"
 
 PlayerBase::PlayerBase(playerEnum type, playColorEnum color)
 {
     this->playerType = type;
     this->playerColor = color;
+    this->randNum = std::default_random_engine(GetCurrentThreadId());
+    this->dist = std::uniform_int_distribution<int>(0, 0x7fffffff);
 }
 
 void CommandLinePlayer::getNextStep(Step* nextStep)
@@ -33,8 +33,8 @@ void SocketPlayer::getNextStep(Step* nextStep)
         pos += this->srcMessage[i] - '0';
     }
     nextStep->player = (int)this->playerColor + 1;
-    nextStep->x = pos / 19;
-    nextStep->y = pos % 19;
+    nextStep->x = pos / BOARD_SIZE;
+    nextStep->y = pos % BOARD_SIZE;
 }
 
 void SocketPlayer::updatePlayer(char* message)
@@ -42,30 +42,46 @@ void SocketPlayer::updatePlayer(char* message)
     this->srcMessage = message;
 }
 
-void MCTSPlayer::getNextStep(Step* nextStep)
-{
-    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-    std::mt19937_64 randNum(seed);
-    std::uniform_int_distribution<int> dist(0, 361);
-    nextStep->player = (int)playerColor + 1;
-    nextStep->x = dist(randNum) % 19;
-    nextStep->y = dist(randNum) % 19;
-}
-
-void MCTSPlayer::getFirstStep(Step* nextStep) const
+void MCTSPlayer::getFirstStep(Step* nextStep)
 {
     nextStep->player = (int)playerColor + 1;
     int dx[5] = {0, 1, -1, 0, 0};
     int dy[5] = {0, 0, 0, 1, -1};
-    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-    std::mt19937_64 randNum(seed);
-    std::uniform_int_distribution<int> dist(0, 4);
-    int i = dist(randNum);
+    int i = this->dist(this->randNum) % 5;
     nextStep->x = dx[i];
     nextStep->y = dy[i];
+}
+
+void MCTSPlayer::getNextStep(Step* nextStep)
+{
+    nextStep->player = (int)playerColor + 1;
+    nextStep->x = this->dist(this->randNum) % BOARD_SIZE;
+    nextStep->y = this->dist(this->randNum) % BOARD_SIZE;
 }
 
 void MCTSPlayer::updatePlayer()
 {
 
+}
+
+void RandomPlayer::getNextStep(Step* nextStep)
+{
+    if(this->legalMove.empty())
+    {
+        nextStep->x = -1;
+        nextStep->y = -1;
+        return;
+    }
+    nextStep->player = (int)playerColor + 1;
+    int chosen = this->dist(this->randNum);
+    nextStep->x = this->legalMove[chosen] / BOARD_SIZE;
+    nextStep->y = this->legalMove[chosen] % BOARD_SIZE;
+}
+
+void RandomPlayer::updatePlayer(Game* globalGame)
+{
+    this->game = globalGame;
+    this->legalMove.clear();
+    this->qiAfterMove.clear();
+    this->game->legalMove(this->legalMove, this->qiAfterMove, true);
 }

@@ -5,12 +5,15 @@
 #ifndef MARTRIXGOC_PLAYER_HPP
 #define MARTRIXGOC_PLAYER_HPP
 
-#include <winsock.h>
+#include <vector>
+#include <random>
+#include "windows.h"
 #include "Step.hpp"
+#include "Game.hpp"
 
 enum playerEnum
 {
-    commandLinePlayer, socketPlayer, MCTPlayer
+    commandLinePlayer, socketPlayer, MCTPlayer, randomPlayer
 };
 
 enum playColorEnum
@@ -21,6 +24,8 @@ enum playColorEnum
 class PlayerBase
 {
 public:
+    std::default_random_engine randNum;
+    std::uniform_int_distribution<int> dist;
     playerEnum playerType;
     playColorEnum playerColor;
     PlayerBase(playerEnum type, playColorEnum color);
@@ -49,8 +54,21 @@ class MCTSPlayer : public PlayerBase
 public:
     using PlayerBase::PlayerBase;
     void getNextStep(Step *nextStep) override;
-    void getFirstStep(Step* netStep) const;
+    void getFirstStep(Step* netStep);
     void updatePlayer();
+};
+
+class RandomPlayer : public PlayerBase
+{
+public:
+    std::vector<int> legalMove = std::vector<int>();
+    std::vector<int> qiAfterMove = std::vector<int>();
+    Game* game;
+
+    using PlayerBase::PlayerBase;
+    void getNextStep(Step* nextStep) override;
+    void updatePlayer(Game* game);
+
 };
 
 #endif //MARTRIXGOC_PLAYER_HPP

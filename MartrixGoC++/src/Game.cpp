@@ -5,9 +5,6 @@
 #include <iostream>
 #include <fstream>
 #include "Game.hpp"
-#include "Step.hpp"
-#include "GoBlock.hpp"
-#include "Point.hpp"
 
 Game::Game(vector_2d(Point*) &points)
 {
@@ -43,7 +40,7 @@ void Game::initHandCap(std::vector<Step*> &handCapSteps, int numOfHandCap)
                     {
                         if(block->points.test(j))
                         {
-                            this->pointBlockMap[this->allBoardPoints[j / 19][j % 19]] = startBlock;
+                            this->pointBlockMap[this->allBoardPoints[j / BOARD_SIZE][j % BOARD_SIZE]] = startBlock;
                         }
                     }
                     delete block;
@@ -84,11 +81,12 @@ void Game::move()
     this->steps.push_back(this->nextStep);
     Point* targetPoint = this->allBoardPoints[this->nextStep->x][this->nextStep->y];
 
-    this->board[targetPoint->x][targetPoint->y] = player;
-    this->player = this->player == WHITE_PLAYER ? BLACK_PLAYER : WHITE_PLAYER;
     this->historyBoard.push_back(this->board);
     this->historyZobristHash.insert(this->newBoardZobristHash);
     this->boardZobristHash = this->newBoardZobristHash;
+
+    this->board[targetPoint->x][targetPoint->y] = player;
+    this->player = this->player == WHITE_PLAYER ? BLACK_PLAYER : WHITE_PLAYER;
     // board update
 
     // self point update
@@ -111,7 +109,7 @@ void Game::move()
                 {
                     if(block->points.test(i))
                     {
-                        this->pointBlockMap[this->allBoardPoints[i / 19][i % 19]] = startBlock;
+                        this->pointBlockMap[this->allBoardPoints[i / BOARD_SIZE][i % BOARD_SIZE]] = startBlock;
                     }
                 }
                 delete block;
@@ -130,7 +128,7 @@ void Game::move()
             {
                 if(block->points.test(i))
                 {
-                    Point* point = this->allBoardPoints[i / 19][i % 19];
+                    Point* point = this->allBoardPoints[i / BOARD_SIZE][i % BOARD_SIZE];
                     around.clear();
                     Point::getAround(point, this->allBoardPoints, around);
                     for (auto &aroundPoint : around)
@@ -202,48 +200,6 @@ void Game::getPickUpBlock(Point* targetPoint)
     }
 }
 
-void Game::loadFromBoardFile(const std::string &fileName, int gapPlayer)
-{
-    this->player = gapPlayer;
-    std::ifstream inFile;
-    inFile.open(fileName);
-    for (int i = 0; i < BOARD_SIZE; i++)
-    {
-        for (int j = 0; j < BOARD_SIZE; j++)
-        {
-            inFile >> this->newBoard[i][j];
-            if(this->newBoard[i][j] != 0)
-            {
-                //this->newBoardZobristHash ^= this->allBoardPoints[i][j]->zobristHash;
-            }
-        }
-    }
-    inFile.close();
-    this->move();
-}
-
-void Game::loadFromBoardStr(const std::string &boardCode, int gapPlayer)
-{
-    //BFS
-    this->player = gapPlayer;
-    for(int i = 0; i < BOARD_SIZE; i++)
-    {
-        for(int j = 0; j < BOARD_SIZE; j++)
-        {
-            if(boardCode[i * BOARD_SIZE + j + 1] - '0' != 0)
-            {
-                //Step* step = new S
-            }
-            this->newBoard[i][j] = boardCode[i * BOARD_SIZE + j + 1] - '0';
-            if(this->newBoard[i][j] != 0)
-            {
-                //this->newBoardZobristHash ^= this->allBoardPoints[i][j]->zobristHash;
-            }
-        }
-    }
-    this->move();
-}
-
 void Game::boardStrEncode(char* boardStr)
 {
     boardStr[0] = char(this->player + '0');
@@ -251,7 +207,7 @@ void Game::boardStrEncode(char* boardStr)
     {
         for(int j = 0; j < BOARD_SIZE; j++)
         {
-            boardStr[i * 19 + j + 1] = char(this->board[i][j] + '0');
+            boardStr[i * BOARD_SIZE + j + 1] = char(this->board[i][j] + '0');
         }
     }
     boardStr[BOARD_SIZE * BOARD_SIZE + 1] = '\0';
@@ -272,4 +228,96 @@ Game::~Game()
         delete block;
     }
     delete targetBlock;
+}
+
+void Game::copy(Game &o)
+{
+    std::unordered_map<GoBlock*, GoBlock*> blockMap;
+    o.player = this->player;
+    o.allBoardPoints = this->allBoardPoints;
+    std::copy(this->board.begin(), this->board.end(), o.board.begin());
+    o.boardZobristHash = this->boardZobristHash;
+    std::copy(this->historyBoard.begin(), this->historyBoard.end(), o.historyBoard.begin());
+    o.historyZobristHash = this->historyZobristHash;
+    o.newBoardZobristHash = this->newBoardZobristHash;
+    for(int i = 0; i < BOARD_SIZE; i++)
+    {
+        for(int j = 0; j < BOARD_SIZE; j++)
+        {
+            if(this->pointBlockMap.count(this->allBoardPoints[i][j]))
+            {
+                Point* nowPoint = this->allBoardPoints[i][j];
+                GoBlock* nowBlock = this->pointBlockMap[nowPoint];
+                if(blockMap.count(nowBlock))
+                {
+                    o.pointBlockMap[nowPoint] = blockMap[nowBlock];
+                }
+                else
+                {
+                    auto* tmpBlock = new GoBlock();
+                    tmpBlock->update(this->pointBlockMap[nowPoint]);
+                    o.pointBlockMap[nowPoint] = tmpBlock;
+                    blockMap[nowBlock] = tmpBlock;
+                }
+            }
+        }
+    }
+}
+
+void Game::legalMove(std::vector<int> &legalMoves, std::vector<int> &qiAfterMove, bool eyeFlag)
+{
+    Step probStep(-1, -1, this->player);
+    for(int i = 0; i < BOARD_SIZE * BOARD_SIZE; i++)
+    {
+        int x = i / BOARD_SIZE, y = i % BOARD_SIZE;
+        probStep.x = x;
+        probStep.y = y;
+        if(this->moveAnalyze(&probStep))
+        {
+            if(eyeFlag)
+            {
+                if(!this->isEye(this->allBoardPoints[x][y], this->player))
+                {
+                    legalMoves.push_back(i);
+                    qiAfterMove.push_back(this->targetBlock->getQi());
+                }
+            }
+            else
+            {
+                legalMoves.push_back(i);
+                qiAfterMove.push_back(this->targetBlock->getQi());
+            }
+        }
+    }
+}
+
+bool Game::isEye(Point* pos, int posPlayer)
+{
+    std::vector<Point*> around;
+    Point::getAround(pos, this->allBoardPoints, around);
+    for(auto &point : around)
+    {
+        if(this->board[point->x][point->y] != posPlayer)
+        {
+            return false;
+        }
+    }
+    size_t count = 0;
+    around.clear();
+    Point::getDiagonal(pos, this->allBoardPoints, around);
+    for(auto &point : around)
+    {
+        if(this->board[point->x][point->y] == posPlayer)
+        {
+            count++;
+        }
+    }
+    if((count == 3 && around.size() == 4) || count == around.size())
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
