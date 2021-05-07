@@ -54,16 +54,13 @@ int main(int argc, char* argv[])
             Application::uiSocket(argc, argv);
             break;
         case MCTS:
-            Application::MCTSTest(argc, argv);
-            Application::MCTSTest(argc, argv);
-            Application::MCTSTest(argc, argv);
-            Application::MCTSTest(argc, argv);
-            Application::MCTSTest(argc, argv);
-            Application::MCTSTest(argc, argv);
-            Application::MCTSTest(argc, argv);
-            Application::MCTSTest(argc, argv);
-            Application::MCTSTest(argc, argv);
-            Application::MCTSTest(argc, argv);
+            int b[2];
+            b[0] = b[1] = 0;
+            for(size_t i = 0; i < 5000; i++)
+            {
+                b[Application::MCTSTest(argc, argv) - 1]++;
+            }
+            std::cout << "B:" << b[0] << "  W:" << b[1] << '\n';
             break;
         case test:
             testCode(argc, argv);

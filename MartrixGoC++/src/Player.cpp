@@ -10,7 +10,7 @@ PlayerBase::PlayerBase(playerEnum type, playColorEnum color)
 {
     this->playerType = type;
     this->playerColor = color;
-    this->randNum = std::default_random_engine(GetCurrentThreadId());
+    this->randNum = std::default_random_engine(GetCurrentThreadId() + std::chrono::system_clock::now().time_since_epoch().count());
     this->dist = std::uniform_int_distribution<int>(0, 0x7fffffff);
 }
 

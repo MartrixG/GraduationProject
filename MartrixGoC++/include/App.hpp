@@ -28,7 +28,7 @@ public:
 
     static void uiSocket(int argc, char* argv[]);
 
-    static void MCTSTest(int argc, char* argv[]);
+    static int MCTSTest(int argc, char* argv[]);
 };
 
 #endif //MARTRIXGOC_APP_HPP

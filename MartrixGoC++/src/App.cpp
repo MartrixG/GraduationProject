@@ -210,28 +210,6 @@ bool initSocket(SOCKET &serverSocket, SOCKET &clientSocket, char* ipAddr, char* 
     return true;
 }
 
-bool initMove(Game &game, const std::string& stepStr)
-{
-    int len = int(stepStr.length());
-    int pos = 0;
-    for(int i = 1; i < len; i++)
-    {
-        pos *= 10;
-        pos += stepStr[i] - '0';
-    }
-    int x = pos / BOARD_SIZE, y = pos % BOARD_SIZE;
-    Step* nextStep = new Step(game.player, game.allBoardPoints[x][y]);
-    if(game.moveAnalyze(nextStep))
-    {
-        game.move();
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
 void Application::uiSocket(int argc, char** argv)
 {
     if (argc != 4)
@@ -309,7 +287,7 @@ void Application::uiSocket(int argc, char** argv)
     WSACleanup();
 }
 
-void Application::MCTSTest(int argc, char** argv)
+int Application::MCTSTest(int argc, char** argv)
 {
     vector_2d(Point*) allBoardPoints(BOARD_SIZE);
     Point::pointsInit(allBoardPoints);
@@ -327,7 +305,7 @@ void Application::MCTSTest(int argc, char** argv)
         res = gameCore(&game, player);
         if(res == 0)
         {
-            std::cout << "illegal position.\n";
+//            std::cout << "illegal position.\n";
             player = player == blackPlayer ? whitePlayer : blackPlayer;
         }
         else if(res == 1)
@@ -337,9 +315,11 @@ void Application::MCTSTest(int argc, char** argv)
         }
         else
         {
-//            std::cout << "finish.\n";
+//            std::cout << game;
+//            std::cout << "finish.\n" << game.getWinner();
             break;
         }
         player = player == blackPlayer ? whitePlayer : blackPlayer;
     }
+    return 2 - ((double)game.getWinner() >= 2.5);
 }

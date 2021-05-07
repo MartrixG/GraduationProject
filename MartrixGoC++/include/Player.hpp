@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <random>
+#include <chrono>
 #include "windows.h"
 #include "Step.hpp"
 #include "Game.hpp"

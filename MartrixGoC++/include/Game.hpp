@@ -49,11 +49,13 @@ public:
 
     void boardStrEncode(char* boardStr);
 
+    int getWinner();
+
     void legalMove(int* legalMoves, int* qiAfterMove, size_t &len);
 
-    void copy(Game& o);
+    bool isEye(Point* pos, int posPlayer);
 
-    bool isEye(Point* pos);
+    void copy(Game& o);
 
     friend void operator<<(std::ostream &out, const Game &o)
     {

@@ -212,22 +212,107 @@ void Game::boardStrEncode(char* boardStr)
     boardStr[BOARD_SIZE * BOARD_SIZE + 1] = '\0';
 }
 
-Game::~Game()
+int Game::getWinner()
 {
-    std::unordered_set<GoBlock*> blockSet;
-    for(auto &line : this->allBoardPoints)
+    int blackCount = 0, whiteCount = 0;
+    for(size_t i = 0; i < BOARD_SIZE; i++)
     {
-        for(auto &point : line)
+        for(size_t j = 0; j < BOARD_SIZE; j++)
         {
-            blockSet.insert(this->pointBlockMap[point]);
+            if(this->board[i][j] != 0)
+            {
+                if(this->pointBlockMap[this->allBoardPoints[i][j]]->getQi() == 1)
+                {
+                    GoBlock* deadBlock = this->pointBlockMap[this->allBoardPoints[i][j]];
+                    for(size_t k = 0; k < BOARD_SIZE * BOARD_SIZE; k++)
+                    {
+                        if(deadBlock->points.test(k))
+                        {
+                            this->board[k / BOARD_SIZE][k % BOARD_SIZE] = BLACK_PLAYER + WHITE_PLAYER - deadBlock->color;
+                        }
+                    }
+                }
+            }
         }
     }
-    for(auto &block : blockSet)
+    for(size_t i = 0; i < BOARD_SIZE; i++)
     {
-        delete block;
+        for(size_t j = 0; j < BOARD_SIZE; j++)
+        {
+            switch (this->board[i][j])
+            {
+                case 0:
+                    if(this->isEye(this->allBoardPoints[i][j], WHITE_PLAYER))
+                    {
+                        whiteCount++;
+                    }
+                    if(this->isEye(this->allBoardPoints[i][j], BLACK_PLAYER))
+                    {
+                        blackCount++;
+                    }
+                    break;
+                case 1:
+                    blackCount++;
+                    break;
+                case 2:
+                    whiteCount++;
+            }
+        }
     }
-    delete targetBlock;
+    return blackCount - whiteCount;
 }
+
+void Game::legalMove(int* legalMoves, int* qiAfterMove, size_t &len)
+{
+    Step probStep(-1, -1, this->player);
+    for(int i = 0; i < BOARD_SIZE * BOARD_SIZE; i++)
+    {
+        int x = i / BOARD_SIZE, y = i % BOARD_SIZE;
+        probStep.x = x;
+        probStep.y = y;
+        if(this->moveAnalyze(&probStep))
+        {
+            if(!this->isEye(this->allBoardPoints[x][y], this->player))
+            {
+                legalMoves[len] = i;
+                qiAfterMove[len] = this->targetBlock->getQi();
+                len++;
+            }
+        }
+    }
+}
+
+bool Game::isEye(Point* pos, int posPlayer)
+{
+    this->aroundSize = 0;
+    Point::getAround(pos, this->allBoardPoints, this->around, this->aroundSize);
+    for(size_t i = 0; i < this->aroundSize; i++)
+    {
+        if(this->board[this->around[i]->x][this->around[i]->y] != posPlayer)
+        {
+            return false;
+        }
+    }
+    size_t count = 0;
+    this->aroundSize = 0;
+    Point::getDiagonal(pos, this->allBoardPoints, this->around, this->aroundSize);
+    for(size_t i = 0; i < this->aroundSize; i++)
+    {
+        if(this->board[this->around[i]->x][this->around[i]->y] == posPlayer)
+        {
+            count++;
+        }
+    }
+    if((count == 3 && this->aroundSize == 4) || (count !=3 && count == this->aroundSize))
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 
 void Game::copy(Game &o)
 {
@@ -263,53 +348,19 @@ void Game::copy(Game &o)
     }
 }
 
-void Game::legalMove(int* legalMoves, int* qiAfterMove, size_t &len)
+Game::~Game()
 {
-    Step probStep(-1, -1, this->player);
-    for(int i = 0; i < BOARD_SIZE * BOARD_SIZE; i++)
+    std::unordered_set<GoBlock*> blockSet;
+    for(auto &line : this->allBoardPoints)
     {
-        int x = i / BOARD_SIZE, y = i % BOARD_SIZE;
-        probStep.x = x;
-        probStep.y = y;
-        if(this->moveAnalyze(&probStep))
+        for(auto &point : line)
         {
-            if(!this->isEye(this->allBoardPoints[x][y]))
-            {
-                legalMoves[len] = i;
-                qiAfterMove[len] = this->targetBlock->getQi();
-                len++;
-            }
+            blockSet.insert(this->pointBlockMap[point]);
         }
     }
-}
-
-bool Game::isEye(Point* pos)
-{
-    this->aroundSize = 0;
-    Point::getAround(pos, this->allBoardPoints, this->around, this->aroundSize);
-    for(size_t i = 0; i < this->aroundSize; i++)
+    for(auto &block : blockSet)
     {
-        if(this->board[this->around[i]->x][this->around[i]->y] != this->player)
-        {
-            return false;
-        }
+        delete block;
     }
-    size_t count = 0;
-    this->aroundSize = 0;
-    Point::getDiagonal(pos, this->allBoardPoints, this->around, this->aroundSize);
-    for(size_t i = 0; i < this->aroundSize; i++)
-    {
-        if(this->board[this->around[i]->x][this->around[i]->y] == this->player)
-        {
-            count++;
-        }
-    }
-    if((count == 3 && this->aroundSize == 4) || (count !=3 && count == this->aroundSize))
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    delete targetBlock;
 }
