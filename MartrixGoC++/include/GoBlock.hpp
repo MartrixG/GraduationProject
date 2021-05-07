@@ -22,7 +22,7 @@ public:
 
     void update(GoBlock* otherBlock);
 
-    void update(Point* beginPoint, int pointColor, const std::vector<Point*> &aroundPoint, const vector_2d(int)& board);
+    void update(Point* beginPoint, int pointColor, Point** aroundPoint, size_t aroundSize, const vector_2d(int)& board);
 
     void merge(Point* linkPointSelf, GoBlock* otherBlock);
 

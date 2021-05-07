@@ -19,10 +19,10 @@ public:
 
     Point(int x, int y, int boardSize, long long blackHash, long long whiteHash);
 
-    static void getAround(Point* nowPoint, const vector_2d(Point*) &allBoardPoints, std::vector<Point*> &aroundPoints);
+    static void getAround(Point* nowPoint, const vector_2d(Point*) &allBoardPoints, Point** aroundPoints, size_t &aroundSize);
 
     static void
-    getDiagonal(Point* nowPoint, const vector_2d(Point*) &allBoardPoints, std::vector<Point*> &diagonalPoints);
+    getDiagonal(Point* nowPoint, const vector_2d(Point*) &allBoardPoints, Point** diagonalPoints, size_t& diagonalSize);
 
     static void pointsInit(vector_2d(Point*) &allBoardPoints);
 

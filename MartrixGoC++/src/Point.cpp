@@ -17,7 +17,7 @@ Point::Point(int x, int y, int boardSize, long long blackHash, long long whiteHa
     this->zobristHash[1] = whiteHash;
 }
 
-void Point::getAround(Point* nowPoint, const vector_2d(Point*) &allBoardPoints, std::vector<Point*> &aroundPoints)
+void Point::getAround(Point* nowPoint, const vector_2d(Point*) &allBoardPoints, Point** aroundPoints, size_t &aroundSize)
 {
     int dx[4] = {0, 0, -1, 1};
     int dy[4] = {-1, 1, 0, 0};
@@ -27,12 +27,12 @@ void Point::getAround(Point* nowPoint, const vector_2d(Point*) &allBoardPoints, 
         int newY = nowPoint->y + dy[i];
         if (newX >= 0 && newX < nowPoint->boardSize && newY >= 0 && newY < nowPoint->boardSize)
         {
-            aroundPoints.push_back(allBoardPoints[newX][newY]);
+            aroundPoints[aroundSize++] = allBoardPoints[newX][newY];
         }
     }
 }
 
-void Point::getDiagonal(Point* nowPoint, const vector_2d(Point*) &allBoardPoints, std::vector<Point*> &diagonalPoints)
+void Point::getDiagonal(Point* nowPoint, const vector_2d(Point*) &allBoardPoints, Point** diagonalPoints, size_t& diagonalSize)
 {
     int dx[4] = {-1, -1, 1, 1};
     int dy[4] = {-1, 1, -1, 1};
@@ -42,7 +42,7 @@ void Point::getDiagonal(Point* nowPoint, const vector_2d(Point*) &allBoardPoints
         int newY = nowPoint->y + dy[i];
         if (newX >= 0 && newX < nowPoint->boardSize && newY >= 0 && newY < nowPoint->boardSize)
         {
-            diagonalPoints.push_back(allBoardPoints[newX][newY]);
+            diagonalPoints[diagonalSize++] = allBoardPoints[newX][newY];
         }
     }
 }
@@ -94,17 +94,25 @@ void Point::test()
             testMatrix[i][j] = allBoardPoints[i][j];
         }
     }
-    std::vector<Point*> around1, around2, around3, around4;
-    Point::getAround(testMatrix[0][0], allBoardPoints, around1);
-    Point::getAround(testMatrix[0][1], allBoardPoints, around2);
-    Point::getAround(testMatrix[1][0], allBoardPoints, around3);
-    Point::getAround(testMatrix[1][1], allBoardPoints, around4);
+    Point* around1[4];
+    Point* around2[4];
+    Point* around3[4];
+    Point* around4[4];
+    size_t around1Size = 0, around2Size = 0, around3Size = 0, around4Size = 0;
+    Point::getAround(testMatrix[0][0], allBoardPoints, around1, around1Size);
+    Point::getAround(testMatrix[0][1], allBoardPoints, around2, around2Size);
+    Point::getAround(testMatrix[1][0], allBoardPoints, around3, around3Size);
+    Point::getAround(testMatrix[1][1], allBoardPoints, around4, around4Size);
 
-    std::vector<Point*> diagonal1, diagonal2, diagonal3, diagonal4;
-    Point::getDiagonal(testMatrix[0][0], allBoardPoints, diagonal1);
-    Point::getDiagonal(testMatrix[0][1], allBoardPoints, diagonal2);
-    Point::getDiagonal(testMatrix[1][0], allBoardPoints, diagonal3);
-    Point::getDiagonal(testMatrix[1][1], allBoardPoints, diagonal4);
+    Point* diagonal1[4];
+    Point* diagonal2[4];
+    Point* diagonal3[4];
+    Point* diagonal4[4];
+    size_t diagonal1Size = 0, diagonal2Size = 0, diagonal3Size = 0, diagonal4Size = 0;
+    Point::getDiagonal(testMatrix[0][0], allBoardPoints, diagonal1, diagonal1Size);
+    Point::getDiagonal(testMatrix[0][1], allBoardPoints, diagonal2, diagonal2Size);
+    Point::getDiagonal(testMatrix[1][0], allBoardPoints, diagonal3, diagonal3Size);
+    Point::getDiagonal(testMatrix[1][1], allBoardPoints, diagonal4, diagonal4Size);
     //test 00
     assert(testMatrix[0][1] == around1[0]);
     assert(testMatrix[1][0] == around1[1]);

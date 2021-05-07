@@ -75,52 +75,15 @@ static void boardEncode(Game &game, std::ofstream &featureFileStream)
     // layer:5 1:legal 0:illegal (fill own eyes is illegal)
     // qi after move
     // layer:6 state[x][y] = k move to (x, y) would have k liberties
-    std::vector<Point*> around;
-    std::vector<Point*> diagonal;
-    for (int i = 0; i < BOARD_SIZE; i++)
+    int legalMove[BOARD_SIZE * BOARD_SIZE];
+    int qiAfterMove[BOARD_SIZE * BOARD_SIZE];
+    size_t len = 0;
+    game.legalMove(legalMove, qiAfterMove, len);
+    for(size_t i = 0; i < len; i++)
     {
-        for (int j = 0; j < BOARD_SIZE; j++)
-        {
-            Step step = Step(i, j, game.player);
-            if (game.moveAnalyze(&step))
-            {
-                around.clear();
-                Point::getAround(game.allBoardPoints[i][j], game.allBoardPoints, around);
-                bool eyeFlag = true;
-                for (auto &point : around)
-                {
-                    if (game.board[point->x][point->y] != game.player)
-                    {
-                        eyeFlag = false;
-                        break;
-                    }
-                }
-                if (eyeFlag)
-                {
-                    int count = 0;
-                    diagonal.clear();
-                    Point::getDiagonal(game.allBoardPoints[i][j], game.allBoardPoints, diagonal);
-                    for (auto &point : diagonal)
-                    {
-                        if (game.board[point->x][point->y] == game.player)
-                        {
-                            count++;
-                        }
-                    }
-                    if (count != int(diagonal.size() - 1))
-                    {
-                        eyeFlag = false;
-                    }
-                }
-                if (!eyeFlag)
-                {
-                    state[5][i][j] = 1;
-                    int qi = game.targetBlock->getQi();
-                    qi = qi > 8 ? 8 : qi;
-                    state[6][i][j] = qi;
-                }
-            }
-        }
+        int x = legalMove[i] / BOARD_SIZE, y = legalMove[i] % BOARD_SIZE;
+        state[5][x][y] = 1;
+        state[6][x][y] = qiAfterMove[i] > 8 ? 8 : qiAfterMove[i];
     }
     for(auto & i : state)
     {

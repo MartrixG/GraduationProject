@@ -66,22 +66,21 @@ void MCTSPlayer::updatePlayer()
 
 void RandomPlayer::getNextStep(Step* nextStep)
 {
-    if(this->legalMove.empty())
+    if(this->legalMoveSize == 0)
     {
         nextStep->x = -1;
         nextStep->y = -1;
         return;
     }
     nextStep->player = (int)playerColor + 1;
-    int chosen = this->dist(this->randNum);
+    int chosen = this->dist(this->randNum) % (int)this->legalMoveSize;
     nextStep->x = this->legalMove[chosen] / BOARD_SIZE;
     nextStep->y = this->legalMove[chosen] % BOARD_SIZE;
 }
 
 void RandomPlayer::updatePlayer(Game* globalGame)
 {
+    this->legalMoveSize = 0;
     this->game = globalGame;
-    this->legalMove.clear();
-    this->qiAfterMove.clear();
-    this->game->legalMove(this->legalMove, this->qiAfterMove, true);
+    this->game->legalMove(legalMove, qiAfterMove, this->legalMoveSize);
 }

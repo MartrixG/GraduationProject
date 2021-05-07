@@ -6,6 +6,7 @@
 #include "Player.hpp"
 
 #include <bitset>
+#include <vector>
 
 enum argsEnum
 {
@@ -53,6 +54,15 @@ int main(int argc, char* argv[])
             Application::uiSocket(argc, argv);
             break;
         case MCTS:
+            Application::MCTSTest(argc, argv);
+            Application::MCTSTest(argc, argv);
+            Application::MCTSTest(argc, argv);
+            Application::MCTSTest(argc, argv);
+            Application::MCTSTest(argc, argv);
+            Application::MCTSTest(argc, argv);
+            Application::MCTSTest(argc, argv);
+            Application::MCTSTest(argc, argv);
+            Application::MCTSTest(argc, argv);
             Application::MCTSTest(argc, argv);
             break;
         case test:

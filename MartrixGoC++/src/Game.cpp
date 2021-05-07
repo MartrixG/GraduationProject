@@ -118,7 +118,6 @@ void Game::move()
     }
 
     // opponent update
-    std::vector<Point*> around;
     for(auto &block : this->opponentBlock)
     {
         block->removeQi(targetPoint);
@@ -129,13 +128,13 @@ void Game::move()
                 if(block->points.test(i))
                 {
                     Point* point = this->allBoardPoints[i / BOARD_SIZE][i % BOARD_SIZE];
-                    around.clear();
-                    Point::getAround(point, this->allBoardPoints, around);
-                    for (auto &aroundPoint : around)
+                    this->aroundSize = 0;
+                    Point::getAround(point, this->allBoardPoints, this->around, this->aroundSize);
+                    for(size_t j = 0; j < this->aroundSize; j++)
                     {
-                        if (this->board[aroundPoint->x][aroundPoint->y] + player == BLACK_PLAYER + WHITE_PLAYER)
+                        if (this->board[this->around[j]->x][this->around[j]->y] + player == BLACK_PLAYER + WHITE_PLAYER)
                         {
-                            this->pointBlockMap[aroundPoint]->addQi(point);
+                            this->pointBlockMap[this->around[j]]->addQi(point);
                         }
                     }
                     this->board[point->x][point->y] = 0;
@@ -149,8 +148,8 @@ void Game::move()
 
 void Game::getPickUpBlock(Point* targetPoint)
 {
-    std::vector<Point*> around;
-    Point::getAround(targetPoint, this->allBoardPoints, around);
+    this->aroundSize = 0;
+    Point::getAround(targetPoint, this->allBoardPoints, this->around, this->aroundSize);
     this->newBoardZobristHash ^= targetPoint->zobristHash[this->player - 1];
     this->pickUpFlag = false;
 
@@ -158,16 +157,16 @@ void Game::getPickUpBlock(Point* targetPoint)
     this->opponentBlock.clear();
 
     int isolatedFlag = true;
-    for (auto &point :around)
+    for (size_t i = 0; i < this->aroundSize; i++)
     {
-        if (this->board[point->x][point->y] != 0)
+        if (this->board[this->around[i]->x][this->around[i]->y] != 0)
         {
-            auto nearBlock = this->pointBlockMap[point];
+            auto nearBlock = this->pointBlockMap[this->around[i]];
             if(!(this->mergedBlock.count(nearBlock) == 0 && this->opponentBlock.count(nearBlock) == 0))
             {
                 continue;
             }
-            if(this->board[point->x][point->y] == player)
+            if(this->board[this->around[i]->x][this->around[i]->y] == player)
             {
                 this->mergedBlock.insert(nearBlock);
                 if(isolatedFlag)
@@ -196,7 +195,7 @@ void Game::getPickUpBlock(Point* targetPoint)
     if(isolatedFlag)
     {
         this->targetBlock->clear();
-        this->targetBlock->update(targetPoint, this->player, around, this->board);
+        this->targetBlock->update(targetPoint, this->player, around, this->aroundSize, this->board);
     }
 }
 
@@ -264,7 +263,7 @@ void Game::copy(Game &o)
     }
 }
 
-void Game::legalMove(std::vector<int> &legalMoves, std::vector<int> &qiAfterMove, bool eyeFlag)
+void Game::legalMove(int* legalMoves, int* qiAfterMove, size_t &len)
 {
     Step probStep(-1, -1, this->player);
     for(int i = 0; i < BOARD_SIZE * BOARD_SIZE; i++)
@@ -274,45 +273,38 @@ void Game::legalMove(std::vector<int> &legalMoves, std::vector<int> &qiAfterMove
         probStep.y = y;
         if(this->moveAnalyze(&probStep))
         {
-            if(eyeFlag)
+            if(!this->isEye(this->allBoardPoints[x][y]))
             {
-                if(!this->isEye(this->allBoardPoints[x][y], this->player))
-                {
-                    legalMoves.push_back(i);
-                    qiAfterMove.push_back(this->targetBlock->getQi());
-                }
-            }
-            else
-            {
-                legalMoves.push_back(i);
-                qiAfterMove.push_back(this->targetBlock->getQi());
+                legalMoves[len] = i;
+                qiAfterMove[len] = this->targetBlock->getQi();
+                len++;
             }
         }
     }
 }
 
-bool Game::isEye(Point* pos, int posPlayer)
+bool Game::isEye(Point* pos)
 {
-    std::vector<Point*> around;
-    Point::getAround(pos, this->allBoardPoints, around);
-    for(auto &point : around)
+    this->aroundSize = 0;
+    Point::getAround(pos, this->allBoardPoints, this->around, this->aroundSize);
+    for(size_t i = 0; i < this->aroundSize; i++)
     {
-        if(this->board[point->x][point->y] != posPlayer)
+        if(this->board[this->around[i]->x][this->around[i]->y] != this->player)
         {
             return false;
         }
     }
     size_t count = 0;
-    around.clear();
-    Point::getDiagonal(pos, this->allBoardPoints, around);
-    for(auto &point : around)
+    this->aroundSize = 0;
+    Point::getDiagonal(pos, this->allBoardPoints, this->around, this->aroundSize);
+    for(size_t i = 0; i < this->aroundSize; i++)
     {
-        if(this->board[point->x][point->y] == posPlayer)
+        if(this->board[this->around[i]->x][this->around[i]->y] == this->player)
         {
             count++;
         }
     }
-    if((count == 3 && around.size() == 4) || count == around.size())
+    if((count == 3 && this->aroundSize == 4) || (count !=3 && count == this->aroundSize))
     {
         return true;
     }

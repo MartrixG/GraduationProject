@@ -337,7 +337,7 @@ void Application::MCTSTest(int argc, char** argv)
         }
         else
         {
-            std::cout << "finish.\n";
+//            std::cout << "finish.\n";
             break;
         }
         player = player == blackPlayer ? whitePlayer : blackPlayer;

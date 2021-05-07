@@ -31,10 +31,11 @@ public:
     // tmp analyze information
     long long newBoardZobristHash = 0;
     Step* nextStep = nullptr;  GoBlock* targetBlock = nullptr;
-
     std::unordered_set<GoBlock*> opponentBlock = std::unordered_set<GoBlock*>();
     bool pickUpFlag = false;
     std::unordered_set<GoBlock*> mergedBlock = std::unordered_set<GoBlock*>();
+    Point* around[4] = {nullptr, nullptr, nullptr, nullptr};
+    size_t aroundSize = 0;
 
     explicit Game(vector_2d(Point*) &points);
 
@@ -48,11 +49,11 @@ public:
 
     void boardStrEncode(char* boardStr);
 
-    void legalMove(std::vector<int>& legalMoves, std::vector<int>& qiAfterMove, bool eyeFlag);
+    void legalMove(int* legalMoves, int* qiAfterMove, size_t &len);
 
     void copy(Game& o);
 
-    bool isEye(Point* pos, int posPlayer);
+    bool isEye(Point* pos);
 
     friend void operator<<(std::ostream &out, const Game &o)
     {

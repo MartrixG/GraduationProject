@@ -6,16 +6,16 @@
 
 GoBlock::GoBlock() = default;
 
-void GoBlock::update(Point* beginPoint, int pointColor, const std::vector<Point*> &aroundPoint, const vector_2d(int) &board)
+void GoBlock::update(Point* beginPoint, int pointColor, Point** aroundPoint, size_t aroundSize, const vector_2d(int) &board)
 {
     this->color = pointColor;
     this->points.set(beginPoint->getPos());
     this->zobristHash = beginPoint->zobristHash[pointColor - 1];
-    for(auto &point : aroundPoint)
+    for(size_t i = 0; i < aroundSize; i++)
     {
-        if(board[point->x][point->y] == 0)
+        if(board[aroundPoint[i]->x][aroundPoint[i]->y] == 0)
         {
-            this->qiPoints.set(point->getPos());
+            this->qiPoints.set(aroundPoint[i]->getPos());
         }
     }
 }
@@ -102,13 +102,14 @@ void GoBlock::test()
         }
     }
 
-    std::vector<Point*> around;
+    Point* around[4];
+    size_t aroundSize = 0;
 
     testBoard[3][2] = 1;
-    around.clear();
-    Point::getAround(allBoardPoints[3][2], allBoardPoints, around);
+    aroundSize = 0;
+    Point::getAround(allBoardPoints[3][2], allBoardPoints, around, aroundSize);
     GoBlock block1;
-    block1.update(allBoardPoints[3][2], 1, around, testBoard);
+    block1.update(allBoardPoints[3][2], 1, around, aroundSize, testBoard);
     std::cout << block1;
     std::cout << '\n';
 
@@ -118,10 +119,10 @@ void GoBlock::test()
     std::cout << '\n';
 
     testBoard[3][5] = 1;
-    around.clear();
-    Point::getAround(allBoardPoints[3][5], allBoardPoints, around);
+    aroundSize = 0;
+    Point::getAround(allBoardPoints[3][5], allBoardPoints, around, aroundSize);
     GoBlock block2;
-    block2.update(allBoardPoints[3][5], 1, around, testBoard);
+    block2.update(allBoardPoints[3][5], 1, around, aroundSize, testBoard);
     std::cout << block2;
     std::cout << '\n';
 
@@ -131,10 +132,10 @@ void GoBlock::test()
     std::cout << '\n';
 
     testBoard[2][4] = 1;
-    around.clear();
-    Point::getAround(allBoardPoints[2][4], allBoardPoints, around);
+    aroundSize = 0;
+    Point::getAround(allBoardPoints[2][4], allBoardPoints, around, aroundSize);
     GoBlock block3;
-    block3.update(allBoardPoints[2][4], 1, around, testBoard);
+    block3.update(allBoardPoints[2][4], 1, around, aroundSize, testBoard);
     std::cout << block3;
     std::cout << '\n';
     testBoard[1][4] = 1;

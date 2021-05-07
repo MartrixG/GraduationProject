@@ -61,8 +61,9 @@ public:
 class RandomPlayer : public PlayerBase
 {
 public:
-    std::vector<int> legalMove = std::vector<int>();
-    std::vector<int> qiAfterMove = std::vector<int>();
+    int legalMove[BOARD_SIZE * BOARD_SIZE];
+    int qiAfterMove[BOARD_SIZE * BOARD_SIZE];
+    size_t legalMoveSize = 0;
     Game* game;
 
     using PlayerBase::PlayerBase;
