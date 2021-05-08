@@ -20,13 +20,13 @@ public:
     int player = BLACK_PLAYER;
     // board points
     vector_2d(Point*) allBoardPoints;
-    std::vector<Step*> steps = std::vector<Step*>();
+//    std::vector<Step*> steps = std::vector<Step*>();
     // board point information
     vector_2d(int) board = vector_2d(int)(BOARD_SIZE, std::vector<int>(BOARD_SIZE));
     long long boardZobristHash = 0;
     std::unordered_map<Point*, GoBlock*> pointBlockMap = std::unordered_map<Point*, GoBlock*>();
     // history information
-    std::vector<vector_2d(int)> historyBoard = std::vector<vector_2d(int)>();
+//    std::vector<vector_2d(int)> historyBoard = std::vector<vector_2d(int)>();
     std::unordered_set<long long> historyZobristHash = std::unordered_set<long long>();
     // tmp analyze information
     long long newBoardZobristHash = 0;
@@ -55,7 +55,7 @@ public:
 
     bool isEye(Point* pos, int posPlayer);
 
-    void copy(Game& o);
+    void copy(Game* o);
 
     friend void operator<<(std::ostream &out, const Game &o)
     {

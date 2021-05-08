@@ -15,7 +15,7 @@ Game::Game(vector_2d(Point*) &points)
 
 void Game::initHandCap(std::vector<Step*> &handCapSteps, int numOfHandCap)
 {
-    this->historyBoard.push_back(this->board);
+//    this->historyBoard.push_back(this->board);
     for (int i = 0; i < numOfHandCap; i++)
     {
         int x = handCapSteps[i]->x, y = handCapSteps[i]->y;
@@ -78,10 +78,10 @@ bool Game::moveAnalyze(Step* step)
 
 void Game::move()
 {
-    this->steps.push_back(this->nextStep);
+//    this->steps.push_back(this->nextStep);
     Point* targetPoint = this->allBoardPoints[this->nextStep->x][this->nextStep->y];
 
-    this->historyBoard.push_back(this->board);
+//    this->historyBoard.push_back(this->board);
     this->historyZobristHash.insert(this->newBoardZobristHash);
     this->boardZobristHash = this->newBoardZobristHash;
 
@@ -314,33 +314,32 @@ bool Game::isEye(Point* pos, int posPlayer)
 }
 
 
-void Game::copy(Game &o)
+void Game::copy(Game* o)
 {
     std::unordered_map<GoBlock*, GoBlock*> blockMap;
-    o.player = this->player;
-    o.allBoardPoints = this->allBoardPoints;
-    std::copy(this->board.begin(), this->board.end(), o.board.begin());
-    o.boardZobristHash = this->boardZobristHash;
-    std::copy(this->historyBoard.begin(), this->historyBoard.end(), o.historyBoard.begin());
-    o.historyZobristHash = this->historyZobristHash;
-    o.newBoardZobristHash = this->newBoardZobristHash;
+    o->player = this->player;
+    std::copy(this->board.begin(), this->board.end(), o->board.begin());
+    o->boardZobristHash = this->boardZobristHash;
+//    std::copy(this->historyBoard.begin(), this->historyBoard.end(), o->historyBoard.begin());
+    o->historyZobristHash = this->historyZobristHash;
+    o->newBoardZobristHash = this->newBoardZobristHash;
     for(int i = 0; i < BOARD_SIZE; i++)
     {
         for(int j = 0; j < BOARD_SIZE; j++)
         {
-            if(this->pointBlockMap.count(this->allBoardPoints[i][j]))
+            if(this->board[i][j] != 0 && this->pointBlockMap.count(this->allBoardPoints[i][j]))
             {
                 Point* nowPoint = this->allBoardPoints[i][j];
                 GoBlock* nowBlock = this->pointBlockMap[nowPoint];
                 if(blockMap.count(nowBlock))
                 {
-                    o.pointBlockMap[nowPoint] = blockMap[nowBlock];
+                    o->pointBlockMap[nowPoint] = blockMap[nowBlock];
                 }
                 else
                 {
                     auto* tmpBlock = new GoBlock();
                     tmpBlock->update(this->pointBlockMap[nowPoint]);
-                    o.pointBlockMap[nowPoint] = tmpBlock;
+                    o->pointBlockMap[nowPoint] = tmpBlock;
                     blockMap[nowBlock] = tmpBlock;
                 }
             }

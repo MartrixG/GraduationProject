@@ -22,7 +22,7 @@ public:
     static void gameInformationAnalyze(vector_2d(Point*) &allBoardPoints, std::string &srcSgf,
                                        std::ofstream &featureFileStream, std::ofstream&labelFileStream);
 
-    static int gameCore(Game* game, PlayerBase* player);
+    static int gameCore(Game* game, PlayerBase* player, Step* nextStep);
 
     static void commandLine(int argc, char* argv[]);
 

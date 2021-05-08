@@ -31,6 +31,7 @@ public:
     playColorEnum playerColor;
     PlayerBase(playerEnum type, playColorEnum color);
     virtual void getNextStep(Step* nextStep) = 0;
+    virtual ~PlayerBase() = 0;
 };
 
 class CommandLinePlayer : public PlayerBase
@@ -70,7 +71,6 @@ public:
     using PlayerBase::PlayerBase;
     void getNextStep(Step* nextStep) override;
     void updatePlayer(Game* game);
-
 };
 
 #endif //MARTRIXGOC_PLAYER_HPP

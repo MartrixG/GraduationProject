@@ -12,6 +12,8 @@
 #include "BoardEncode.hpp"
 #include "Player.hpp"
 
+const Step endStep(-1, -1, -1);
+
 void Application::loadSGF(int argc, char* argv[])
 {
     // read sgf file
@@ -137,10 +139,12 @@ void Application::commandLine(int argc, char* argv[])
     auto* whitePlayer = new CommandLinePlayer(commandLinePlayer, white);
     CommandLinePlayer* player = blackPlayer;
     std::cout << "game start.\n" << game;
+
+    Step* nextStep = new Step(-1, -1, -1);
     while(true)
     {
         int res;
-        res = gameCore(&game, player);
+        res = gameCore(&game, player, nextStep);
         if(res == 0)
         {
             std::cout << "illegal position.\n";
@@ -160,16 +164,14 @@ void Application::commandLine(int argc, char* argv[])
     }
 }
 
-int Application::gameCore(Game* game, PlayerBase* player)
+int Application::gameCore(Game* game, PlayerBase* player, Step* nextStep)
 {
-    Step nextStep(-1, -1, -1);
-    Step endStep(-1, -1, -1);
-    player->getNextStep(&nextStep);
-    if(nextStep == endStep)
+    player->getNextStep(nextStep);
+    if(*nextStep == endStep)
     {
         return 2;
     }
-    if(game->moveAnalyze(&nextStep))
+    if(game->moveAnalyze(nextStep))
     {
         game->move();
         return 1;
@@ -273,12 +275,12 @@ void Application::uiSocket(int argc, char** argv)
             break;
         }
         uiPlayer->updatePlayer(srcMessage);
-        gameCore(&game, uiPlayer);
+//        gameCore(&game, uiPlayer);
         game.boardStrEncode(srcMessage);
         send(clientSocket, srcMessage, bufSize, 0);
 
         mctsPlayer->updatePlayer();
-        gameCore(&game, mctsPlayer);
+//        gameCore(&game, mctsPlayer);
         game.boardStrEncode(srcMessage);
         send(clientSocket, srcMessage, bufSize, 0);
     }
@@ -295,14 +297,15 @@ int Application::MCTSTest(int argc, char** argv)
 
     auto* blackPlayer = new RandomPlayer(randomPlayer, black);
     auto* whitePlayer = new RandomPlayer(randomPlayer, white);
-
     RandomPlayer* player = blackPlayer;
+
+    Step* nextStep = new Step(-1, -1, -1);
 //    std::cout << "game start.\n" << game;
     while(true)
     {
         int res;
         player->updatePlayer(&game);
-        res = gameCore(&game, player);
+        res = gameCore(&game, player, nextStep);
         if(res == 0)
         {
 //            std::cout << "illegal position.\n";
