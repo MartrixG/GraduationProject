@@ -12,16 +12,13 @@
 
 static void boardEncode(Game &game, std::ofstream &featureFileStream)
 {
-    int state[7][BOARD_SIZE][BOARD_SIZE];
+    int state[7][BOARD_SIZE * BOARD_SIZE];
     memset(state, 0, sizeof(state));
     //color
     //layer:0 0:empty 1:black 2:white
-    for (int i = 0; i < BOARD_SIZE; i++)
+    for (int i = 0; i < BOARD_SIZE * BOARD_SIZE; i++)
     {
-        for (int j = 0; j < BOARD_SIZE; j++)
-        {
-            state[0][i][j] = game.board[i][j];
-        }
+        state[0][i] = game.board[i];
     }
     //turn
     //layer:1 state[x][y] = k, (x, y) is last k step
@@ -29,7 +26,7 @@ static void boardEncode(Game &game, std::ofstream &featureFileStream)
 //    int length = int(steps->size()), epoch = std::min(7, length);
 //    for (int i = 0; i < epoch; i++)
 //    {
-//        state[1][(*steps)[length - i - 1]->x][(*steps)[length - i - 1]->y] = i + 1;
+//        state[1][(*steps)[length - i - 1]->pos] = i + 1;
 //    }
 //    for (int i = 0; i < BOARD_SIZE; i++)
 //    {
@@ -37,7 +34,7 @@ static void boardEncode(Game &game, std::ofstream &featureFileStream)
 //        {
 //            if (game.historyBoard[game.historyBoard.size() - epoch][i][j] != 0)
 //            {
-//                state[1][i][j] = epoch + 1;
+//                state[1][i * BOARD_SIZE + j] = epoch + 1;
 //            }
 //        }
 //    }
@@ -47,26 +44,23 @@ static void boardEncode(Game &game, std::ofstream &featureFileStream)
     //layer:3 state[x][y] = k, (x, y)'block has k points of opponent would be captured
     //selfAtari
     //layer:4 state[x][y] = k, (x, y)'block has k points of own would be captured
-    for (int i = 0; i < BOARD_SIZE; i++)
+    for (int i = 0; i < BOARD_SIZE * BOARD_SIZE; i++)
     {
-        for (int j = 0; j < BOARD_SIZE; j++)
+        if (game.board[i] != 0)
         {
-            if (game.board[i][j] != 0)
+            int qi = game.pointBlockMap[game.allBoardPoints[i]]->getQi();
+            int blockSize = game.pointBlockMap[game.allBoardPoints[i]]->getSize();
+            qi = qi > 8 ? 8 : qi;
+            blockSize = blockSize > 8 ? 8 : blockSize;
+            state[2][i] = qi;
+            if (qi == 1)
             {
-                int qi = game.pointBlockMap[game.allBoardPoints[i][j]]->getQi();
-                int blockSize = game.pointBlockMap[game.allBoardPoints[i][j]]->getSize();
-                qi = qi > 8 ? 8 : qi;
-                blockSize = blockSize > 8 ? 8 : blockSize;
-                state[2][i][j] = qi;
-                if (qi == 1)
+                if (game.board[i] != game.player)
                 {
-                    if (game.board[i][j] != game.player)
-                    {
-                        state[3][i][j] = blockSize;
-                    } else
-                    {
-                        state[4][i][j] = blockSize;
-                    }
+                    state[3][i] = blockSize;
+                } else
+                {
+                    state[4][i] = blockSize;
                 }
             }
         }
@@ -81,18 +75,14 @@ static void boardEncode(Game &game, std::ofstream &featureFileStream)
     game.legalMove(legalMove, qiAfterMove, len);
     for(size_t i = 0; i < len; i++)
     {
-        int x = legalMove[i] / BOARD_SIZE, y = legalMove[i] % BOARD_SIZE;
-        state[5][x][y] = 1;
-        state[6][x][y] = qiAfterMove[i] > 8 ? 8 : qiAfterMove[i];
+        state[5][legalMove[i]] = 1;
+        state[6][legalMove[i]] = qiAfterMove[i] > 8 ? 8 : qiAfterMove[i];
     }
     for(auto & i : state)
     {
         for(auto & j : i)
         {
-            for(auto & k : j)
-            {
-                featureFileStream << k;
-            }
+            featureFileStream << j;
         }
     }
     featureFileStream << '\n';

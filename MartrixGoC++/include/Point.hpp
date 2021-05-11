@@ -7,34 +7,39 @@
 
 #include "vector"
 #include "ostream"
+#include "unordered_map"
 
-#define vector_2d(type) std::vector<std::vector<type>>
+#define vector_2d(T) std::vector<std::vector<T>>
+
 const int BOARD_SIZE = 19;
 
 class Point
 {
 public:
-    int x, y, boardSize;
+    using PointPtr = Point*;
+    using PArVecPtr = std::vector<PointPtr>*;
+    using PDiVecPtr = std::vector<PointPtr>*;
+
+    int pos, boardSize;
     long long zobristHash[2]{};
 
-    Point(int x, int y, int boardSize, long long blackHash, long long whiteHash);
+    Point(int pos, int boardSize, long long blackHash, long long whiteHash);
 
-    static void getAround(Point* nowPoint, const vector_2d(Point*) &allBoardPoints, Point** aroundPoints, size_t &aroundSize);
+    static void pointsInit(PointPtr* allBoardPoints,
+                           std::unordered_map<PointPtr, PArVecPtr> &allAround,
+                           std::unordered_map<PointPtr, PDiVecPtr> &allDiagonal);
 
-    static void
-    getDiagonal(Point* nowPoint, const vector_2d(Point*) &allBoardPoints, Point** diagonalPoints, size_t& diagonalSize);
-
-    static void pointsInit(vector_2d(Point*) &allBoardPoints);
-
-    int getPos() const;
+    static void test();
 
     friend std::ostream &operator<<(std::ostream &out, const Point &o)
     {
-        out << "x: " << o.x << " y: " << o.y;
+        out << "x: " << o.pos / BOARD_SIZE << " y: " << o.pos % BOARD_SIZE;
         return out;
     }
+private:
+    static void getAround(PointPtr nowPoint, PointPtr* allBoardPoints, PArVecPtr aroundPoints);
 
-    static void test();
+    static void getDiagonal(Point* nowPoint, PointPtr* allBoardPoints, PDiVecPtr diagonalPoints);
 };
 
 #endif //MARTRIXGOC___POINT_H

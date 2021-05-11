@@ -26,9 +26,11 @@ void Application::loadSGF(int argc, char* argv[])
     std::string fileContext;
     std::getline(fileStick, fileContext);
     // init go game
-    vector_2d(Point*) allBoardPoints(BOARD_SIZE);
-    Point::pointsInit(allBoardPoints);
-    Game game = Game(allBoardPoints);
+    PointPtr allBoardPoints[BOARD_SIZE * BOARD_SIZE];
+    std::unordered_map<PointPtr, PArVecPtr> around;
+    std::unordered_map<PointPtr, PDiVecPtr> diagonal;
+    Point::pointsInit(allBoardPoints, around, diagonal);
+    Game game = Game(allBoardPoints, &around, &diagonal);
 
     GoSGF sgf(fileContext);
 
@@ -62,8 +64,10 @@ void Application::makeData(int argc, char* argv[])
         return;
     }
     // init points
-    vector_2d(Point*) allBoardPoints(BOARD_SIZE);
-    Point::pointsInit(allBoardPoints);
+    PointPtr allBoardPoints[BOARD_SIZE * BOARD_SIZE];
+    std::unordered_map<PointPtr, PArVecPtr> around;
+    std::unordered_map<PointPtr, PDiVecPtr> diagonal;
+    Point::pointsInit(allBoardPoints, around, diagonal);
     // read sgf file
     std::ifstream srcFileStream(argv[2], std::ios::in);
     // process feature file, label file
@@ -81,28 +85,30 @@ void Application::makeData(int argc, char* argv[])
     {
         while (std::getline(srcFileStream, srcSgf))
         {
-            gameInformationAnalyze(allBoardPoints, srcSgf, featureFileStream, labelFileStream);
+            gameInformationAnalyze(allBoardPoints, &around, &diagonal, srcSgf, featureFileStream, labelFileStream);
 //            line++;
 //            std::cout << std::left << std::setw(4) << line << "/ " << lines << '\n';
         }
-    } else
+    }
+    else
     {
         while (chosenNumberOfLine != 0)
         {
             chosenNumberOfLine--;
             std::getline(srcFileStream, srcSgf);
         }
-        gameInformationAnalyze(allBoardPoints, srcSgf, featureFileStream, labelFileStream);
+        gameInformationAnalyze(allBoardPoints, &around, &diagonal, srcSgf, featureFileStream, labelFileStream);
     }
     srcFileStream.close();
     featureFileStream.close();
 }
 
-void Application::gameInformationAnalyze(vector_2d(Point*) &allBoardPoints, std::string &srcSgf,
+void Application::gameInformationAnalyze(PointPtr* allBoardPoints, std::unordered_map<PointPtr, PArVecPtr>* around,
+                                         std::unordered_map<PointPtr, PDiVecPtr>* diagonal, std::string &srcSgf,
                                          std::ofstream &featureFileStream, std::ofstream &labelFileStream)
 {
     // init go game
-    Game game = Game(allBoardPoints);
+    Game game = Game(allBoardPoints, around, diagonal);
     GoSGF sgf(srcSgf);
     // handCap
     if (sgf.HA != 0)
@@ -131,9 +137,11 @@ void Application::gameInformationAnalyze(vector_2d(Point*) &allBoardPoints, std:
 void Application::commandLine(int argc, char* argv[])
 {
     // init go game
-    vector_2d(Point*) allBoardPoints(BOARD_SIZE);
-    Point::pointsInit(allBoardPoints);
-    Game game = Game(allBoardPoints);
+    PointPtr allBoardPoints[BOARD_SIZE * BOARD_SIZE];
+    std::unordered_map<PointPtr, PArVecPtr> around;
+    std::unordered_map<PointPtr, PDiVecPtr> diagonal;
+    Point::pointsInit(allBoardPoints, around, diagonal);
+    Game game = Game(allBoardPoints, &around, &diagonal);
     // init player
     auto* blackPlayer = new CommandLinePlayer(commandLinePlayer, black);
     auto* whitePlayer = new CommandLinePlayer(commandLinePlayer, white);
@@ -231,9 +239,11 @@ void Application::uiSocket(int argc, char** argv)
         std::cout << "init socket success.\n";
     }
     // init go game
-    vector_2d(Point*) allBoardPoints(BOARD_SIZE);
-    Point::pointsInit(allBoardPoints);
-    Game game = Game(allBoardPoints);
+    PointPtr allBoardPoints[BOARD_SIZE * BOARD_SIZE];
+    std::unordered_map<PointPtr, PArVecPtr> around;
+    std::unordered_map<PointPtr, PDiVecPtr> diagonal;
+    Point::pointsInit(allBoardPoints, around, diagonal);
+    Game game = Game(allBoardPoints, &around, &diagonal);
     Step nextStep(-1, -1, -1);
 
     char srcMessage[512];
@@ -289,40 +299,42 @@ void Application::uiSocket(int argc, char** argv)
     WSACleanup();
 }
 
-int Application::MCTSTest(int argc, char** argv)
+void Application::randomPlayerTest(int argc, char** argv)
 {
-    vector_2d(Point*) allBoardPoints(BOARD_SIZE);
-    Point::pointsInit(allBoardPoints);
-    Game game = Game(allBoardPoints);
+    PointPtr allBoardPoints[BOARD_SIZE * BOARD_SIZE];
+    std::unordered_map<PointPtr, PArVecPtr> around;
+    std::unordered_map<PointPtr, PDiVecPtr> diagonal;
+    Point::pointsInit(allBoardPoints, around, diagonal);
+    int num;
+    char* _;
+    num = strtol(argv[2], &_, 10);
+    int b[2];
+    b[0] = b[1] = 0;
 
     auto* blackPlayer = new RandomPlayer(randomPlayer, black);
     auto* whitePlayer = new RandomPlayer(randomPlayer, white);
-    RandomPlayer* player = blackPlayer;
 
-    Step* nextStep = new Step(-1, -1, -1);
-//    std::cout << "game start.\n" << game;
-    while(true)
+    for(int i = 0; i < num; i++)
     {
-        int res;
-        player->updatePlayer(&game);
-        res = gameCore(&game, player, nextStep);
-        if(res == 0)
+        Game game = Game(allBoardPoints, &around, &diagonal);
+        RandomPlayer* player = blackPlayer;
+        Step* nextStep = new Step(-1, -1, -1);
+        while(true)
         {
-//            std::cout << "illegal position.\n";
+            int res;
+            player->updatePlayer(&game);
+            res = gameCore(&game, player, nextStep);
+            if(res == 0)
+            {
+                player = player == blackPlayer ? whitePlayer : blackPlayer;
+            }
+            else if(res == 2)
+            {
+                break;
+            }
             player = player == blackPlayer ? whitePlayer : blackPlayer;
         }
-        else if(res == 1)
-        {
-//            std::cout << game;
-//            std::cout << '\n';
-        }
-        else
-        {
-//            std::cout << game;
-//            std::cout << "finish.\n" << game.getWinner();
-            break;
-        }
-        player = player == blackPlayer ? whitePlayer : blackPlayer;
+        b[1 - ((double)game.getWinner() >= 2.5)]++;
     }
-    return 2 - ((double)game.getWinner() >= 2.5);
+    std::cout << "B:" << b[0] << "  W:" << b[1] << '\n';
 }

@@ -8,63 +8,65 @@
 #include "Game.hpp"
 #include <cassert>
 
-Point::Point(int x, int y, int boardSize, long long blackHash, long long whiteHash)
+Point::Point(int pos, int boardSize, long long blackHash, long long whiteHash)
 {
-    this->x = x;
-    this->y = y;
+    this->pos = pos;
     this->boardSize = boardSize;
     this->zobristHash[0] = blackHash;
     this->zobristHash[1] = whiteHash;
 }
 
-void Point::getAround(Point* nowPoint, const vector_2d(Point*) &allBoardPoints, Point** aroundPoints, size_t &aroundSize)
+void Point::getAround(PointPtr nowPoint, PointPtr* allBoardPoints, std::vector<PointPtr>* aroundPoints)
 {
     int dx[4] = {0, 0, -1, 1};
     int dy[4] = {-1, 1, 0, 0};
-    for (int i = 0; i < 4; i++)
+    for (size_t i = 0; i < 4; i++)
     {
-        int newX = nowPoint->x + dx[i];
-        int newY = nowPoint->y + dy[i];
-        if (newX >= 0 && newX < nowPoint->boardSize && newY >= 0 && newY < nowPoint->boardSize)
+        int newX = nowPoint->pos / BOARD_SIZE + dx[i];
+        int newY = nowPoint->pos % BOARD_SIZE + dy[i];
+        if (newX >= 0 && newX < BOARD_SIZE && newY >= 0 && newY < BOARD_SIZE)
         {
-            aroundPoints[aroundSize++] = allBoardPoints[newX][newY];
+            aroundPoints->push_back(allBoardPoints[newX * BOARD_SIZE + newY]);
         }
     }
 }
 
-void Point::getDiagonal(Point* nowPoint, const vector_2d(Point*) &allBoardPoints, Point** diagonalPoints, size_t& diagonalSize)
+void Point::getDiagonal(PointPtr nowPoint, PointPtr* allBoardPoints, std::vector<PointPtr>* diagonalPoints)
 {
     int dx[4] = {-1, -1, 1, 1};
     int dy[4] = {-1, 1, -1, 1};
-    for (int i = 0; i < 4; i++)
+    for (size_t i = 0; i < 4; i++)
     {
-        int newX = nowPoint->x + dx[i];
-        int newY = nowPoint->y + dy[i];
-        if (newX >= 0 && newX < nowPoint->boardSize && newY >= 0 && newY < nowPoint->boardSize)
+        int newX = nowPoint->pos / BOARD_SIZE + dx[i];
+        int newY = nowPoint->pos % BOARD_SIZE + dy[i];
+        if (newX >= 0 && newX < BOARD_SIZE && newY >= 0 && newY < BOARD_SIZE)
         {
-            diagonalPoints[diagonalSize++] = allBoardPoints[newX][newY];
+            diagonalPoints->push_back(allBoardPoints[newX * BOARD_SIZE + newY]);
         }
     }
 }
 
-void Point::pointsInit(vector_2d(Point*) &allBoardPoints)
+void Point::pointsInit(PointPtr* allBoardPoints,
+                       std::unordered_map<PointPtr, PArVecPtr> &allAround,
+                       std::unordered_map<PointPtr, PDiVecPtr> &allDiagonal)
 {
     unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
     std::mt19937_64 rand_num(seed);
     std::uniform_int_distribution<long long> dist(0, 0x7fffffffffffffff);
-    for (int i = 0; i < BOARD_SIZE; i++)
+    for(int i = 0; i < BOARD_SIZE * BOARD_SIZE; i++)
     {
-        std::vector<Point> tmp;
-        for (int j = 0; j < BOARD_SIZE; j++)
-        {
-            allBoardPoints[i].push_back(new Point(i, j, BOARD_SIZE, dist(rand_num), dist(rand_num)));
-        }
+        allBoardPoints[i] = new Point(i, BOARD_SIZE, dist(rand_num), dist(rand_num));
     }
-}
-
-int Point::getPos() const
-{
-    return this->x * BOARD_SIZE + this->y;
+    for(int i = 0; i < BOARD_SIZE * BOARD_SIZE; i++)
+    {
+        PointPtr point = allBoardPoints[i];
+        auto around = new std::vector<PointPtr>();
+        auto diagonal = new std::vector<PointPtr>();
+        getAround(point, allBoardPoints, around);
+        getDiagonal(point, allBoardPoints ,diagonal);
+        allAround[point] = around;
+        allDiagonal[point] = diagonal;
+    }
 }
 
 void Point::test()
@@ -76,74 +78,49 @@ void Point::test()
      * dx[4] = {0, 0, -1, 1}
      * dy[4] = {-1, 1, 0, 0}
      */
-    vector_2d(Point*) allBoardPoints(BOARD_SIZE);
-    Point::pointsInit(allBoardPoints);
-    for (int i = 0; i < BOARD_SIZE; i++)
+    PointPtr allBoardPoints[BOARD_SIZE * BOARD_SIZE];
+    std::unordered_map<PointPtr, PArVecPtr> allAround;
+    std::unordered_map<PointPtr, PDiVecPtr> allDiagonal;
+    Point::pointsInit(allBoardPoints, allAround, allDiagonal);
+    for (int i = 0; i < BOARD_SIZE * BOARD_SIZE; i++)
     {
-        for (int j = 0; j < BOARD_SIZE; j++)
-        {
-            assert(allBoardPoints[i][j]->x == i);
-            assert(allBoardPoints[i][j]->y == j);
-        }
+        assert(allBoardPoints[i]->pos == i);
     }
-    Point* testMatrix[3][3];
-    for (int i = 0; i < 3; i++)
-    {
-        for (int j = 0; j < 3; j++)
-        {
-            testMatrix[i][j] = allBoardPoints[i][j];
-        }
-    }
-    Point* around1[4];
-    Point* around2[4];
-    Point* around3[4];
-    Point* around4[4];
-    size_t around1Size = 0, around2Size = 0, around3Size = 0, around4Size = 0;
-    Point::getAround(testMatrix[0][0], allBoardPoints, around1, around1Size);
-    Point::getAround(testMatrix[0][1], allBoardPoints, around2, around2Size);
-    Point::getAround(testMatrix[1][0], allBoardPoints, around3, around3Size);
-    Point::getAround(testMatrix[1][1], allBoardPoints, around4, around4Size);
 
-    Point* diagonal1[4];
-    Point* diagonal2[4];
-    Point* diagonal3[4];
-    Point* diagonal4[4];
-    size_t diagonal1Size = 0, diagonal2Size = 0, diagonal3Size = 0, diagonal4Size = 0;
-    Point::getDiagonal(testMatrix[0][0], allBoardPoints, diagonal1, diagonal1Size);
-    Point::getDiagonal(testMatrix[0][1], allBoardPoints, diagonal2, diagonal2Size);
-    Point::getDiagonal(testMatrix[1][0], allBoardPoints, diagonal3, diagonal3Size);
-    Point::getDiagonal(testMatrix[1][1], allBoardPoints, diagonal4, diagonal4Size);
+    PArVecPtr around1, around2, around3, around4;
+    around1 = allAround[allBoardPoints[0 * BOARD_SIZE + 0]];
+    around2 = allAround[allBoardPoints[0 * BOARD_SIZE + 1]];
+    around3 = allAround[allBoardPoints[1 * BOARD_SIZE + 0]];
+    around4 = allAround[allBoardPoints[1 * BOARD_SIZE + 1]];
+
+    PDiVecPtr diagonal1, diagonal2, diagonal3, diagonal4;
+    diagonal1 = allDiagonal[allBoardPoints[0 * BOARD_SIZE + 0]];
+    diagonal2 = allDiagonal[allBoardPoints[0 * BOARD_SIZE + 1]];
+    diagonal3 = allDiagonal[allBoardPoints[1 * BOARD_SIZE + 0]];
+    diagonal4 = allDiagonal[allBoardPoints[1 * BOARD_SIZE + 1]];
     //test 00
-    assert(testMatrix[0][1] == around1[0]);
-    assert(testMatrix[1][0] == around1[1]);
-    assert(testMatrix[1][1] == diagonal1[0]);
+    assert(allBoardPoints[0 * BOARD_SIZE + 1] == around1->at(0));
+    assert(allBoardPoints[1 * BOARD_SIZE + 0] == around1->at(1));
+    assert(allBoardPoints[1 * BOARD_SIZE + 1] == diagonal1->at(0));
     //test 01
-    assert(testMatrix[0][0] == around2[0]);
-    assert(testMatrix[0][2] == around2[1]);
-    assert(testMatrix[1][1] == around2[2]);
-    assert(testMatrix[1][0] == diagonal2[0]);
-    assert(testMatrix[1][2] == diagonal2[1]);
+    assert(allBoardPoints[0 * BOARD_SIZE + 0] == around2->at(0));
+    assert(allBoardPoints[0 * BOARD_SIZE + 2] == around2->at(1));
+    assert(allBoardPoints[1 * BOARD_SIZE + 1] == around2->at(2));
+    assert(allBoardPoints[1 * BOARD_SIZE + 0] == diagonal2->at(0));
+    assert(allBoardPoints[1 * BOARD_SIZE + 2] == diagonal2->at(1));
     //test 10
-    assert(testMatrix[1][1] == around3[0]);
-    assert(testMatrix[0][0] == around3[1]);
-    assert(testMatrix[2][0] == around3[2]);
-    assert(testMatrix[0][1] == diagonal3[0]);
-    assert(testMatrix[2][1] == diagonal3[1]);
+    assert(allBoardPoints[1 * BOARD_SIZE + 1] == around3->at(0));
+    assert(allBoardPoints[0 * BOARD_SIZE + 0] == around3->at(1));
+    assert(allBoardPoints[2 * BOARD_SIZE + 0] == around3->at(2));
+    assert(allBoardPoints[0 * BOARD_SIZE + 1] == diagonal3->at(0));
+    assert(allBoardPoints[2 * BOARD_SIZE + 1] == diagonal3->at(1));
     //test 11
-    assert(testMatrix[1][0] == around4[0]);
-    assert(testMatrix[1][2] == around4[1]);
-    assert(testMatrix[0][1] == around4[2]);
-    assert(testMatrix[2][1] == around4[3]);
-    assert(testMatrix[0][0] == diagonal4[0]);
-    assert(testMatrix[0][2] == diagonal4[1]);
-    assert(testMatrix[2][0] == diagonal4[2]);
-    assert(testMatrix[2][2] == diagonal4[3]);
-    for(int i = 0; i < BOARD_SIZE; i++)
-    {
-        for(int j = 0; j < BOARD_SIZE; j++)
-        {
-            std::cout << allBoardPoints[i][j]->zobristHash[0] << '\n';
-            std::cout << allBoardPoints[i][j]->zobristHash[1] << '\n';
-        }
-    }
+    assert(allBoardPoints[1 * BOARD_SIZE + 0] == around4->at(0));
+    assert(allBoardPoints[1 * BOARD_SIZE + 2] == around4->at(1));
+    assert(allBoardPoints[0 * BOARD_SIZE + 1] == around4->at(2));
+    assert(allBoardPoints[2 * BOARD_SIZE + 1] == around4->at(3));
+    assert(allBoardPoints[0 * BOARD_SIZE + 0] == diagonal4->at(0));
+    assert(allBoardPoints[0 * BOARD_SIZE + 2] == diagonal4->at(1));
+    assert(allBoardPoints[2 * BOARD_SIZE + 0] == diagonal4->at(2));
+    assert(allBoardPoints[2 * BOARD_SIZE + 2] == diagonal4->at(3));
 }

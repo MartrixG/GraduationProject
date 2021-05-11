@@ -14,13 +14,15 @@ Step::Step(char player, char x, char y)
         this->x = x - 'a';
         this->y = y - 'a';
     }
+    this->pos = this->x * BOARD_SIZE + this->y;
 }
 
-Step::Step(int player, Point* point)
+Step::Step(int player, PointPtr point)
 {
     this->player = player;
-    this->x = point->x;
-    this->y = point->y;
+    this->pos = point->pos;
+    this->x = point->pos / BOARD_SIZE;
+    this->y = point->pos % BOARD_SIZE;
 }
 
 Step::Step(int x, int y, int player)
@@ -28,9 +30,10 @@ Step::Step(int x, int y, int player)
     this->player = player;
     this->x = x;
     this->y = y;
+    this->pos = x * BOARD_SIZE + y;
 }
 
 bool Step::operator==(const Step &o) const
 {
-    return this->x == o.x && this->y == o.y;
+    return this->pos == o.pos;
 }

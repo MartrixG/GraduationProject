@@ -4,34 +4,48 @@
 
 #include <iostream>
 #include <fstream>
+#include <cstring>
 #include "Game.hpp"
 
-Game::Game(vector_2d(Point*) &points)
+Game::Game(PointPtr* points, std::unordered_map<PointPtr, PArVecPtr>* around, std::unordered_map<PointPtr, PDivecPtr>* diagonal)
 {
     this->allBoardPoints = points;
+    this->allAround = around;
+    this->allDiagonal = diagonal;
     this->targetBlock = new GoBlock();
     this->historyZobristHash.insert(0);
+    memset(this->board, 0, sizeof(this->board));
 }
 
 void Game::initHandCap(std::vector<Step*> &handCapSteps, int numOfHandCap)
 {
-//    this->historyBoard.push_back(this->board);
+    /*
+    vector_2d(int) tmpBoard(BOARD_SIZE, std::vector<int>(BOARD_SIZE));
+    this->historyBoard.push_back(tmpBoard);
+    for(size_t i = 0; i < BOARD_SIZE; i++)
+    {
+        for(size_t j = 0; j < BOARD_SIZE; j++)
+        {
+            this->historyBoard.back()[i][j] = this->board[i * BOARD_SIZE + j];
+        }
+    }
+    */
     for (int i = 0; i < numOfHandCap; i++)
     {
-        int x = handCapSteps[i]->x, y = handCapSteps[i]->y;
-        this->getPickUpBlock(this->allBoardPoints[x][y]);
-        this->board[x][y] = player;
+        int pos = handCapSteps[i]->pos;
+        this->getPickUpBlock(this->allBoardPoints[pos]);
+        this->board[pos] = player;
         if(this->mergedBlock.empty())
         {
-            this->pointBlockMap[this->allBoardPoints[x][y]] = this->targetBlock;
+            this->pointBlockMap[this->allBoardPoints[pos]] = this->targetBlock;
             this->targetBlock = new GoBlock();
         }
         else
         {
-            GoBlock* startBlock = *this->mergedBlock.begin();
+            BlockPtr startBlock = *this->mergedBlock.begin();
             startBlock->clear();
             startBlock->update(this->targetBlock);
-            this->pointBlockMap[this->allBoardPoints[x][y]] = startBlock;
+            this->pointBlockMap[this->allBoardPoints[pos]] = startBlock;
             for(auto &block : this->mergedBlock)
             {
                 if(block != startBlock)
@@ -40,7 +54,7 @@ void Game::initHandCap(std::vector<Step*> &handCapSteps, int numOfHandCap)
                     {
                         if(block->points.test(j))
                         {
-                            this->pointBlockMap[this->allBoardPoints[j / BOARD_SIZE][j % BOARD_SIZE]] = startBlock;
+                            this->pointBlockMap[this->allBoardPoints[j]] = startBlock;
                         }
                     }
                     delete block;
@@ -53,17 +67,17 @@ void Game::initHandCap(std::vector<Step*> &handCapSteps, int numOfHandCap)
 
 bool Game::moveAnalyze(Step* step)
 {
-    int x = step->x, y = step->y;
+    int pos = step->pos;
     if (step->player != this->player)
     {
         return false;
     }
-    if (this->board[x][y] != 0)
+    if (this->board[pos] != 0)
     {
         return false;
     }
     this->newBoardZobristHash = this->boardZobristHash;
-    this->getPickUpBlock(this->allBoardPoints[x][y]);
+    this->getPickUpBlock(this->allBoardPoints[pos]);
     if (this->targetBlock->getQi() == 0 && !pickUpFlag)
     {
         return false;
@@ -79,13 +93,21 @@ bool Game::moveAnalyze(Step* step)
 void Game::move()
 {
 //    this->steps.push_back(this->nextStep);
-    Point* targetPoint = this->allBoardPoints[this->nextStep->x][this->nextStep->y];
-
-//    this->historyBoard.push_back(this->board);
+    PointPtr targetPoint = this->allBoardPoints[this->nextStep->pos];
+    /*
+    this->historyBoard.push_back(tmpBoard);
+    for(size_t i = 0; i < BOARD_SIZE; i++)
+    {
+        for(size_t j = 0; j < BOARD_SIZE; j++)
+        {
+            this->historyBoard.back()[i][j] = this->board[i * BOARD_SIZE + j];
+        }
+    }
+    */
     this->historyZobristHash.insert(this->newBoardZobristHash);
     this->boardZobristHash = this->newBoardZobristHash;
 
-    this->board[targetPoint->x][targetPoint->y] = player;
+    this->board[targetPoint->pos] = player;
     this->player = this->player == WHITE_PLAYER ? BLACK_PLAYER : WHITE_PLAYER;
     // board update
 
@@ -97,7 +119,7 @@ void Game::move()
     }
     else
     {
-        GoBlock* startBlock = *this->mergedBlock.begin();
+        BlockPtr startBlock = *this->mergedBlock.begin();
         startBlock->clear();
         startBlock->update(this->targetBlock);
         this->pointBlockMap[targetPoint] = startBlock;
@@ -109,7 +131,7 @@ void Game::move()
                 {
                     if(block->points.test(i))
                     {
-                        this->pointBlockMap[this->allBoardPoints[i / BOARD_SIZE][i % BOARD_SIZE]] = startBlock;
+                        this->pointBlockMap[this->allBoardPoints[i]] = startBlock;
                     }
                 }
                 delete block;
@@ -127,18 +149,17 @@ void Game::move()
             {
                 if(block->points.test(i))
                 {
-                    Point* point = this->allBoardPoints[i / BOARD_SIZE][i % BOARD_SIZE];
-                    this->aroundSize = 0;
-                    Point::getAround(point, this->allBoardPoints, this->around, this->aroundSize);
-                    for(size_t j = 0; j < this->aroundSize; j++)
+                    PointPtr nowPoint = this->allBoardPoints[i];
+                    PArVecPtr around = (*this->allAround)[nowPoint];
+                    for(auto &point : *around)
                     {
-                        if (this->board[this->around[j]->x][this->around[j]->y] + player == BLACK_PLAYER + WHITE_PLAYER)
+                        if (this->board[point->pos] + player == BLACK_PLAYER + WHITE_PLAYER)
                         {
-                            this->pointBlockMap[this->around[j]]->addQi(point);
+                            this->pointBlockMap[point]->addQi(nowPoint);
                         }
                     }
-                    this->board[point->x][point->y] = 0;
-                    this->pointBlockMap.erase(point);
+                    this->board[nowPoint->pos] = 0;
+                    this->pointBlockMap.erase(nowPoint);
                 }
             }
             delete block;
@@ -146,10 +167,8 @@ void Game::move()
     }
 }
 
-void Game::getPickUpBlock(Point* targetPoint)
+void Game::getPickUpBlock(PointPtr targetPoint)
 {
-    this->aroundSize = 0;
-    Point::getAround(targetPoint, this->allBoardPoints, this->around, this->aroundSize);
     this->newBoardZobristHash ^= targetPoint->zobristHash[this->player - 1];
     this->pickUpFlag = false;
 
@@ -157,23 +176,24 @@ void Game::getPickUpBlock(Point* targetPoint)
     this->opponentBlock.clear();
 
     int isolatedFlag = true;
-    for (size_t i = 0; i < this->aroundSize; i++)
+    std::vector<PointPtr>* around = (*this->allAround)[targetPoint];
+    for (auto &point : *around)
     {
-        if (this->board[this->around[i]->x][this->around[i]->y] != 0)
+        if (this->board[point->pos] != 0)
         {
-            auto nearBlock = this->pointBlockMap[this->around[i]];
-            if(!(this->mergedBlock.count(nearBlock) == 0 && this->opponentBlock.count(nearBlock) == 0))
+            auto nearBlock = this->pointBlockMap[point];
+            if(this->mergedBlock.count(nearBlock) != 0 || this->opponentBlock.count(nearBlock) != 0)
             {
                 continue;
             }
-            if(this->board[this->around[i]->x][this->around[i]->y] == player)
+            if(this->board[point->pos] == player)
             {
                 this->mergedBlock.insert(nearBlock);
                 if(isolatedFlag)
                 {
                     this->targetBlock->clear();
                     this->targetBlock->update(nearBlock);
-                    this->targetBlock->addPoint(targetPoint, this->board, this->allBoardPoints);
+                    this->targetBlock->addPoint(targetPoint, around, this->board);
                     isolatedFlag = false;
                 }
                 else
@@ -195,19 +215,16 @@ void Game::getPickUpBlock(Point* targetPoint)
     if(isolatedFlag)
     {
         this->targetBlock->clear();
-        this->targetBlock->update(targetPoint, this->player, around, this->aroundSize, this->board);
+        this->targetBlock->update(targetPoint, this->player, around, this->board);
     }
 }
 
-void Game::boardStrEncode(char* boardStr)
+void Game::boardStrEncode(char* boardStr) const
 {
     boardStr[0] = char(this->player + '0');
-    for(int i = 0; i < BOARD_SIZE; i++)
+    for(int i = 0; i < BOARD_SIZE * BOARD_SIZE; i++)
     {
-        for(int j = 0; j < BOARD_SIZE; j++)
-        {
-            boardStr[i * BOARD_SIZE + j + 1] = char(this->board[i][j] + '0');
-        }
+        boardStr[i + 1] = char(this->board[i] + '0');
     }
     boardStr[BOARD_SIZE * BOARD_SIZE + 1] = '\0';
 }
@@ -215,48 +232,42 @@ void Game::boardStrEncode(char* boardStr)
 int Game::getWinner()
 {
     int blackCount = 0, whiteCount = 0;
-    for(size_t i = 0; i < BOARD_SIZE; i++)
+    for(size_t i = 0; i < BOARD_SIZE * BOARD_SIZE; i++)
     {
-        for(size_t j = 0; j < BOARD_SIZE; j++)
+        if(this->board[i] != 0)
         {
-            if(this->board[i][j] != 0)
+            if(this->pointBlockMap[this->allBoardPoints[i]]->getQi() == 1)
             {
-                if(this->pointBlockMap[this->allBoardPoints[i][j]]->getQi() == 1)
+                BlockPtr deadBlock = this->pointBlockMap[this->allBoardPoints[i]];
+                for(size_t k = 0; k < BOARD_SIZE * BOARD_SIZE; k++)
                 {
-                    GoBlock* deadBlock = this->pointBlockMap[this->allBoardPoints[i][j]];
-                    for(size_t k = 0; k < BOARD_SIZE * BOARD_SIZE; k++)
+                    if(deadBlock->points.test(k))
                     {
-                        if(deadBlock->points.test(k))
-                        {
-                            this->board[k / BOARD_SIZE][k % BOARD_SIZE] = BLACK_PLAYER + WHITE_PLAYER - deadBlock->color;
-                        }
+                        this->board[k] = BLACK_PLAYER + WHITE_PLAYER - deadBlock->color;
                     }
                 }
             }
         }
     }
-    for(size_t i = 0; i < BOARD_SIZE; i++)
+    for(size_t i = 0; i < BOARD_SIZE * BOARD_SIZE; i++)
     {
-        for(size_t j = 0; j < BOARD_SIZE; j++)
+        switch (this->board[i])
         {
-            switch (this->board[i][j])
-            {
-                case 0:
-                    if(this->isEye(this->allBoardPoints[i][j], WHITE_PLAYER))
-                    {
-                        whiteCount++;
-                    }
-                    if(this->isEye(this->allBoardPoints[i][j], BLACK_PLAYER))
-                    {
-                        blackCount++;
-                    }
-                    break;
-                case 1:
-                    blackCount++;
-                    break;
-                case 2:
+            case 0:
+                if(this->isEye(this->allBoardPoints[i], WHITE_PLAYER))
+                {
                     whiteCount++;
-            }
+                }
+                if(this->isEye(this->allBoardPoints[i], BLACK_PLAYER))
+                {
+                    blackCount++;
+                }
+                break;
+            case 1:
+                blackCount++;
+                break;
+            case 2:
+                whiteCount++;
         }
     }
     return blackCount - whiteCount;
@@ -267,12 +278,10 @@ void Game::legalMove(int* legalMoves, int* qiAfterMove, size_t &len)
     Step probStep(-1, -1, this->player);
     for(int i = 0; i < BOARD_SIZE * BOARD_SIZE; i++)
     {
-        int x = i / BOARD_SIZE, y = i % BOARD_SIZE;
-        probStep.x = x;
-        probStep.y = y;
+        probStep.pos = i;
         if(this->moveAnalyze(&probStep))
         {
-            if(!this->isEye(this->allBoardPoints[x][y], this->player))
+            if(!this->isEye(this->allBoardPoints[i], this->player))
             {
                 legalMoves[len] = i;
                 qiAfterMove[len] = this->targetBlock->getQi();
@@ -282,28 +291,26 @@ void Game::legalMove(int* legalMoves, int* qiAfterMove, size_t &len)
     }
 }
 
-bool Game::isEye(Point* pos, int posPlayer)
+bool Game::isEye(PointPtr pos, int posPlayer) const
 {
-    this->aroundSize = 0;
-    Point::getAround(pos, this->allBoardPoints, this->around, this->aroundSize);
-    for(size_t i = 0; i < this->aroundSize; i++)
+    PArVecPtr around = (*this->allAround)[pos];
+    for(auto &point : *around)
     {
-        if(this->board[this->around[i]->x][this->around[i]->y] != posPlayer)
+        if(this->board[point->pos] != posPlayer)
         {
             return false;
         }
     }
     size_t count = 0;
-    this->aroundSize = 0;
-    Point::getDiagonal(pos, this->allBoardPoints, this->around, this->aroundSize);
-    for(size_t i = 0; i < this->aroundSize; i++)
+    PDivecPtr diagonal = (*this->allDiagonal)[pos];
+    for(auto &point : *diagonal)
     {
-        if(this->board[this->around[i]->x][this->around[i]->y] == posPlayer)
+        if(this->board[point->pos] == posPlayer)
         {
             count++;
         }
     }
-    if((count == 3 && this->aroundSize == 4) || (count !=3 && count == this->aroundSize))
+    if((count == 3 && (*this->allDiagonal)[pos]->size() == 4) || (count !=3 && count == (*this->allDiagonal)[pos]->size()))
     {
         return true;
     }
@@ -316,32 +323,29 @@ bool Game::isEye(Point* pos, int posPlayer)
 
 void Game::copy(Game* o)
 {
-    std::unordered_map<GoBlock*, GoBlock*> blockMap;
+    std::unordered_map<BlockPtr, BlockPtr> blockMap;
     o->player = this->player;
-    std::copy(this->board.begin(), this->board.end(), o->board.begin());
+    memcpy(o->board, this->board, sizeof(*this->board));
     o->boardZobristHash = this->boardZobristHash;
 //    std::copy(this->historyBoard.begin(), this->historyBoard.end(), o->historyBoard.begin());
     o->historyZobristHash = this->historyZobristHash;
     o->newBoardZobristHash = this->newBoardZobristHash;
-    for(int i = 0; i < BOARD_SIZE; i++)
+    for(int i = 0; i < BOARD_SIZE * BOARD_SIZE; i++)
     {
-        for(int j = 0; j < BOARD_SIZE; j++)
+        if(this->board[i] != 0 && this->pointBlockMap.count(this->allBoardPoints[i]))
         {
-            if(this->board[i][j] != 0 && this->pointBlockMap.count(this->allBoardPoints[i][j]))
+            PointPtr nowPoint = this->allBoardPoints[i];
+            BlockPtr nowBlock = this->pointBlockMap[nowPoint];
+            if(blockMap.count(nowBlock))
             {
-                Point* nowPoint = this->allBoardPoints[i][j];
-                GoBlock* nowBlock = this->pointBlockMap[nowPoint];
-                if(blockMap.count(nowBlock))
-                {
-                    o->pointBlockMap[nowPoint] = blockMap[nowBlock];
-                }
-                else
-                {
-                    auto* tmpBlock = new GoBlock();
-                    tmpBlock->update(this->pointBlockMap[nowPoint]);
-                    o->pointBlockMap[nowPoint] = tmpBlock;
-                    blockMap[nowBlock] = tmpBlock;
-                }
+                o->pointBlockMap[nowPoint] = blockMap[nowBlock];
+            }
+            else
+            {
+                auto* tmpBlock = new GoBlock();
+                tmpBlock->update(this->pointBlockMap[nowPoint]);
+                o->pointBlockMap[nowPoint] = tmpBlock;
+                blockMap[nowBlock] = tmpBlock;
             }
         }
     }
@@ -349,13 +353,10 @@ void Game::copy(Game* o)
 
 Game::~Game()
 {
-    std::unordered_set<GoBlock*> blockSet;
-    for(auto &line : this->allBoardPoints)
+    std::unordered_set<BlockPtr> blockSet;
+    for(size_t i = 0; i < BOARD_SIZE * BOARD_SIZE; i++)
     {
-        for(auto &point : line)
-        {
-            blockSet.insert(this->pointBlockMap[point]);
-        }
+        blockSet.insert(this->pointBlockMap[this->allBoardPoints[i]]);
     }
     for(auto &block : blockSet)
     {

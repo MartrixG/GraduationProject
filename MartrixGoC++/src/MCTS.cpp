@@ -9,7 +9,7 @@ TreeNode::TreeNode(TreeNode* fa, Game* faGame)
 {
     this->parent = fa;
     this->nextStep = new Step(-1, -1, -1);
-    this->game = new Game(faGame->allBoardPoints);
+    this->game = new Game(faGame->allBoardPoints, faGame->allAround, faGame->allDiagonal);
 //    faGame->copy(*this->game);
     this->game = faGame;
     //->legalMove(this->unvisitedSteps, true);
@@ -37,7 +37,7 @@ double TreeNode::score(int totRollouts) const
 
 MCTS::MCTS(Game* game)
 {
-    Game* tmpGame = new Game(game->allBoardPoints);
+    Game* tmpGame = new Game(game->allBoardPoints, game->allAround, game->allDiagonal);
     game->copy(tmpGame);
     this->root = new TreeNode(nullptr, tmpGame);
     this->blackRandomPlayer = new RandomPlayer(randomPlayer, black);
@@ -64,7 +64,7 @@ void MCTS::updateAllChildren(TreeNode* node)
         nextStep.player = node->game->player;
         nextStep.x = player->legalMove[i] / 19;
         nextStep.y = player->legalMove[i] % 19;
-        Game* tmpGame = new Game(node->game->allBoardPoints);
+        Game* tmpGame = new Game(node->game->allBoardPoints, node->game->allAround, node->game->allDiagonal);
         node->game->copy(tmpGame);
         tmpGame->moveAnalyze(node->nextStep);
         tmpGame->move();
@@ -81,7 +81,7 @@ void MCTS::treePolicy(TreeNode* node)
 
 void MCTS::defaultPolicy(TreeNode* node)
 {
-    Game* experimentGame = new Game(node->game->allBoardPoints);
+    Game* experimentGame = new Game(node->game->allBoardPoints, node->game->allAround, node->game->allDiagonal);
     node->game->copy(experimentGame);
     RandomPlayer* player;
     if(node->game->player == BLACK_PLAYER)

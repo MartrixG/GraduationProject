@@ -15,11 +15,13 @@ const int WHITE_PLAYER = 2;
 class Step
 {
 public:
-    int x, y, player;
+    using PointPtr = Point::PointPtr;
+
+    int x, y, player, pos;
 
     explicit Step(char player, char x, char y);
 
-    Step(int player, Point* point);
+    Step(int player, PointPtr point);
 
     Step(int x, int y, int player);
 

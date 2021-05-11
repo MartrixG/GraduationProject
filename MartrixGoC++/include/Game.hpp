@@ -16,28 +16,35 @@
 class Game
 {
 public:
+    using PointPtr = Point::PointPtr;
+    using PArVecPtr = Point::PArVecPtr;
+    using PDivecPtr = Point::PDiVecPtr;
+    using BlockPtr = GoBlock::BlockPtr;
+
     // game base information
     int player = BLACK_PLAYER;
     // board points
-    vector_2d(Point*) allBoardPoints;
+    PointPtr* allBoardPoints;
+    std::unordered_map<PointPtr, PArVecPtr>* allAround;
+    std::unordered_map<PointPtr, PDivecPtr>* allDiagonal;
 //    std::vector<Step*> steps = std::vector<Step*>();
     // board point information
-    vector_2d(int) board = vector_2d(int)(BOARD_SIZE, std::vector<int>(BOARD_SIZE));
+    int board[BOARD_SIZE * BOARD_SIZE]{};
     long long boardZobristHash = 0;
-    std::unordered_map<Point*, GoBlock*> pointBlockMap = std::unordered_map<Point*, GoBlock*>();
+    std::unordered_map<PointPtr, BlockPtr> pointBlockMap = std::unordered_map<PointPtr, BlockPtr>();
     // history information
 //    std::vector<vector_2d(int)> historyBoard = std::vector<vector_2d(int)>();
     std::unordered_set<long long> historyZobristHash = std::unordered_set<long long>();
     // tmp analyze information
     long long newBoardZobristHash = 0;
-    Step* nextStep = nullptr;  GoBlock* targetBlock = nullptr;
-    std::unordered_set<GoBlock*> opponentBlock = std::unordered_set<GoBlock*>();
-    bool pickUpFlag = false;
-    std::unordered_set<GoBlock*> mergedBlock = std::unordered_set<GoBlock*>();
-    Point* around[4] = {nullptr, nullptr, nullptr, nullptr};
-    size_t aroundSize = 0;
+    Step* nextStep = nullptr;  BlockPtr targetBlock = nullptr; bool pickUpFlag = false;
+    std::unordered_set<BlockPtr> opponentBlock = std::unordered_set<BlockPtr>();
+    std::unordered_set<BlockPtr> mergedBlock = std::unordered_set<BlockPtr>();
+    //
+//    vector_2d(int) tmpBoard = vector_2d(int)(BOARD_SIZE, std::vector<int>(BOARD_SIZE));
+    //
 
-    explicit Game(vector_2d(Point*) &points);
+    Game(PointPtr* points, std::unordered_map<PointPtr, PArVecPtr>* around, std::unordered_map<PointPtr, PDivecPtr>* diagonal);
 
     void initHandCap(std::vector<Step*> &handCapSteps, int numOfHandCap);
 
@@ -45,15 +52,15 @@ public:
 
     void move();
 
-    void getPickUpBlock(Point* targetPoint);
+    void getPickUpBlock(PointPtr targetPoint);
 
-    void boardStrEncode(char* boardStr);
+    void boardStrEncode(char* boardStr) const;
 
     int getWinner();
 
     void legalMove(int* legalMoves, int* qiAfterMove, size_t &len);
 
-    bool isEye(Point* pos, int posPlayer);
+    bool isEye(PointPtr pos, int posPlayer) const;
 
     void copy(Game* o);
 
@@ -70,7 +77,7 @@ public:
             std::cout << char('a' + i) << " ";
             for (int j = 0; j < BOARD_SIZE; j++)
             {
-                switch (o.board[i][j])
+                switch (o.board[i * BOARD_SIZE + j])
                 {
                     case 0:
                         std::cout << ". ";

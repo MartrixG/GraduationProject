@@ -68,14 +68,12 @@ void RandomPlayer::getNextStep(Step* nextStep)
 {
     if(this->legalMoveSize == 0)
     {
-        nextStep->x = -1;
-        nextStep->y = -1;
+        nextStep->pos = -20;
         return;
     }
     nextStep->player = (int)playerColor + 1;
     int chosen = this->dist(this->randNum) % (int)this->legalMoveSize;
-    nextStep->x = this->legalMove[chosen] / BOARD_SIZE;
-    nextStep->y = this->legalMove[chosen] % BOARD_SIZE;
+    nextStep->pos = this->legalMove[chosen];
 }
 
 void RandomPlayer::updatePlayer(Game* globalGame)
@@ -84,3 +82,6 @@ void RandomPlayer::updatePlayer(Game* globalGame)
     this->game = globalGame;
     this->game->legalMove(legalMove, qiAfterMove, this->legalMoveSize);
 }
+
+RandomPlayer::~RandomPlayer()
+= default;

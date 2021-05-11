@@ -8,11 +8,16 @@
 #include <unordered_set >
 #include <iostream>
 #include <bitset>
+#include <cstring>
 #include "Point.hpp"
 
 class GoBlock
 {
 public:
+    using BlockPtr = GoBlock*;
+    using PointPtr = Point::PointPtr;
+    using PArVecPtr = Point::PArVecPtr;
+
     std::bitset<BOARD_SIZE * BOARD_SIZE> points = std::bitset<BOARD_SIZE * BOARD_SIZE>();
     std::bitset<BOARD_SIZE * BOARD_SIZE> qiPoints = std::bitset<BOARD_SIZE * BOARD_SIZE>();
     int color = -1;
@@ -20,17 +25,17 @@ public:
 
     GoBlock();
 
-    void update(GoBlock* otherBlock);
+    void update(BlockPtr otherBlock);
 
-    void update(Point* beginPoint, int pointColor, Point** aroundPoint, size_t aroundSize, const vector_2d(int)& board);
+    void update(PointPtr beginPoint, int pointColor, PArVecPtr around, const int* board);
 
-    void merge(Point* linkPointSelf, GoBlock* otherBlock);
+    void merge(PointPtr linkPointSelf, BlockPtr otherBlock);
 
-    void addPoint(Point* linkPoint, const vector_2d(int)& board, const vector_2d(Point*) &allBoardPoints);
+    void addPoint(PointPtr linkPoint, PArVecPtr around, const int* board);
 
-    void removeQi(Point* targetPoint);
+    void removeQi(PointPtr targetPoint);
 
-    void addQi(Point* targetPoint);
+    void addQi(PointPtr targetPoint);
 
     int getQi() const;
 

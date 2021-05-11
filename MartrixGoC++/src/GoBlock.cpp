@@ -6,21 +6,21 @@
 
 GoBlock::GoBlock() = default;
 
-void GoBlock::update(Point* beginPoint, int pointColor, Point** aroundPoint, size_t aroundSize, const vector_2d(int) &board)
+void GoBlock::update(PointPtr beginPoint, int pointColor, PArVecPtr around, const int* board)
 {
     this->color = pointColor;
-    this->points.set(beginPoint->getPos());
+    this->points.set(beginPoint->pos);
     this->zobristHash = beginPoint->zobristHash[pointColor - 1];
-    for(size_t i = 0; i < aroundSize; i++)
+    for(auto point : *around)
     {
-        if(board[aroundPoint[i]->x][aroundPoint[i]->y] == 0)
+        if(board[point->pos] == 0)
         {
-            this->qiPoints.set(aroundPoint[i]->getPos());
+            this->qiPoints.set(point->pos);
         }
     }
 }
 
-void GoBlock::update(GoBlock* otherBlock)
+void GoBlock::update(BlockPtr otherBlock)
 {
     this->points |= otherBlock->points;
     this->zobristHash |= otherBlock->zobristHash;
@@ -28,43 +28,36 @@ void GoBlock::update(GoBlock* otherBlock)
     this->color = otherBlock->color;
 }
 
-void GoBlock::merge(Point* linkPointSelf, GoBlock* otherBlock)
+void GoBlock::merge(PointPtr linkPointSelf, BlockPtr otherBlock)
 {
     this->points |= otherBlock->points;
     this->zobristHash |= otherBlock->zobristHash;
     this->qiPoints |= otherBlock->qiPoints;
-    this->qiPoints.reset(linkPointSelf->getPos());
+    this->qiPoints.reset(linkPointSelf->pos);
 }
 
-void GoBlock::addPoint(Point* linkPoint, const vector_2d(int) &board, const vector_2d(Point*) &allBoardPoints)
+void GoBlock::addPoint(PointPtr linkPoint, PArVecPtr around, const int* board)
 {
-    this->points.set(linkPoint->getPos());
+    this->points.set(linkPoint->pos);
     this->zobristHash |= linkPoint->zobristHash[this->color - 1];
-    this->qiPoints.reset(linkPoint->getPos());
-    int dx[4] = {0, 0, -1, 1};
-    int dy[4] = {-1, 1, 0, 0};
-    for(int i = 0; i < 4; i++)
+    this->qiPoints.reset(linkPoint->pos);
+    for(auto &point : *around)
     {
-        int newX = linkPoint->x + dx[i];
-        int newY = linkPoint->y + dy[i];
-        if(newX >= 0 && newX < linkPoint->boardSize && newY >= 0 && newY < linkPoint->boardSize)
+        if(board[point->pos] == 0)
         {
-            if(board[newX][newY] == 0)
-            {
-                this->addQi(allBoardPoints[newX][newY]);
-            }
+            this->addQi(point);
         }
     }
 }
 
-void GoBlock::removeQi(Point* targetPoint)
+void GoBlock::removeQi(PointPtr targetPoint)
 {
-    this->qiPoints.reset(targetPoint->getPos());
+    this->qiPoints.reset(targetPoint->pos);
 }
 
-void GoBlock::addQi(Point* targetPoint)
+void GoBlock::addQi(PointPtr targetPoint)
 {
-    this->qiPoints.set(targetPoint->getPos());
+    this->qiPoints.set(targetPoint->pos);
 }
 
 int GoBlock::getQi() const
@@ -91,65 +84,62 @@ void GoBlock::test()
      * dx[4] = {0, 0, -1, 1}
      * dy[4] = {-1, 1, 0, 0}
      */
-    vector_2d(Point*) allBoardPoints(BOARD_SIZE);
-    Point::pointsInit(allBoardPoints);
-    vector_2d(int) testBoard(BOARD_SIZE);
-    for (auto &line :testBoard)
-    {
-        for (int i = 0; i < BOARD_SIZE; i++)
-        {
-            line.push_back(0);
-        }
-    }
+    PointPtr allBoardPoints[BOARD_SIZE * BOARD_SIZE];
+    std::unordered_map<PointPtr, std::vector<PointPtr>*> allAround;
+    std::unordered_map<PointPtr, std::vector<PointPtr>*> allDiagonal;
+    Point::pointsInit(allBoardPoints, allAround, allDiagonal);
 
-    Point* around[4];
-    size_t aroundSize = 0;
+    int testBoard[BOARD_SIZE * BOARD_SIZE];
+    memset(testBoard, 0, sizeof(testBoard));
 
-    testBoard[3][2] = 1;
-    aroundSize = 0;
-    Point::getAround(allBoardPoints[3][2], allBoardPoints, around, aroundSize);
+    PArVecPtr around;
+
+    testBoard[3 * BOARD_SIZE + 2] = 1;
+    around = allAround[allBoardPoints[3 * BOARD_SIZE + 2]];
     GoBlock block1;
-    block1.update(allBoardPoints[3][2], 1, around, aroundSize, testBoard);
+    block1.update(allBoardPoints[3 * BOARD_SIZE + 2], 1, around, testBoard);
     std::cout << block1;
     std::cout << '\n';
 
-    testBoard[3][3] = 1;
-    block1.addPoint(allBoardPoints[3][3], testBoard, allBoardPoints);
+    testBoard[3 * BOARD_SIZE + 3] = 1;
+    around = allAround[allBoardPoints[3 * BOARD_SIZE + 3]];
+    block1.addPoint(allBoardPoints[3 * BOARD_SIZE + 3], around, testBoard);
     std::cout << block1;
     std::cout << '\n';
 
-    testBoard[3][5] = 1;
-    aroundSize = 0;
-    Point::getAround(allBoardPoints[3][5], allBoardPoints, around, aroundSize);
+    testBoard[3 * BOARD_SIZE + 5] = 1;
+    around = allAround[allBoardPoints[3 * BOARD_SIZE + 5]];
     GoBlock block2;
-    block2.update(allBoardPoints[3][5], 1, around, aroundSize, testBoard);
+    block2.update(allBoardPoints[3 * BOARD_SIZE + 5], 1, around, testBoard);
     std::cout << block2;
     std::cout << '\n';
 
-    testBoard[3][6] = 1;
-    block2.addPoint(allBoardPoints[3][6], testBoard, allBoardPoints);
+    testBoard[3 * BOARD_SIZE + 6] = 1;
+    around = allAround[allBoardPoints[3 * BOARD_SIZE + 6]];
+    block2.addPoint(allBoardPoints[3 * BOARD_SIZE + 6], around, testBoard);
     std::cout << block2;
     std::cout << '\n';
 
-    testBoard[2][4] = 1;
-    aroundSize = 0;
-    Point::getAround(allBoardPoints[2][4], allBoardPoints, around, aroundSize);
+    testBoard[2 * BOARD_SIZE + 4] = 1;
+    around = allAround[allBoardPoints[2 * BOARD_SIZE + 4]];
     GoBlock block3;
-    block3.update(allBoardPoints[2][4], 1, around, aroundSize, testBoard);
+    block3.update(allBoardPoints[2 * BOARD_SIZE + 4], 1, around, testBoard);
     std::cout << block3;
     std::cout << '\n';
-    testBoard[1][4] = 1;
-    block3.addPoint(allBoardPoints[1][4], testBoard, allBoardPoints);
+    testBoard[1 * BOARD_SIZE + 4] = 1;
+    around = allAround[allBoardPoints[1 * BOARD_SIZE + 4]];
+    block3.addPoint(allBoardPoints[1 * BOARD_SIZE + 4], around, testBoard);
     std::cout << block3;
     std::cout << '\n';
 
-    block3.addPoint(allBoardPoints[3][4], testBoard, allBoardPoints);
+    around = allAround[allBoardPoints[3 * BOARD_SIZE + 4]];
+    block3.addPoint(allBoardPoints[3 * BOARD_SIZE + 4], around, testBoard);
     std::cout << block3;
     std::cout << '\n';
-    block3.merge(allBoardPoints[3][4], &block2);
+    block3.merge(allBoardPoints[3 * BOARD_SIZE + 4], &block2);
     std::cout << block3;
     std::cout << '\n';
-    block3.merge(allBoardPoints[3][4], &block1);
+    block3.merge(allBoardPoints[3 * BOARD_SIZE + 4], &block1);
     std::cout << block3;
     std::cout << '\n';
 }

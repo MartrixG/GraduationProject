@@ -15,11 +15,16 @@
 class Application
 {
 public:
+    using PointPtr = Point::PointPtr;
+    using PArVecPtr = Point::PArVecPtr;
+    using PDiVecPtr = Point::PDiVecPtr;
+
     static void loadSGF(int argc, char* argv[]);
 
     static void makeData(int argc, char* argv[]);
 
-    static void gameInformationAnalyze(vector_2d(Point*) &allBoardPoints, std::string &srcSgf,
+    static void gameInformationAnalyze(PointPtr* allBoardPoints, std::unordered_map<PointPtr, PArVecPtr>* around,
+                                       std::unordered_map<PointPtr, PDiVecPtr>* diagonal, std::string &srcSgf,
                                        std::ofstream &featureFileStream, std::ofstream&labelFileStream);
 
     static int gameCore(Game* game, PlayerBase* player, Step* nextStep);
@@ -28,7 +33,7 @@ public:
 
     static void uiSocket(int argc, char* argv[]);
 
-    static int MCTSTest(int argc, char* argv[]);
+    static void randomPlayerTest(int argc, char** argv);
 };
 
 #endif //MARTRIXGOC_APP_HPP
