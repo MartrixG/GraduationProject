@@ -18,6 +18,8 @@ public:
     using PArVecPtr = Point::PArVecPtr;
     using PDiVecPtr = Point::PDiVecPtr;
 
+    static int gameCore(Game* game, PlayerBase* player, Step* nextStep);
+
     static void loadSGF(int argc, char* argv[]);
 
     static void makeData(int argc, char* argv[]);
@@ -25,13 +27,13 @@ public:
     static void gameInformationAnalyze(PointPtr* allBoardPoints, PArVecPtr* around, PDiVecPtr* diagonal,
                                        std::string &srcSgf, std::ofstream &featureFileStream, std::ofstream&labelFileStream);
 
-    static int gameCore(Game* game, PlayerBase* player, Step* nextStep);
-
     static void commandLine(int argc, char* argv[]);
 
     static void uiSocket(int argc, char* argv[]);
 
     static void randomPlayerTest(int argc, char** argv);
+
+    static void mctsPlayerTest(int argc, char** argv);
 };
 
 #endif //MARTRIXGOC_APP_HPP

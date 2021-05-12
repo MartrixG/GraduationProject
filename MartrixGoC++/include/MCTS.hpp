@@ -21,8 +21,10 @@ public:
     int numRollouts = 0;
     int selfWinCount = 0, opponentWinCount = 0;
     Game* game = nullptr;
-    std::vector<int> unvisitedSteps = std::vector<int>();
-    std::vector<TreeNode*> children = std::vector<TreeNode*>();
+    int legalMove[BOARD_SIZE * BOARD_SIZE] = {0};
+    int qiAfterMove[BOARD_SIZE * BOARD_SIZE] = {0};
+    size_t legalMoveSize = 0;
+    TreeNode* children[BOARD_SIZE * BOARD_SIZE] = {nullptr};
 
     TreeNode(TreeNode* fa, Game* faGame);
 
@@ -35,6 +37,7 @@ public:
 
 class MCTS
 {
+public:
     TreeNode* root;
 
     RandomPlayer* blackRandomPlayer = nullptr;

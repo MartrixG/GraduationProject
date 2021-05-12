@@ -12,6 +12,24 @@
 
 const Step endStep(-1, -1, -1);
 
+int Application::gameCore(Game* game, PlayerBase* player, Step* nextStep)
+{
+    player->getNextStep(nextStep);
+    if(*nextStep == endStep)
+    {
+        return 2;
+    }
+    if(game->moveAnalyze(nextStep))
+    {
+        game->move();
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
 void Application::loadSGF(int argc, char* argv[])
 {
     // read sgf file
@@ -140,8 +158,8 @@ void Application::commandLine(int argc, char* argv[])
     Point::pointsInit(allBoardPoints, allAround, allDiagonal);
     Game game = Game(allBoardPoints, allAround, allDiagonal);
     // init player
-    auto* blackPlayer = new CommandLinePlayer(commandLinePlayer, black);
-    auto* whitePlayer = new CommandLinePlayer(commandLinePlayer, white);
+    auto* blackPlayer = new CommandLinePlayer(commandLinePlayer, BLACK_PLAYER);
+    auto* whitePlayer = new CommandLinePlayer(commandLinePlayer, WHITE_PLAYER);
     CommandLinePlayer* player = blackPlayer;
     std::cout << "game start.\n" << game;
 
@@ -166,24 +184,6 @@ void Application::commandLine(int argc, char* argv[])
             break;
         }
         player = player == blackPlayer ? whitePlayer : blackPlayer;
-    }
-}
-
-int Application::gameCore(Game* game, PlayerBase* player, Step* nextStep)
-{
-    player->getNextStep(nextStep);
-    if(*nextStep == endStep)
-    {
-        return 2;
-    }
-    if(game->moveAnalyze(nextStep))
-    {
-        game->move();
-        return 1;
-    }
-    else
-    {
-        return 0;
     }
 }
 
@@ -253,20 +253,20 @@ void Application::uiSocket(int argc, char** argv)
     MCTSPlayer* mctsPlayer;
     if(srcMessage[0] == '1')
     {
-        uiPlayer = new SocketPlayer(socketPlayer, black);
-        mctsPlayer = new MCTSPlayer(MCTPlayer, white);
+        uiPlayer = new SocketPlayer(socketPlayer, BLACK_PLAYER);
+        mctsPlayer = new MCTSPlayer(MCTPlayer, WHITE_PLAYER);
     }
     else
     {
-        uiPlayer = new SocketPlayer(socketPlayer, white);
-        mctsPlayer = new MCTSPlayer(MCTPlayer, black);
+        uiPlayer = new SocketPlayer(socketPlayer, WHITE_PLAYER);
+        mctsPlayer = new MCTSPlayer(MCTPlayer, BLACK_PLAYER);
     }
     handCapNum = srcMessage[1] - '0';
     for(int i = 0; i < handCapNum - 1; i++)
     {
         //pass
     }
-    if(mctsPlayer->playerColor == black)
+    if(mctsPlayer->playerColor == BLACK_PLAYER)
     {
         mctsPlayer->getFirstStep(&nextStep);
         game.moveAnalyze(&nextStep);
@@ -286,7 +286,7 @@ void Application::uiSocket(int argc, char** argv)
         game.boardStrEncode(srcMessage);
         send(clientSocket, srcMessage, bufSize, 0);
 
-        mctsPlayer->updatePlayer();
+        mctsPlayer->updatePlayer(&game);
 //        gameCore(&game, mctsPlayer);
         game.boardStrEncode(srcMessage);
         send(clientSocket, srcMessage, bufSize, 0);
@@ -308,19 +308,19 @@ void Application::randomPlayerTest(int argc, char** argv)
     int b[2];
     b[0] = b[1] = 0;
 
-    auto* blackPlayer = new RandomPlayer(randomPlayer, black);
-    auto* whitePlayer = new RandomPlayer(randomPlayer, white);
+    auto* blackPlayer = new RandomPlayer(randomPlayer, BLACK_PLAYER);
+    auto* whitePlayer = new RandomPlayer(randomPlayer, WHITE_PLAYER);
 
     for(int i = 0; i < num; i++)
     {
         Game game = Game(allBoardPoints, allAround, allDiagonal);
         RandomPlayer* player = blackPlayer;
-        Step* nextStep = new Step(-1, -1, -1);
+        Step nextStep(-1, -1, -1);
         while(true)
         {
             int res;
             player->updatePlayer(&game);
-            res = gameCore(&game, player, nextStep);
+            res = gameCore(&game, player, &nextStep);
             if(res == 0)
             {
                 player = player == blackPlayer ? whitePlayer : blackPlayer;
@@ -334,4 +334,25 @@ void Application::randomPlayerTest(int argc, char** argv)
         b[1 - ((double)game.getWinner() >= 2.5)]++;
     }
     std::cout << "B:" << b[0] << "  W:" << b[1] << '\n';
+}
+
+void Application::mctsPlayerTest(int argc, char** argv)
+{
+    PointPtr allBoardPoints[BOARD_SIZE * BOARD_SIZE];
+    PArVecPtr allAround[BOARD_SIZE * BOARD_SIZE];
+    PDiVecPtr allDiagonal[BOARD_SIZE * BOARD_SIZE];
+    Point::pointsInit(allBoardPoints, allAround, allDiagonal);
+    Game game = Game(allBoardPoints, allAround, allDiagonal);
+    Step nextStep(-1, -1, -1);
+
+    auto* blackPlayer = new MCTSPlayer(MCTPlayer, BLACK_PLAYER);
+    auto* whitePlayer = new MCTSPlayer(MCTPlayer, WHITE_PLAYER);
+
+    blackPlayer->getFirstStep(&nextStep);
+    game.moveAnalyze(&nextStep);
+    game.move();
+    MCTSPlayer* player = whitePlayer;
+
+    int res;
+    player->updatePlayer(&game);
 }

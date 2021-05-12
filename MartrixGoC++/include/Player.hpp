@@ -17,19 +17,16 @@ enum playerEnum
     commandLinePlayer, socketPlayer, MCTPlayer, randomPlayer
 };
 
-enum playColorEnum
-{
-    black, white
-};
-
 class PlayerBase
 {
 public:
     std::default_random_engine randNum;
     std::uniform_int_distribution<int> dist;
     playerEnum playerType;
-    playColorEnum playerColor;
-    PlayerBase(playerEnum type, playColorEnum color);
+    int playerColor;
+
+    PlayerBase(playerEnum type, int color);
+
     virtual void getNextStep(Step* nextStep) = 0;
 };
 
@@ -37,6 +34,7 @@ class CommandLinePlayer : public PlayerBase
 {
 public:
     using PlayerBase::PlayerBase;
+
     void getNextStep(Step* nextStep) override;
 };
 
@@ -46,7 +44,9 @@ public:
     char* srcMessage = nullptr;
 
     using PlayerBase::PlayerBase;
+
     void getNextStep(Step* nextStep) override;
+
     void updatePlayer(char* message);
 };
 
@@ -54,9 +54,12 @@ class MCTSPlayer : public PlayerBase
 {
 public:
     using PlayerBase::PlayerBase;
+
     void getNextStep(Step *nextStep) override;
+
     void getFirstStep(Step* netStep);
-    void updatePlayer();
+
+    void updatePlayer(Game* game);
 };
 
 class RandomPlayer : public PlayerBase
@@ -65,11 +68,13 @@ public:
     int legalMove[BOARD_SIZE * BOARD_SIZE];
     int qiAfterMove[BOARD_SIZE * BOARD_SIZE];
     size_t legalMoveSize = 0;
-    Game* game;
 
     using PlayerBase::PlayerBase;
+
     void getNextStep(Step* nextStep) override;
+
     void updatePlayer(Game* game);
+
     ~RandomPlayer();
 };
 

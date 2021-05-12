@@ -325,27 +325,25 @@ void Game::copy(Game* o)
 {
     std::unordered_map<BlockPtr, BlockPtr> blockMap;
     o->player = this->player;
-    memcpy(o->board, this->board, sizeof(*this->board));
+    memcpy(o->board, this->board, sizeof(this->board));
     o->boardZobristHash = this->boardZobristHash;
 //    std::copy(this->historyBoard.begin(), this->historyBoard.end(), o->historyBoard.begin());
     o->historyZobristHash = this->historyZobristHash;
     o->newBoardZobristHash = this->newBoardZobristHash;
     for(int i = 0; i < BOARD_SIZE * BOARD_SIZE; i++)
     {
-//        if(this->board[i] != 0 && this->pointBlockMap.count(this->allBoardPoints[i]))
-        if(this->board[i] != 0 && this->pointBlockMap[i] != nullptr)
+        BlockPtr nowBlock = this->pointBlockMap[i];
+        if(nowBlock != nullptr)
         {
-            PointPtr nowPoint = this->allBoardPoints[i];
-            BlockPtr nowBlock = this->pointBlockMap[nowPoint->pos];
             if(blockMap.count(nowBlock))
             {
-                o->pointBlockMap[nowPoint->pos] = blockMap[nowBlock];
+                o->pointBlockMap[i] = blockMap[nowBlock];
             }
             else
             {
                 auto* tmpBlock = new GoBlock();
-                tmpBlock->update(this->pointBlockMap[nowPoint->pos]);
-                o->pointBlockMap[nowPoint->pos] = tmpBlock;
+                tmpBlock->update(nowBlock);
+                o->pointBlockMap[i] = tmpBlock;
                 blockMap[nowBlock] = tmpBlock;
             }
         }

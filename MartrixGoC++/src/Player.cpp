@@ -5,8 +5,9 @@
 #include <iostream>
 #include <cstring>
 #include "Player.hpp"
+#include "MCTS.hpp"
 
-PlayerBase::PlayerBase(playerEnum type, playColorEnum color)
+PlayerBase::PlayerBase(playerEnum type, int color)
 {
     this->playerType = type;
     this->playerColor = color;
@@ -18,7 +19,7 @@ void CommandLinePlayer::getNextStep(Step* nextStep)
 {
     int x, y;
     std::cin >> x >> y;
-    nextStep->player = (int)playerColor + 1;
+    nextStep->player = playerColor;
     nextStep->pos = (x - 1) * BOARD_SIZE + y - 1;
 }
 
@@ -31,7 +32,7 @@ void SocketPlayer::getNextStep(Step* nextStep)
         pos *= 10;
         pos += this->srcMessage[i] - '0';
     }
-    nextStep->player = (int)this->playerColor + 1;
+    nextStep->player = this->playerColor;
     nextStep->pos = pos;
 }
 
@@ -42,7 +43,7 @@ void SocketPlayer::updatePlayer(char* message)
 
 void MCTSPlayer::getFirstStep(Step* nextStep)
 {
-    nextStep->player = (int)playerColor + 1;
+    nextStep->player = playerColor;
     int star = BOARD_SIZE * (BOARD_SIZE / 4 - 1) + BOARD_SIZE - (BOARD_SIZE / 4);
     int dPos[5] = {0, 1, -1, BOARD_SIZE, -BOARD_SIZE};
     int i = this->dist(this->randNum) % 5;
@@ -51,13 +52,13 @@ void MCTSPlayer::getFirstStep(Step* nextStep)
 
 void MCTSPlayer::getNextStep(Step* nextStep)
 {
-    nextStep->player = (int)playerColor + 1;
+    nextStep->player = playerColor;
     nextStep->pos = this->dist(this->randNum) % (BOARD_SIZE * BOARD_SIZE);
 }
 
-void MCTSPlayer::updatePlayer()
+void MCTSPlayer::updatePlayer(Game* game)
 {
-
+    MCTS searchTree(game);
 }
 
 void RandomPlayer::getNextStep(Step* nextStep)
@@ -67,7 +68,7 @@ void RandomPlayer::getNextStep(Step* nextStep)
         nextStep->pos = -BOARD_SIZE - 1;
         return;
     }
-    nextStep->player = (int)playerColor + 1;
+    nextStep->player = playerColor;
     int chosen = this->dist(this->randNum) % (int)this->legalMoveSize;
     nextStep->pos = this->legalMove[chosen];
 }
@@ -75,8 +76,7 @@ void RandomPlayer::getNextStep(Step* nextStep)
 void RandomPlayer::updatePlayer(Game* globalGame)
 {
     this->legalMoveSize = 0;
-    this->game = globalGame;
-    this->game->legalMove(legalMove, qiAfterMove, this->legalMoveSize);
+    globalGame->legalMove(legalMove, qiAfterMove, this->legalMoveSize);
 }
 
 RandomPlayer::~RandomPlayer()
