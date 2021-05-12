@@ -48,8 +48,8 @@ static void boardEncode(Game &game, std::ofstream &featureFileStream)
     {
         if (game.board[i] != 0)
         {
-            int qi = game.pointBlockMap[game.allBoardPoints[i]]->getQi();
-            int blockSize = game.pointBlockMap[game.allBoardPoints[i]]->getSize();
+            int qi = game.pointBlockMap[i]->getQi();
+            int blockSize = game.pointBlockMap[i]->getSize();
             qi = qi > 8 ? 8 : qi;
             blockSize = blockSize > 8 ? 8 : blockSize;
             state[2][i] = qi;

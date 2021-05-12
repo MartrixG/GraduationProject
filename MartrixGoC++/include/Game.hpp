@@ -29,9 +29,10 @@ public:
     std::unordered_map<PointPtr, PDivecPtr>* allDiagonal;
 //    std::vector<Step*> steps = std::vector<Step*>();
     // board point information
-    int board[BOARD_SIZE * BOARD_SIZE]{};
+    int board[BOARD_SIZE * BOARD_SIZE] = {0};
     long long boardZobristHash = 0;
-    std::unordered_map<PointPtr, BlockPtr> pointBlockMap = std::unordered_map<PointPtr, BlockPtr>();
+//    std::unordered_map<PointPtr, BlockPtr> pointBlockMap = std::unordered_map<PointPtr, BlockPtr>();
+    BlockPtr pointBlockMap[BOARD_SIZE * BOARD_SIZE] = {nullptr};
     // history information
 //    std::vector<vector_2d(int)> historyBoard = std::vector<vector_2d(int)>();
     std::unordered_set<long long> historyZobristHash = std::unordered_set<long long>();
