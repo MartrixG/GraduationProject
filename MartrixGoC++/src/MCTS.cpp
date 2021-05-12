@@ -62,8 +62,7 @@ void MCTS::updateAllChildren(TreeNode* node)
     for(size_t i = 0; i < player->legalMoveSize; i++)
     {
         nextStep.player = node->game->player;
-        nextStep.x = player->legalMove[i] / 19;
-        nextStep.y = player->legalMove[i] % 19;
+        nextStep.pos = player->legalMove[i];
         Game* tmpGame = new Game(node->game->allBoardPoints, node->game->allAround, node->game->allDiagonal);
         node->game->copy(tmpGame);
         tmpGame->moveAnalyze(node->nextStep);

@@ -18,9 +18,8 @@ void CommandLinePlayer::getNextStep(Step* nextStep)
 {
     int x, y;
     std::cin >> x >> y;
-    nextStep->x = x - 1;
-    nextStep->y = y - 1;
     nextStep->player = (int)playerColor + 1;
+    nextStep->pos = (x - 1) * BOARD_SIZE + y - 1;
 }
 
 void SocketPlayer::getNextStep(Step* nextStep)
@@ -33,8 +32,7 @@ void SocketPlayer::getNextStep(Step* nextStep)
         pos += this->srcMessage[i] - '0';
     }
     nextStep->player = (int)this->playerColor + 1;
-    nextStep->x = pos / BOARD_SIZE;
-    nextStep->y = pos % BOARD_SIZE;
+    nextStep->pos = pos;
 }
 
 void SocketPlayer::updatePlayer(char* message)
@@ -45,18 +43,16 @@ void SocketPlayer::updatePlayer(char* message)
 void MCTSPlayer::getFirstStep(Step* nextStep)
 {
     nextStep->player = (int)playerColor + 1;
-    int dx[5] = {0, 1, -1, 0, 0};
-    int dy[5] = {0, 0, 0, 1, -1};
+    int star = BOARD_SIZE * (BOARD_SIZE / 4 - 1) + BOARD_SIZE - (BOARD_SIZE / 4);
+    int dPos[5] = {0, 1, -1, 19, -19};
     int i = this->dist(this->randNum) % 5;
-    nextStep->x = dx[i];
-    nextStep->y = dy[i];
+    nextStep->pos = star + dPos[i];
 }
 
 void MCTSPlayer::getNextStep(Step* nextStep)
 {
     nextStep->player = (int)playerColor + 1;
-    nextStep->x = this->dist(this->randNum) % BOARD_SIZE;
-    nextStep->y = this->dist(this->randNum) % BOARD_SIZE;
+    nextStep->pos = this->dist(this->randNum) % (BOARD_SIZE * BOARD_SIZE);
 }
 
 void MCTSPlayer::updatePlayer()

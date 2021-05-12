@@ -17,7 +17,7 @@ class Step
 public:
     using PointPtr = Point::PointPtr;
 
-    int x, y, player, pos;
+    int player, pos;
 
     explicit Step(char player, char x, char y);
 
@@ -28,7 +28,7 @@ public:
     friend std::ostream &operator<<(std::ostream &out, const Step &o)
     {
         out << (o.player == BLACK_PLAYER ? "B " : "W ");
-        out << char('a' + o.x) << char('a' + o.y);
+        out << char('a' + o.pos / BOARD_SIZE) << char('a' + o.pos % BOARD_SIZE);
         return out;
     }
 
