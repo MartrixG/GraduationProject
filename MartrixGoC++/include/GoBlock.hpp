@@ -17,6 +17,7 @@ public:
     using BlockPtr = GoBlock*;
     using PointPtr = Point::PointPtr;
     using PArVecPtr = Point::PArVecPtr;
+    using PDiVecPtr = Point::PDiVecPtr;
 
     std::bitset<BOARD_SIZE * BOARD_SIZE> points = std::bitset<BOARD_SIZE * BOARD_SIZE>();
     std::bitset<BOARD_SIZE * BOARD_SIZE> qiPoints = std::bitset<BOARD_SIZE * BOARD_SIZE>();
@@ -33,9 +34,9 @@ public:
 
     void addPoint(PointPtr linkPoint, PArVecPtr around, const int* board);
 
-    void removeQi(PointPtr targetPoint);
+    void removeQi(int targetPoint);
 
-    void addQi(PointPtr targetPoint);
+    void addQi(int targetPoint);
 
     int getQi() const;
 

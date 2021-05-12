@@ -7,7 +7,6 @@
 
 #include "vector"
 #include "ostream"
-#include "unordered_map"
 
 #define vector_2d(T) std::vector<std::vector<T>>
 
@@ -20,14 +19,12 @@ public:
     using PArVecPtr = std::vector<PointPtr>*;
     using PDiVecPtr = std::vector<PointPtr>*;
 
-    int pos, boardSize;
+    int pos;
     long long zobristHash[2]{};
 
-    Point(int pos, int boardSize, long long blackHash, long long whiteHash);
+    Point(int pos, long long blackHash, long long whiteHash);
 
-    static void pointsInit(PointPtr* allBoardPoints,
-                           std::unordered_map<PointPtr, PArVecPtr> &allAround,
-                           std::unordered_map<PointPtr, PDiVecPtr> &allDiagonal);
+    static void pointsInit(PointPtr* allBoardPoints, PArVecPtr* allAround, PDiVecPtr* allDiagonal);
 
     static void test();
 

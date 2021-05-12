@@ -23,9 +23,8 @@ public:
 
     static void makeData(int argc, char* argv[]);
 
-    static void gameInformationAnalyze(PointPtr* allBoardPoints, std::unordered_map<PointPtr, PArVecPtr>* around,
-                                       std::unordered_map<PointPtr, PDiVecPtr>* diagonal, std::string &srcSgf,
-                                       std::ofstream &featureFileStream, std::ofstream&labelFileStream);
+    static void gameInformationAnalyze(PointPtr* allBoardPoints, PArVecPtr* around, PDiVecPtr* diagonal,
+                                       std::string &srcSgf, std::ofstream &featureFileStream, std::ofstream&labelFileStream);
 
     static int gameCore(Game* game, PlayerBase* player, Step* nextStep);
 

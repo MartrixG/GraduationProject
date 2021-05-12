@@ -18,15 +18,15 @@ class Game
 public:
     using PointPtr = Point::PointPtr;
     using PArVecPtr = Point::PArVecPtr;
-    using PDivecPtr = Point::PDiVecPtr;
+    using PDiVecPtr = Point::PDiVecPtr;
     using BlockPtr = GoBlock::BlockPtr;
 
     // game base information
     int player = BLACK_PLAYER;
     // board points
     PointPtr* allBoardPoints;
-    std::unordered_map<PointPtr, PArVecPtr>* allAround;
-    std::unordered_map<PointPtr, PDivecPtr>* allDiagonal;
+    PArVecPtr* allAround;
+    PDiVecPtr* allDiagonal;
 //    std::vector<Step*> steps = std::vector<Step*>();
     // board point information
     int board[BOARD_SIZE * BOARD_SIZE] = {0};
@@ -45,7 +45,7 @@ public:
 //    vector_2d(int) tmpBoard = vector_2d(int)(BOARD_SIZE, std::vector<int>(BOARD_SIZE));
     //
 
-    Game(PointPtr* points, std::unordered_map<PointPtr, PArVecPtr>* around, std::unordered_map<PointPtr, PDivecPtr>* diagonal);
+    Game(PointPtr* points, PArVecPtr* around, PDiVecPtr* diagonal);
 
     void initHandCap(std::vector<Step*> &handCapSteps, int numOfHandCap);
 

@@ -27,10 +27,10 @@ void Application::loadSGF(int argc, char* argv[])
     std::getline(fileStick, fileContext);
     // init go game
     PointPtr allBoardPoints[BOARD_SIZE * BOARD_SIZE];
-    std::unordered_map<PointPtr, PArVecPtr> around;
-    std::unordered_map<PointPtr, PDiVecPtr> diagonal;
-    Point::pointsInit(allBoardPoints, around, diagonal);
-    Game game = Game(allBoardPoints, &around, &diagonal);
+    PArVecPtr allAround[BOARD_SIZE * BOARD_SIZE];
+    PDiVecPtr allDiagonal[BOARD_SIZE * BOARD_SIZE];
+    Point::pointsInit(allBoardPoints, allAround, allDiagonal);
+    Game game = Game(allBoardPoints, allAround, allDiagonal);
 
     GoSGF sgf(fileContext);
 
@@ -65,9 +65,9 @@ void Application::makeData(int argc, char* argv[])
     }
     // init points
     PointPtr allBoardPoints[BOARD_SIZE * BOARD_SIZE];
-    std::unordered_map<PointPtr, PArVecPtr> around;
-    std::unordered_map<PointPtr, PDiVecPtr> diagonal;
-    Point::pointsInit(allBoardPoints, around, diagonal);
+    PArVecPtr allAround[BOARD_SIZE * BOARD_SIZE];
+    PDiVecPtr allDiagonal[BOARD_SIZE * BOARD_SIZE];
+    Point::pointsInit(allBoardPoints, allAround, allDiagonal);
     // read sgf file
     std::ifstream srcFileStream(argv[2], std::ios::in);
     // process feature file, label file
@@ -85,7 +85,7 @@ void Application::makeData(int argc, char* argv[])
     {
         while (std::getline(srcFileStream, srcSgf))
         {
-            gameInformationAnalyze(allBoardPoints, &around, &diagonal, srcSgf, featureFileStream, labelFileStream);
+            gameInformationAnalyze(allBoardPoints, allAround, allDiagonal, srcSgf, featureFileStream, labelFileStream);
 //            line++;
 //            std::cout << std::left << std::setw(4) << line << "/ " << lines << '\n';
         }
@@ -97,15 +97,14 @@ void Application::makeData(int argc, char* argv[])
             chosenNumberOfLine--;
             std::getline(srcFileStream, srcSgf);
         }
-        gameInformationAnalyze(allBoardPoints, &around, &diagonal, srcSgf, featureFileStream, labelFileStream);
+        gameInformationAnalyze(allBoardPoints, allAround, allDiagonal, srcSgf, featureFileStream, labelFileStream);
     }
     srcFileStream.close();
     featureFileStream.close();
 }
 
-void Application::gameInformationAnalyze(PointPtr* allBoardPoints, std::unordered_map<PointPtr, PArVecPtr>* around,
-                                         std::unordered_map<PointPtr, PDiVecPtr>* diagonal, std::string &srcSgf,
-                                         std::ofstream &featureFileStream, std::ofstream &labelFileStream)
+void Application::gameInformationAnalyze(PointPtr* allBoardPoints, PArVecPtr* around, PDiVecPtr* diagonal,
+                                         std::string &srcSgf, std::ofstream &featureFileStream, std::ofstream &labelFileStream)
 {
     // init go game
     Game game = Game(allBoardPoints, around, diagonal);
@@ -138,10 +137,10 @@ void Application::commandLine(int argc, char* argv[])
 {
     // init go game
     PointPtr allBoardPoints[BOARD_SIZE * BOARD_SIZE];
-    std::unordered_map<PointPtr, PArVecPtr> around;
-    std::unordered_map<PointPtr, PDiVecPtr> diagonal;
-    Point::pointsInit(allBoardPoints, around, diagonal);
-    Game game = Game(allBoardPoints, &around, &diagonal);
+    PArVecPtr allAround[BOARD_SIZE * BOARD_SIZE];
+    PDiVecPtr allDiagonal[BOARD_SIZE * BOARD_SIZE];
+    Point::pointsInit(allBoardPoints, allAround, allDiagonal);
+    Game game = Game(allBoardPoints, allAround, allDiagonal);
     // init player
     auto* blackPlayer = new CommandLinePlayer(commandLinePlayer, black);
     auto* whitePlayer = new CommandLinePlayer(commandLinePlayer, white);
@@ -240,10 +239,10 @@ void Application::uiSocket(int argc, char** argv)
     }
     // init go game
     PointPtr allBoardPoints[BOARD_SIZE * BOARD_SIZE];
-    std::unordered_map<PointPtr, PArVecPtr> around;
-    std::unordered_map<PointPtr, PDiVecPtr> diagonal;
-    Point::pointsInit(allBoardPoints, around, diagonal);
-    Game game = Game(allBoardPoints, &around, &diagonal);
+    PArVecPtr allAround[BOARD_SIZE * BOARD_SIZE];
+    PDiVecPtr allDiagonal[BOARD_SIZE * BOARD_SIZE];
+    Point::pointsInit(allBoardPoints, allAround, allDiagonal);
+    Game game = Game(allBoardPoints, allAround, allDiagonal);
     Step nextStep(-1, -1, -1);
 
     char srcMessage[512];
@@ -302,9 +301,9 @@ void Application::uiSocket(int argc, char** argv)
 void Application::randomPlayerTest(int argc, char** argv)
 {
     PointPtr allBoardPoints[BOARD_SIZE * BOARD_SIZE];
-    std::unordered_map<PointPtr, PArVecPtr> around;
-    std::unordered_map<PointPtr, PDiVecPtr> diagonal;
-    Point::pointsInit(allBoardPoints, around, diagonal);
+    PArVecPtr allAround[BOARD_SIZE * BOARD_SIZE];
+    PDiVecPtr allDiagonal[BOARD_SIZE * BOARD_SIZE];
+    Point::pointsInit(allBoardPoints, allAround, allDiagonal);
     int num;
     char* _;
     num = strtol(argv[2], &_, 10);
@@ -316,7 +315,7 @@ void Application::randomPlayerTest(int argc, char** argv)
 
     for(int i = 0; i < num; i++)
     {
-        Game game = Game(allBoardPoints, &around, &diagonal);
+        Game game = Game(allBoardPoints, allAround, allDiagonal);
         RandomPlayer* player = blackPlayer;
         Step* nextStep = new Step(-1, -1, -1);
         while(true)

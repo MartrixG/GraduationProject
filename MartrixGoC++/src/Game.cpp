@@ -7,7 +7,7 @@
 #include <cstring>
 #include "Game.hpp"
 
-Game::Game(PointPtr* points, std::unordered_map<PointPtr, PArVecPtr>* around, std::unordered_map<PointPtr, PDivecPtr>* diagonal)
+Game::Game(PointPtr* points, PArVecPtr* around, PDiVecPtr* diagonal)
 {
     this->allBoardPoints = points;
     this->allAround = around;
@@ -141,25 +141,23 @@ void Game::move()
     // opponent update
     for(auto &block : this->opponentBlock)
     {
-        block->removeQi(targetPoint);
+        block->removeQi(targetPoint->pos);
         if (block->getQi() == 0)
         {
             for (int i = 0; i < BOARD_SIZE * BOARD_SIZE; i++)
             {
                 if(block->points.test(i))
                 {
-                    PointPtr nowPoint = this->allBoardPoints[i];
-                    PArVecPtr around = (*this->allAround)[nowPoint];
+                    PArVecPtr around = this->allAround[i];
                     for(auto &point : *around)
                     {
                         if (this->board[point->pos] + player == BLACK_PLAYER + WHITE_PLAYER)
                         {
-                            this->pointBlockMap[point->pos]->addQi(nowPoint);
+                            this->pointBlockMap[point->pos]->addQi(i);
                         }
                     }
-                    this->board[nowPoint->pos] = 0;
-                    this->pointBlockMap[nowPoint->pos] = nullptr;
-//                    this->pointBlockMap.erase(nowPoint);
+                    this->board[i] = 0;
+                    this->pointBlockMap[i] = nullptr;
                 }
             }
             delete block;
@@ -176,7 +174,7 @@ void Game::getPickUpBlock(PointPtr targetPoint)
     this->opponentBlock.clear();
 
     int isolatedFlag = true;
-    std::vector<PointPtr>* around = (*this->allAround)[targetPoint];
+    PArVecPtr around = this->allAround[targetPoint->pos];
     for (auto &point : *around)
     {
         if (this->board[point->pos] != 0)
@@ -293,7 +291,7 @@ void Game::legalMove(int* legalMoves, int* qiAfterMove, size_t &len)
 
 bool Game::isEye(PointPtr pos, int posPlayer) const
 {
-    PArVecPtr around = (*this->allAround)[pos];
+    PArVecPtr around = this->allAround[pos->pos];
     for(auto &point : *around)
     {
         if(this->board[point->pos] != posPlayer)
@@ -302,7 +300,7 @@ bool Game::isEye(PointPtr pos, int posPlayer) const
         }
     }
     size_t count = 0;
-    PDivecPtr diagonal = (*this->allDiagonal)[pos];
+    PArVecPtr diagonal = this->allDiagonal[pos->pos];
     for(auto &point : *diagonal)
     {
         if(this->board[point->pos] == posPlayer)
