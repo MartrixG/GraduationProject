@@ -11,7 +11,6 @@
 #include <unordered_map>
 #include "Step.hpp"
 #include "GoBlock.hpp"
-#include "Point.hpp"
 
 class Game
 {
@@ -53,7 +52,7 @@ public:
 
     void move();
 
-    void getPickUpBlock(PointPtr targetPoint);
+    void getPickUpBlock(int targetPoint);
 
     void boardStrEncode(char* boardStr) const;
 
@@ -61,7 +60,7 @@ public:
 
     void legalMove(int* legalMoves, int* qiAfterMove, size_t &len);
 
-    bool isEye(PointPtr pos, int posPlayer) const;
+    bool isEye(int pos, int posPlayer) const;
 
     void copy(Game* o);
 

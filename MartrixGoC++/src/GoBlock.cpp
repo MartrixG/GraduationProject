@@ -13,9 +13,9 @@ void GoBlock::update(PointPtr beginPoint, int pointColor, PArVecPtr around, cons
     this->zobristHash = beginPoint->zobristHash[pointColor - 1];
     for(auto point : *around)
     {
-        if(board[point->pos] == 0)
+        if(board[point] == 0)
         {
-            this->qiPoints.set(point->pos);
+            this->qiPoints.set(point);
         }
     }
 }
@@ -43,9 +43,9 @@ void GoBlock::addPoint(PointPtr linkPoint, PArVecPtr around, const int* board)
     this->qiPoints.reset(linkPoint->pos);
     for(auto &point : *around)
     {
-        if(board[point->pos] == 0)
+        if(board[point] == 0)
         {
-            this->addQi(point->pos);
+            this->addQi(point);
         }
     }
 }

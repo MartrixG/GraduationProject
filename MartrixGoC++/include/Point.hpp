@@ -8,16 +8,14 @@
 #include "vector"
 #include "ostream"
 
-#define vector_2d(T) std::vector<std::vector<T>>
-
 const int BOARD_SIZE = 19;
 
 class Point
 {
 public:
     using PointPtr = Point*;
-    using PArVecPtr = std::vector<PointPtr>*;
-    using PDiVecPtr = std::vector<PointPtr>*;
+    using PArVecPtr = std::vector<int>*;
+    using PDiVecPtr = std::vector<int>*;
 
     int pos;
     long long zobristHash[2]{};
@@ -34,9 +32,9 @@ public:
         return out;
     }
 private:
-    static void getAround(PointPtr nowPoint, PointPtr* allBoardPoints, PArVecPtr aroundPoints);
+    static void getAround(int nowPoint, PArVecPtr aroundPoints);
 
-    static void getDiagonal(Point* nowPoint, PointPtr* allBoardPoints, PDiVecPtr diagonalPoints);
+    static void getDiagonal(int nowPoint, PDiVecPtr diagonalPoints);
 };
 
 #endif //MARTRIXGOC___POINT_H

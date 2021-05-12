@@ -44,7 +44,7 @@ void MCTSPlayer::getFirstStep(Step* nextStep)
 {
     nextStep->player = (int)playerColor + 1;
     int star = BOARD_SIZE * (BOARD_SIZE / 4 - 1) + BOARD_SIZE - (BOARD_SIZE / 4);
-    int dPos[5] = {0, 1, -1, 19, -19};
+    int dPos[5] = {0, 1, -1, BOARD_SIZE, -BOARD_SIZE};
     int i = this->dist(this->randNum) % 5;
     nextStep->pos = star + dPos[i];
 }
@@ -64,7 +64,7 @@ void RandomPlayer::getNextStep(Step* nextStep)
 {
     if(this->legalMoveSize == 0)
     {
-        nextStep->pos = -20;
+        nextStep->pos = -BOARD_SIZE - 1;
         return;
     }
     nextStep->player = (int)playerColor + 1;

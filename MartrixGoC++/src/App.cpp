@@ -3,8 +3,6 @@
 //
 
 #include <string>
-#include <iostream>
-#include <iomanip>
 #include <winsock.h>
 #include "Game.hpp"
 #include "GoSGF.hpp"

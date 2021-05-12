@@ -7,7 +7,6 @@
 
 #include <iostream>
 #include <fstream>
-#include "Point.hpp"
 #include "Player.hpp"
 #include "Game.hpp"
 
