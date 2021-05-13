@@ -10,26 +10,6 @@
 #include "BoardEncode.hpp"
 #include "Player.hpp"
 
-const Step endStep(-1, -1, -1);
-
-int Application::gameCore(Game* game, PlayerBase* player, Step* nextStep)
-{
-    player->getNextStep(nextStep);
-    if(*nextStep == endStep)
-    {
-        return 2;
-    }
-    if(game->moveAnalyze(nextStep))
-    {
-        game->move();
-        return 1;
-    }
-    else
-    {
-        return 0;
-    }
-}
-
 void Application::loadSGF(int argc, char* argv[])
 {
     // read sgf file
@@ -158,30 +138,31 @@ void Application::commandLine(int argc, char* argv[])
     Point::pointsInit(allBoardPoints, allAround, allDiagonal);
     Game game = Game(allBoardPoints, allAround, allDiagonal);
     // init player
-    auto* blackPlayer = new CommandLinePlayer(commandLinePlayer, BLACK_PLAYER);
-    auto* whitePlayer = new CommandLinePlayer(commandLinePlayer, WHITE_PLAYER);
+    auto* blackPlayer = new CommandLinePlayer(BLACK_PLAYER);
+    auto* whitePlayer = new CommandLinePlayer(WHITE_PLAYER);
     CommandLinePlayer* player = blackPlayer;
     std::cout << "game start.\n" << game;
 
-    Step* nextStep = new Step(-1, -1, -1);
+    Step endStep(-1, -1, -1);
+
     while(true)
     {
-        int res;
-        res = gameCore(&game, player, nextStep);
-        if(res == 0)
+        player->getNextStep(game.nextStep);
+        if(*game.nextStep == endStep)
         {
-            std::cout << "illegal position.\n";
-            player = player == blackPlayer ? whitePlayer : blackPlayer;
+            std::cout << "finish.\n";
+            break;
         }
-        else if(res == 1)
+        if(game.moveAnalyze(game.nextStep))
         {
+            game.move();
             std::cout << game;
             std::cout << '\n';
         }
         else
         {
-            std::cout << "finish.\n";
-            break;
+            std::cout << "illegal position.\n";
+            player = player == blackPlayer ? whitePlayer : blackPlayer;
         }
         player = player == blackPlayer ? whitePlayer : blackPlayer;
     }
@@ -253,13 +234,13 @@ void Application::uiSocket(int argc, char** argv)
     MCTSPlayer* mctsPlayer;
     if(srcMessage[0] == '1')
     {
-        uiPlayer = new SocketPlayer(socketPlayer, BLACK_PLAYER);
-        mctsPlayer = new MCTSPlayer(MCTPlayer, WHITE_PLAYER);
+        uiPlayer = new SocketPlayer(BLACK_PLAYER);
+        mctsPlayer = new MCTSPlayer(WHITE_PLAYER);
     }
     else
     {
-        uiPlayer = new SocketPlayer(socketPlayer, WHITE_PLAYER);
-        mctsPlayer = new MCTSPlayer(MCTPlayer, BLACK_PLAYER);
+        uiPlayer = new SocketPlayer(WHITE_PLAYER);
+        mctsPlayer = new MCTSPlayer(BLACK_PLAYER);
     }
     handCapNum = srcMessage[1] - '0';
     for(int i = 0; i < handCapNum - 1; i++)
@@ -308,27 +289,23 @@ void Application::randomPlayerTest(int argc, char** argv)
     int b[2];
     b[0] = b[1] = 0;
 
-    auto* blackPlayer = new RandomPlayer(randomPlayer, BLACK_PLAYER);
-    auto* whitePlayer = new RandomPlayer(randomPlayer, WHITE_PLAYER);
+    auto* blackPlayer = new RandomPlayer(BLACK_PLAYER);
+    auto* whitePlayer = new RandomPlayer(WHITE_PLAYER);
 
     for(int i = 0; i < num; i++)
     {
         Game game = Game(allBoardPoints, allAround, allDiagonal);
         RandomPlayer* player = blackPlayer;
-        Step nextStep(-1, -1, -1);
         while(true)
         {
-            int res;
             player->updatePlayer(&game);
-            res = gameCore(&game, player, &nextStep);
-            if(res == 0)
-            {
-                player = player == blackPlayer ? whitePlayer : blackPlayer;
-            }
-            else if(res == 2)
+            if(player->legalMoveSize == 0)
             {
                 break;
             }
+            player->getNextStep(game.nextStep);
+            game.moveAnalyze(game.nextStep);
+            game.move();
             player = player == blackPlayer ? whitePlayer : blackPlayer;
         }
         b[1 - ((double)game.getWinner() >= 2.5)]++;
@@ -343,16 +320,14 @@ void Application::mctsPlayerTest(int argc, char** argv)
     PDiVecPtr allDiagonal[BOARD_SIZE * BOARD_SIZE];
     Point::pointsInit(allBoardPoints, allAround, allDiagonal);
     Game game = Game(allBoardPoints, allAround, allDiagonal);
-    Step nextStep(-1, -1, -1);
 
-    auto* blackPlayer = new MCTSPlayer(MCTPlayer, BLACK_PLAYER);
-    auto* whitePlayer = new MCTSPlayer(MCTPlayer, WHITE_PLAYER);
+    auto* blackPlayer = new MCTSPlayer(BLACK_PLAYER);
+    auto* whitePlayer = new MCTSPlayer(WHITE_PLAYER);
 
-    blackPlayer->getFirstStep(&nextStep);
-    game.moveAnalyze(&nextStep);
+    blackPlayer->getFirstStep(game.nextStep);
+    game.moveAnalyze(game.nextStep);
     game.move();
     MCTSPlayer* player = whitePlayer;
 
-    int res;
     player->updatePlayer(&game);
 }

@@ -7,15 +7,12 @@
 #include "Player.hpp"
 #include "MCTS.hpp"
 
-PlayerBase::PlayerBase(playerEnum type, int color)
+CommandLinePlayer::CommandLinePlayer(int color)
 {
-    this->playerType = type;
     this->playerColor = color;
-    this->randNum = std::default_random_engine(GetCurrentThreadId() + std::chrono::system_clock::now().time_since_epoch().count());
-    this->dist = std::uniform_int_distribution<int>(0, 0x7fffffff);
 }
 
-void CommandLinePlayer::getNextStep(Step* nextStep)
+void CommandLinePlayer::getNextStep(Step* nextStep) const
 {
     int x, y;
     std::cin >> x >> y;
@@ -23,7 +20,17 @@ void CommandLinePlayer::getNextStep(Step* nextStep)
     nextStep->pos = (x - 1) * BOARD_SIZE + y - 1;
 }
 
-void SocketPlayer::getNextStep(Step* nextStep)
+SocketPlayer::SocketPlayer(int color)
+{
+    this->playerColor = color;
+}
+
+void SocketPlayer::updatePlayer(char* message)
+{
+    this->srcMessage = message;
+}
+
+void SocketPlayer::getNextStep(Step* nextStep) const
 {
     size_t len = strlen(this->srcMessage);
     int pos = 0;
@@ -36,9 +43,36 @@ void SocketPlayer::getNextStep(Step* nextStep)
     nextStep->pos = pos;
 }
 
-void SocketPlayer::updatePlayer(char* message)
+RandomPlayer::RandomPlayer(int color)
 {
-    this->srcMessage = message;
+    this->playerColor = color;
+    this->randNum = std::default_random_engine(GetCurrentThreadId() + std::chrono::system_clock::now().time_since_epoch().count());
+    this->dist = std::uniform_int_distribution<int>(0, 0x7fffffff);
+}
+
+void RandomPlayer::getNextStep(Step* nextStep)
+{
+    if(this->legalMoveSize == 0)
+    {
+        nextStep->pos = -BOARD_SIZE - 1;
+        return;
+    }
+    nextStep->player = playerColor;
+    int chosen = this->dist(this->randNum) % (int)this->legalMoveSize;
+    nextStep->pos = this->legalMove[chosen];
+}
+
+void RandomPlayer::updatePlayer(Game* globalGame)
+{
+    this->legalMoveSize = 0;
+    globalGame->legalMove(legalMove, qiAfterMove, this->legalMoveSize);
+}
+
+MCTSPlayer::MCTSPlayer(int color)
+{
+    this->playerColor = color;
+    this->randNum = std::default_random_engine(GetCurrentThreadId() + std::chrono::system_clock::now().time_since_epoch().count());
+    this->dist = std::uniform_int_distribution<int>(0, 0x7fffffff);
 }
 
 void MCTSPlayer::getFirstStep(Step* nextStep)
@@ -60,24 +94,3 @@ void MCTSPlayer::updatePlayer(Game* game)
 {
     MCTS searchTree(game);
 }
-
-void RandomPlayer::getNextStep(Step* nextStep)
-{
-    if(this->legalMoveSize == 0)
-    {
-        nextStep->pos = -BOARD_SIZE - 1;
-        return;
-    }
-    nextStep->player = playerColor;
-    int chosen = this->dist(this->randNum) % (int)this->legalMoveSize;
-    nextStep->pos = this->legalMove[chosen];
-}
-
-void RandomPlayer::updatePlayer(Game* globalGame)
-{
-    this->legalMoveSize = 0;
-    globalGame->legalMove(legalMove, qiAfterMove, this->legalMoveSize);
-}
-
-RandomPlayer::~RandomPlayer()
-= default;

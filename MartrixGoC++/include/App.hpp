@@ -18,8 +18,6 @@ public:
     using PArVecPtr = Point::PArVecPtr;
     using PDiVecPtr = Point::PDiVecPtr;
 
-    static int gameCore(Game* game, PlayerBase* player, Step* nextStep);
-
     static void loadSGF(int argc, char* argv[]);
 
     static void makeData(int argc, char* argv[]);

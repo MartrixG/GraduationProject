@@ -12,70 +12,61 @@
 #include "Step.hpp"
 #include "Game.hpp"
 
-enum playerEnum
-{
-    commandLinePlayer, socketPlayer, MCTPlayer, randomPlayer
-};
-
-class PlayerBase
+class CommandLinePlayer
 {
 public:
-    std::default_random_engine randNum;
-    std::uniform_int_distribution<int> dist;
-    playerEnum playerType;
     int playerColor;
 
-    PlayerBase(playerEnum type, int color);
+    explicit CommandLinePlayer(int color);
 
-    virtual void getNextStep(Step* nextStep) = 0;
+    void getNextStep(Step* nextStep) const;
+
 };
 
-class CommandLinePlayer : public PlayerBase
-{
-public:
-    using PlayerBase::PlayerBase;
-
-    void getNextStep(Step* nextStep) override;
-};
-
-class SocketPlayer : public PlayerBase
+class SocketPlayer
 {
 public:
     char* srcMessage = nullptr;
+    int playerColor;
 
-    using PlayerBase::PlayerBase;
-
-    void getNextStep(Step* nextStep) override;
+    explicit SocketPlayer(int color);
 
     void updatePlayer(char* message);
+
+    void getNextStep(Step* nextStep) const;
 };
 
-class MCTSPlayer : public PlayerBase
+class RandomPlayer
 {
 public:
-    using PlayerBase::PlayerBase;
+    int playerColor;
+    int legalMove[BOARD_SIZE * BOARD_SIZE]{};
+    int qiAfterMove[BOARD_SIZE * BOARD_SIZE]{};
+    size_t legalMoveSize = 0;
+    std::default_random_engine randNum;
+    std::uniform_int_distribution<int> dist;
 
-    void getNextStep(Step *nextStep) override;
+    explicit RandomPlayer(int color);
+
+    void getNextStep(Step* nextStep);
+
+    void updatePlayer(Game* game);
+};
+
+class MCTSPlayer
+{
+public:
+    int playerColor;
+    std::default_random_engine randNum;
+    std::uniform_int_distribution<int> dist;
+
+    explicit MCTSPlayer(int color);
+
+    void getNextStep(Step *nextStep);
 
     void getFirstStep(Step* netStep);
 
     void updatePlayer(Game* game);
-};
-
-class RandomPlayer : public PlayerBase
-{
-public:
-    int legalMove[BOARD_SIZE * BOARD_SIZE];
-    int qiAfterMove[BOARD_SIZE * BOARD_SIZE];
-    size_t legalMoveSize = 0;
-
-    using PlayerBase::PlayerBase;
-
-    void getNextStep(Step* nextStep) override;
-
-    void updatePlayer(Game* game);
-
-    ~RandomPlayer();
 };
 
 #endif //MARTRIXGOC_PLAYER_HPP

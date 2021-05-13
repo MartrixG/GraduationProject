@@ -17,12 +17,12 @@ class TreeNode
 {
 public:
     TreeNode* parent = nullptr;
-    Step* nextStep = nullptr;
     int numRollouts = 0;
     int selfWinCount = 0, opponentWinCount = 0;
     Game* game = nullptr;
     int legalMove[BOARD_SIZE * BOARD_SIZE] = {0};
     int qiAfterMove[BOARD_SIZE * BOARD_SIZE] = {0};
+    RandomPlayer* nodeRandomPlayer = nullptr;
     size_t legalMoveSize = 0;
     TreeNode* children[BOARD_SIZE * BOARD_SIZE] = {nullptr};
 
@@ -40,18 +40,15 @@ class MCTS
 public:
     TreeNode* root;
 
-    RandomPlayer* blackRandomPlayer = nullptr;
-    RandomPlayer* whiteRandomPlayer = nullptr;
-
     explicit MCTS(Game* game);
 
-    void updateAllChildren(TreeNode* node);
+    static void updateAllChildren(TreeNode* node);
 
-    void treePolicy(TreeNode* node);
-
-    void defaultPolicy(TreeNode* node);
+    static void defaultPolicy(TreeNode* node);
 
     static void backup(TreeNode* node);
+
+    void treePolicy(TreeNode* node);
 };
 
 #endif //MARTRIXGOC_MCTS_HPP

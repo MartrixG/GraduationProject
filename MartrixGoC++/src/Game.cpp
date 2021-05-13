@@ -13,6 +13,7 @@ Game::Game(PointPtr* points, PArVecPtr* around, PDiVecPtr* diagonal)
     this->allAround = around;
     this->allDiagonal = diagonal;
     this->targetBlock = new GoBlock();
+    this->nextStep = new Step(-1, -1, -1);
     this->historyZobristHash.insert(0);
 }
 
@@ -275,11 +276,11 @@ int Game::getWinner()
 
 void Game::legalMove(int* legalMoves, int* qiAfterMove, size_t &len)
 {
-    Step probStep(-1, -1, this->player);
+    this->nextStep->player = this->player;
     for(int i = 0; i < BOARD_SIZE * BOARD_SIZE; i++)
     {
-        probStep.pos = i;
-        if(this->moveAnalyze(&probStep))
+        this->nextStep->pos = i;
+        if(this->moveAnalyze(this->nextStep))
         {
             if(!this->isEye(i, this->player))
             {
