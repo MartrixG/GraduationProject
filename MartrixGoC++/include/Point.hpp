@@ -8,7 +8,7 @@
 #include "vector"
 #include "ostream"
 
-const int BOARD_SIZE = 19;
+const int BOARD_SIZE = 9;
 
 class Point
 {

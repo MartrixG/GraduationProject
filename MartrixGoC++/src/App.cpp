@@ -8,7 +8,10 @@
 #include "GoSGF.hpp"
 #include "App.hpp"
 #include "BoardEncode.hpp"
-#include "Player.hpp"
+#include "CommandLinePlayer.hpp"
+#include "SocketPlayer.hpp"
+#include "RandomPlayer.hpp"
+#include "MCTSPlayer.hpp"
 
 void Application::loadSGF(int argc, char* argv[])
 {
@@ -323,11 +326,28 @@ void Application::mctsPlayerTest(int argc, char** argv)
 
     auto* blackPlayer = new MCTSPlayer(BLACK_PLAYER);
     auto* whitePlayer = new MCTSPlayer(WHITE_PLAYER);
+    MCTSPlayer* player = whitePlayer;
 
     blackPlayer->getFirstStep(game.nextStep);
     game.moveAnalyze(game.nextStep);
     game.move();
-    MCTSPlayer* player = whitePlayer;
+    std::cout << *game.nextStep;
+    std::cout << game;
+    std::cout << '\n';
 
-    player->updatePlayer(&game);
+    while(true)
+    {
+        player->updatePlayer(&game);
+        player->getNextStep(game.nextStep);
+        if(game.nextStep->pos == -1)
+        {
+            break;
+        }
+        game.moveAnalyze(game.nextStep);
+        game.move();
+        std::cout << *game.nextStep << '\n';
+        std::cout << game;
+        std::cout << '\n';
+        player->playerColor = BLACK_PLAYER + WHITE_PLAYER - player->playerColor;
+    }
 }

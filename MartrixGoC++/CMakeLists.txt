@@ -5,7 +5,7 @@ set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++")
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS -Wall)
 set(CMAKE_CXX_FLAGS_DEBUG   "-g -Wall" )
-set(CMAKE_CXX_FLAGS_RELEASE "-O2 -Wall")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -Wall")
 
 SET(CMAKE_BUILD_TYPE "Release")
 

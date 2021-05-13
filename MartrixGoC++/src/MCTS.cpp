@@ -3,60 +3,52 @@
 //
 
 #include "MCTS.hpp"
-#include "App.hpp"
-
-TreeNode::TreeNode(TreeNode* fa, Game* faGame)
-{
-    this->parent = fa;
-    this->game = faGame;
-    this->game->legalMove(this->legalMove, this->qiAfterMove, this->legalMoveSize);
-    this->nodeRandomPlayer = new RandomPlayer(BLACK_PLAYER);
-}
-
-void TreeNode::chooseBest(TreeNode* bestNode)
-{
-
-}
-
-double TreeNode::score(int totRollouts) const
-{
-    return (double)this->selfWinCount / (double)this->numRollouts + C * std::sqrt(std::log((double)totRollouts) / (double)this->numRollouts);
-}
-
-TreeNode::~TreeNode()
-{
-    delete this->game;
-    delete this->nodeRandomPlayer;
-
-    for(auto &child : this->children)
-    {
-        delete child;
-    }
-}
 
 MCTS::MCTS(Game* game)
 {
+    this->randNum = std::default_random_engine(GetCurrentThreadId() + std::chrono::system_clock::now().time_since_epoch().count());
+    this->dist = std::uniform_int_distribution<int>(0, 0x7fffffff);
     Game* tmpGame = new Game(game->allBoardPoints, game->allAround, game->allDiagonal);
     game->copy(tmpGame);
     this->root = new TreeNode(nullptr, tmpGame);
     MCTS::defaultPolicy(root);
-    MCTS::updateAllChildren(root);
 }
 
-void MCTS::updateAllChildren(TreeNode* node)
+int MCTS::search(TreeNode* &chosenNode)
 {
-    for(size_t i = 0; i < node->legalMoveSize; i++)
+    chosenNode = this->root;
+    TreeNode* bestNode = nullptr;
+    int totRollouts = this->root->numRollouts;
+    while(chosenNode->unvisitedMove.empty())
     {
-        Game* tmpGame = new Game(node->game->allBoardPoints, node->game->allAround, node->game->allDiagonal);
-        node->game->copy(tmpGame);
-        tmpGame->nextStep->player = node->game->player;
-        tmpGame->nextStep->pos = node->legalMove[i];
-        tmpGame->moveAnalyze(tmpGame->nextStep);
-        tmpGame->move();
-        node->children[i] = new TreeNode(node, tmpGame);
-        MCTS::defaultPolicy(node->children[i]);
-        MCTS::backup(node->children[i]);
+        chosenNode->chooseBest(bestNode, totRollouts);
+        chosenNode = bestNode;
     }
+    if(chosenNode->legalMoveSize == 0)
+    {
+        return -1;
+    }
+    int location = this->dist(this->randNum) % (int)chosenNode->unvisitedMove.size();
+    for(auto &i : chosenNode->unvisitedMove)
+    {
+        location--;
+        if(location == -1)
+        {
+            return i;
+        }
+    }
+}
+
+void MCTS::expand(TreeNode* node, int location)
+{
+    Game* tmpGame = new Game(node->game->allBoardPoints, node->game->allAround, node->game->allDiagonal);
+    node->game->copy(tmpGame);
+    tmpGame->nextStep->player = node->game->player;
+    tmpGame->nextStep->pos = node->legalMove[location];
+    tmpGame->moveAnalyze(tmpGame->nextStep);
+    tmpGame->move();
+    node->children[location] = new TreeNode(node, tmpGame);
+    node->unvisitedMove.erase(location);
 }
 
 void MCTS::defaultPolicy(TreeNode* node)
@@ -78,23 +70,52 @@ void MCTS::defaultPolicy(TreeNode* node)
         player->playerColor = BLACK_PLAYER + WHITE_PLAYER - player->playerColor;
     }
     node->numRollouts++;
-    if(2 - ((double)experimentGame.getWinner() >= 2.5) == node->game->player)
-    {
-        node->selfWinCount++;
-    }
+    int winFlag;
+    winFlag = 2 - ((double)experimentGame.getWinner() >= 2.5) != node->game->player;
+    node->selfWinCount += winFlag;
+    MCTS::backup(node, winFlag);
 }
 
-void MCTS::treePolicy(TreeNode* node)
-{
-
-}
-
-void MCTS::backup(TreeNode* node)
+void MCTS::backup(TreeNode* node, int win)
 {
     while(node->parent != nullptr)
     {
-        node->parent->selfWinCount += node->numRollouts - node->selfWinCount;
-        node->parent->numRollouts += node->numRollouts;
+        node->parent->selfWinCount += 1 - win;
+        node->parent->numRollouts++;
+        win = 1 - win;
         node = node->parent;
+    }
+}
+
+void MCTS::updateAllChildren(TreeNode* node)
+{
+    for(size_t i = 0; i < node->legalMoveSize; i++)
+    {
+        MCTS::expand(node, (int)i);
+        MCTS::defaultPolicy(node->children[i]);
+    }
+}
+
+void MCTS::work()
+{
+    if(this->root->legalMoveSize == 0)
+    {
+        return;
+    }
+    updateAllChildren(this->root);
+    for (size_t i = 0; i < 100000; i++)
+    {
+        if(i % 10000 == 0)
+        {
+            std::cout << i << "/100000\n";
+        }
+        TreeNode* expandNode = nullptr;
+        int location = this->search(expandNode);
+        if(location == -1)
+        {
+            return;
+        }
+        expand(expandNode, location);
+        defaultPolicy(expandNode->children[location]);
     }
 }

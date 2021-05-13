@@ -28,9 +28,9 @@ public:
     PDiVecPtr* allDiagonal;
 //    std::vector<Step*> steps = std::vector<Step*>();
     // board point information
-    int board[BOARD_SIZE * BOARD_SIZE] = {0};
+    int* board = nullptr;
     long long boardZobristHash = 0;
-    BlockPtr pointBlockMap[BOARD_SIZE * BOARD_SIZE] = {nullptr};
+    BlockPtr* pointBlockMap = nullptr;
     // history information
 //    std::vector<vector_2d(int)> historyBoard = std::vector<vector_2d(int)>();
     std::unordered_set<long long> historyZobristHash = std::unordered_set<long long>();
@@ -61,7 +61,7 @@ public:
 
     bool isEye(int pos, int posPlayer) const;
 
-    void copy(Game* o);
+    void copy(Game* o) const;
 
     friend void operator<<(std::ostream &out, const Game &o)
     {

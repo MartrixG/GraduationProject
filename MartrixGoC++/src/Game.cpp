@@ -15,6 +15,14 @@ Game::Game(PointPtr* points, PArVecPtr* around, PDiVecPtr* diagonal)
     this->targetBlock = new GoBlock();
     this->nextStep = new Step(-1, -1, -1);
     this->historyZobristHash.insert(0);
+
+    this->board = new int[BOARD_SIZE * BOARD_SIZE];
+    this->pointBlockMap = new BlockPtr[BOARD_SIZE * BOARD_SIZE];
+    for(size_t i = 0; i < BOARD_SIZE * BOARD_SIZE; i++)
+    {
+        this->board[i] = 0;
+        this->pointBlockMap[i] = nullptr;
+    }
 }
 
 void Game::initHandCap(std::vector<Step*> &handCapSteps, int numOfHandCap)
@@ -322,11 +330,15 @@ bool Game::isEye(int pos, int posPlayer) const
 }
 
 
-void Game::copy(Game* o)
+void Game::copy(Game* o) const
 {
     std::unordered_map<BlockPtr, BlockPtr> blockMap;
     o->player = this->player;
-    memcpy(o->board, this->board, sizeof(this->board));
+//    memcpy(o->board, this->board, sizeof(this->board));
+    for(size_t i = 0; i < BOARD_SIZE * BOARD_SIZE; i++)
+    {
+        o->board[i] = this->board[i];
+    }
     o->boardZobristHash = this->boardZobristHash;
 //    std::copy(this->historyBoard.begin(), this->historyBoard.end(), o->historyBoard.begin());
     o->historyZobristHash = this->historyZobristHash;
@@ -354,13 +366,16 @@ void Game::copy(Game* o)
 Game::~Game()
 {
     std::unordered_set<BlockPtr> blockSet;
-    for(auto & i : this->pointBlockMap)
+    for(size_t i = 0 ; i < BOARD_SIZE * BOARD_SIZE; i++)
     {
-        blockSet.insert(i);
+        blockSet.insert(this->pointBlockMap[i]);
     }
     for(auto &block : blockSet)
     {
         delete block;
     }
     delete targetBlock;
+    delete nextStep;
+    delete []board;
+    delete []pointBlockMap;
 }
