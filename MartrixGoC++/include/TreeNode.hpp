@@ -15,8 +15,8 @@ class TreeNode
 {
 public:
     TreeNode* parent = nullptr;
+    int winCount[3] = {0};
     int numRollouts = 0;
-    int selfWinCount = 0, opponentWinCount = 0;
     std::unordered_set<int> unvisitedMove;
     int legalMove[BOARD_SIZE * BOARD_SIZE] = {0};
     int qiAfterMove[BOARD_SIZE * BOARD_SIZE] = {0};
@@ -30,7 +30,7 @@ public:
 
     void chooseBest(TreeNode* &bestNode, int totRollouts);
 
-    double score(int totRollouts) const;
+    double score(double totRollouts) const;
 
     ~TreeNode();
 };

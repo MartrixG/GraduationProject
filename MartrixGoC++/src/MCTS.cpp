@@ -3,6 +3,7 @@
 //
 
 #include "MCTS.hpp"
+#include <ctime>
 
 MCTS::MCTS(Game* game)
 {
@@ -19,7 +20,7 @@ int MCTS::search(TreeNode* &chosenNode)
     chosenNode = this->root;
     TreeNode* bestNode = nullptr;
     int totRollouts = this->root->numRollouts;
-    while(chosenNode->unvisitedMove.empty())
+    while(chosenNode->unvisitedMove.empty() && chosenNode->legalMoveSize != 0)
     {
         chosenNode->chooseBest(bestNode, totRollouts);
         chosenNode = bestNode;
@@ -51,7 +52,7 @@ void MCTS::expand(TreeNode* node, int location)
     node->unvisitedMove.erase(location);
 }
 
-void MCTS::defaultPolicy(TreeNode* node)
+int MCTS::defaultPolicy(TreeNode* node)
 {
     Game experimentGame(node->game->allBoardPoints, node->game->allAround, node->game->allDiagonal);
     node->game->copy(&experimentGame);
@@ -60,29 +61,27 @@ void MCTS::defaultPolicy(TreeNode* node)
     while(true)
     {
         player->updatePlayer(&experimentGame);
-        if(player->legalMoveSize == 0)
+        player->getNextStep(experimentGame.nextStep);
+        if(experimentGame.nextStep->pos == -1)
         {
             break;
         }
-        player->getNextStep(experimentGame.nextStep);
         experimentGame.moveAnalyze(experimentGame.nextStep);
         experimentGame.move();
         player->playerColor = BLACK_PLAYER + WHITE_PLAYER - player->playerColor;
     }
+    int winColor = 2 - ((double)experimentGame.getWinner() >= 2.5);
     node->numRollouts++;
-    int winFlag;
-    winFlag = 2 - ((double)experimentGame.getWinner() >= 2.5) != node->game->player;
-    node->selfWinCount += winFlag;
-    MCTS::backup(node, winFlag);
+    node->winCount[winColor]++;
+    return winColor;
 }
 
-void MCTS::backup(TreeNode* node, int win)
+void MCTS::backup(TreeNode* node, int winColor)
 {
-    while(node->parent != nullptr)
+    while(node != nullptr)
     {
-        node->parent->selfWinCount += 1 - win;
-        node->parent->numRollouts++;
-        win = 1 - win;
+        node->winCount[winColor]++;
+        node->numRollouts++;
         node = node->parent;
     }
 }
@@ -92,7 +91,8 @@ void MCTS::updateAllChildren(TreeNode* node)
     for(size_t i = 0; i < node->legalMoveSize; i++)
     {
         MCTS::expand(node, (int)i);
-        MCTS::defaultPolicy(node->children[i]);
+        int winColor = MCTS::defaultPolicy(node->children[i]);
+        MCTS::backup(node, winColor);
     }
 }
 
@@ -103,12 +103,8 @@ void MCTS::work()
         return;
     }
     updateAllChildren(this->root);
-    for (size_t i = 0; i < 100000; i++)
+    for (size_t i = 0; i < 10000; i++)
     {
-        if(i % 10000 == 0)
-        {
-            std::cout << i << "/100000\n";
-        }
         TreeNode* expandNode = nullptr;
         int location = this->search(expandNode);
         if(location == -1)
@@ -116,6 +112,7 @@ void MCTS::work()
             return;
         }
         expand(expandNode, location);
-        defaultPolicy(expandNode->children[location]);
+        int winColor = defaultPolicy(expandNode->children[location]);
+        MCTS::backup(expandNode, winColor);
     }
 }

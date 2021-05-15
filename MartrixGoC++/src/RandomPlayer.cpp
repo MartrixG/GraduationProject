@@ -17,7 +17,7 @@ void RandomPlayer::getNextStep(Step* nextStep)
 {
     if(this->legalMoveSize == 0)
     {
-        nextStep->pos = -BOARD_SIZE - 1;
+        nextStep->pos = -1;
         return;
     }
     nextStep->player = playerColor;

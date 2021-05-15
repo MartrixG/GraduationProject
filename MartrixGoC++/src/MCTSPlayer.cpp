@@ -29,15 +29,21 @@ void MCTSPlayer::getNextStep(Step* nextStep)
     {
         nextStep->pos = -1;
     }
-    int mostVis = -1;
+    int mostVis = -1, winCount;
     for(size_t i = 0; i < this->roots[0]->legalMoveSize; i++)
     {
         int vis = this->roots[0]->children[i]->numRollouts;
         if(vis > mostVis)
         {
             mostVis = vis;
+            winCount = this->roots[0]->children[i]->winCount[this->roots[0]->game->player];
             nextStep->pos = this->roots[0]->legalMove[i];
         }
+    }
+    // Confess
+    if((double)winCount / (double)mostVis < 0.05)
+    {
+        nextStep->pos = -2;
     }
     delete this->roots[0];
 }
@@ -47,8 +53,4 @@ void MCTSPlayer::updatePlayer(Game* game)
     MCTS searchTree(game);
     searchTree.work();
     this->roots[0] = searchTree.root;
-    for(size_t i = 0; i < searchTree.root->legalMoveSize; i++)
-    {
-        std::cout << "pos: " << i << "  vis: " << searchTree.root->children[i]->numRollouts << '\n';
-    }
 }

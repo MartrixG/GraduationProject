@@ -146,12 +146,10 @@ void Application::commandLine(int argc, char* argv[])
     CommandLinePlayer* player = blackPlayer;
     std::cout << "game start.\n" << game;
 
-    Step endStep(-1, -1, -1);
-
     while(true)
     {
         player->getNextStep(game.nextStep);
-        if(*game.nextStep == endStep)
+        if(game.nextStep->pos == -1)
         {
             std::cout << "finish.\n";
             break;
@@ -302,11 +300,11 @@ void Application::randomPlayerTest(int argc, char** argv)
         while(true)
         {
             player->updatePlayer(&game);
-            if(player->legalMoveSize == 0)
+            player->getNextStep(game.nextStep);
+            if(game.nextStep->pos == -1)
             {
                 break;
             }
-            player->getNextStep(game.nextStep);
             game.moveAnalyze(game.nextStep);
             game.move();
             player = player == blackPlayer ? whitePlayer : blackPlayer;
@@ -331,7 +329,7 @@ void Application::mctsPlayerTest(int argc, char** argv)
     blackPlayer->getFirstStep(game.nextStep);
     game.moveAnalyze(game.nextStep);
     game.move();
-    std::cout << *game.nextStep;
+    std::cout << *game.nextStep << '\n';
     std::cout << game;
     std::cout << '\n';
 
@@ -343,6 +341,11 @@ void Application::mctsPlayerTest(int argc, char** argv)
         {
             break;
         }
+        if(game.nextStep->pos == -2)
+        {
+            std::cout << player->playerColor << " Confess.\n";
+            break;
+        }
         game.moveAnalyze(game.nextStep);
         game.move();
         std::cout << *game.nextStep << '\n';
@@ -350,4 +353,6 @@ void Application::mctsPlayerTest(int argc, char** argv)
         std::cout << '\n';
         player->playerColor = BLACK_PLAYER + WHITE_PLAYER - player->playerColor;
     }
+    int winColor = 2 - ((double)game.getWinner() >= 2.5);
+    std::cout << winColor << " win.\n";
 }

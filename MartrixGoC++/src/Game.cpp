@@ -267,15 +267,15 @@ int Game::getWinner()
                 {
                     whiteCount++;
                 }
-                if(this->board[around->at(0)] == WHITE_PLAYER)
+                if(this->board[around->at(0)] == BLACK_PLAYER)
                 {
                     blackCount++;
                 }
                 break;
-            case 1:
+            case BLACK_PLAYER:
                 blackCount++;
                 break;
-            case 2:
+            case WHITE_PLAYER:
                 whiteCount++;
         }
     }

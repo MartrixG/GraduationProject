@@ -23,9 +23,9 @@ public:
 
     static void expand(TreeNode* node, int location);
 
-    static void defaultPolicy(TreeNode* node);
+    static int defaultPolicy(TreeNode* node);
 
-    static void backup(TreeNode* node, int win);
+    static void backup(TreeNode* node, int winColor);
 
     static void updateAllChildren(TreeNode* node);
 

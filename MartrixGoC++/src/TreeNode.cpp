@@ -23,7 +23,7 @@ void TreeNode::chooseBest(TreeNode* &bestNode, int totRollouts)
     {
         if(child != nullptr)
         {
-            double tmpScore = child->score(totRollouts);
+            double tmpScore = child->score((double)totRollouts);
             if(tmpScore > score)
             {
                 score = tmpScore;
@@ -33,9 +33,10 @@ void TreeNode::chooseBest(TreeNode* &bestNode, int totRollouts)
     }
 }
 
-double TreeNode::score(int totRollouts) const
+double TreeNode::score(double totRollouts) const
 {
-    return (double)this->selfWinCount / (double)this->numRollouts + std::sqrt(C * std::log((double)totRollouts) / (double)this->numRollouts);
+    auto parentWinCount = (double)this->winCount[BLACK_PLAYER + WHITE_PLAYER - this->game->player];
+    return parentWinCount / (double)this->numRollouts + std::sqrt(C * std::log(totRollouts) / (double)this->numRollouts);
 }
 
 TreeNode::~TreeNode()
