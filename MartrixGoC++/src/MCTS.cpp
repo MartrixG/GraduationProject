@@ -38,6 +38,7 @@ int MCTS::search(TreeNode* &chosenNode)
             return i;
         }
     }
+    return -1;
 }
 
 void MCTS::expand(TreeNode* node, int location)
@@ -103,7 +104,7 @@ void MCTS::work()
         return;
     }
     updateAllChildren(this->root);
-    for (size_t i = 0; i < 10000; i++)
+    for (size_t i = 0; i < 30000; i++)
     {
         TreeNode* expandNode = nullptr;
         int location = this->search(expandNode);

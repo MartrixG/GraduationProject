@@ -29,7 +29,7 @@ void MCTSPlayer::getNextStep(Step* nextStep)
     {
         nextStep->pos = -1;
     }
-    int mostVis = -1, winCount;
+    int mostVis = -1, winCount = 0;
     for(size_t i = 0; i < this->roots[0]->legalMoveSize; i++)
     {
         int vis = this->roots[0]->children[i]->numRollouts;

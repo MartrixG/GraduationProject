@@ -3,6 +3,9 @@
 #include <ctime>
 #include "App.hpp"
 #include "GoBlock.hpp"
+#include "ThreadPool.hpp"
+#include <random>
+#include "windows.h"
 
 enum argsEnum
 {
@@ -21,10 +24,39 @@ void initArgs()
     argsTransform["mcts"]          =  mctsPlayerTest;
 }
 
+int func()
+{
+    std::default_random_engine randNum(GetCurrentThreadId() + std::chrono::system_clock::now().time_since_epoch().count());
+    std::uniform_int_distribution<int> dist(0, 0x7fffffff);
+    int epoch = (dist(randNum) % 10) + 969000;
+    int a = 1, b = 1, c = 0;
+    for(int i = 0; i < epoch; i++)
+    {
+        c = a + b;
+        a = b;
+        b = c;
+        c %= 1000000000;
+    }
+    return c;
+}
+
 void testCode(int argc, char* argv[])
 {
-    GoBlock::test();
-    Point::test();
+//    GoBlock::test();
+//    Point::test();
+    ThreadPool pool(16);
+    std::queue<std::future<int>> resQueue;
+    for(size_t i = 0; i < 32; i++)
+    {
+        resQueue.push(pool.enqueue(func));
+    }
+    for(size_t i = 0; i < 237100; i++)
+    {
+        while(!resQueue.front().valid());
+        resQueue.front().get();
+        resQueue.pop();
+        resQueue.push(pool.enqueue(func));
+    }
 }
 
 int main(int argc, char* argv[])

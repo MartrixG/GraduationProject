@@ -336,6 +336,7 @@ void Application::mctsPlayerTest(int argc, char** argv)
     while(true)
     {
         player->updatePlayer(&game);
+        return;
         player->getNextStep(game.nextStep);
         if(game.nextStep->pos == -1)
         {
