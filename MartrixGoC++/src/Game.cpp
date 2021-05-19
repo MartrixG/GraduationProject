@@ -3,7 +3,6 @@
 //
 
 #include <iostream>
-#include <fstream>
 #include <cstring>
 #include "Game.hpp"
 
@@ -27,17 +26,6 @@ Game::Game(PointPtr* points, PArVecPtr* around, PDiVecPtr* diagonal)
 
 void Game::initHandCap(std::vector<Step*> &handCapSteps, int numOfHandCap)
 {
-    /*
-    vector_2d(int) tmpBoard(BOARD_SIZE, std::vector<int>(BOARD_SIZE));
-    this->historyBoard.push_back(tmpBoard);
-    for(size_t i = 0; i < BOARD_SIZE; i++)
-    {
-        for(size_t j = 0; j < BOARD_SIZE; j++)
-        {
-            this->historyBoard.back()[i][j] = this->board[i * BOARD_SIZE + j];
-        }
-    }
-    */
     for (int i = 0; i < numOfHandCap; i++)
     {
         int pos = handCapSteps[i]->pos;
@@ -100,24 +88,13 @@ bool Game::moveAnalyze(Step* step)
 
 void Game::move()
 {
-//    this->steps.push_back(this->nextStep);
     PointPtr targetPoint = this->allBoardPoints[this->nextStep->pos];
-    /*
-    this->historyBoard.push_back(tmpBoard);
-    for(size_t i = 0; i < BOARD_SIZE; i++)
-    {
-        for(size_t j = 0; j < BOARD_SIZE; j++)
-        {
-            this->historyBoard.back()[i][j] = this->board[i * BOARD_SIZE + j];
-        }
-    }
-    */
     this->historyZobristHash.insert(this->newBoardZobristHash);
     this->boardZobristHash = this->newBoardZobristHash;
 
+    // board update
     this->board[targetPoint->pos] = player;
     this->player = this->player == WHITE_PLAYER ? BLACK_PLAYER : WHITE_PLAYER;
-    // board update
 
     // self point update
     if(this->mergedBlock.empty())
@@ -236,47 +213,19 @@ void Game::boardStrEncode(char* boardStr) const
     boardStr[BOARD_SIZE * BOARD_SIZE + 1] = '\0';
 }
 
-int Game::getWinner()
+int Game::getWinner() const
 {
     int blackCount = 0, whiteCount = 0;
     for(size_t i = 0; i < BOARD_SIZE * BOARD_SIZE; i++)
     {
-        if(this->board[i] != 0)
-        {
-            if(this->pointBlockMap[i]->getQi() == 1)
-            {
-                BlockPtr deadBlock = this->pointBlockMap[i];
-                for(size_t k = 0; k < BOARD_SIZE * BOARD_SIZE; k++)
-                {
-                    if(deadBlock->points.test(k))
-                    {
-                        this->board[k] = BLACK_PLAYER + WHITE_PLAYER - deadBlock->color;
-                    }
-                }
-            }
-        }
-    }
-    PArVecPtr around;
-    for(size_t i = 0; i < BOARD_SIZE * BOARD_SIZE; i++)
-    {
         switch (this->board[i])
         {
-            case 0:
-                around = this->allAround[i];
-                if(this->board[around->at(0)] == WHITE_PLAYER)
-                {
-                    whiteCount++;
-                }
-                if(this->board[around->at(0)] == BLACK_PLAYER)
-                {
-                    blackCount++;
-                }
-                break;
             case BLACK_PLAYER:
                 blackCount++;
                 break;
             case WHITE_PLAYER:
                 whiteCount++;
+                break;
         }
     }
     return blackCount - whiteCount;
@@ -334,13 +283,11 @@ void Game::copy(Game* o) const
 {
     std::unordered_map<BlockPtr, BlockPtr> blockMap;
     o->player = this->player;
-//    memcpy(o->board, this->board, sizeof(this->board));
     for(size_t i = 0; i < BOARD_SIZE * BOARD_SIZE; i++)
     {
         o->board[i] = this->board[i];
     }
     o->boardZobristHash = this->boardZobristHash;
-//    std::copy(this->historyBoard.begin(), this->historyBoard.end(), o->historyBoard.begin());
     o->historyZobristHash = this->historyZobristHash;
     o->newBoardZobristHash = this->newBoardZobristHash;
     for(int i = 0; i < BOARD_SIZE * BOARD_SIZE; i++)

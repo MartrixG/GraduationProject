@@ -11,6 +11,7 @@
 #include "Step.hpp"
 #include "Game.hpp"
 #include "MCTS.hpp"
+#include "ThreadPool.hpp"
 
 class TreeNode;
 
@@ -20,11 +21,13 @@ public:
     int playerColor;
     std::default_random_engine randNum;
     std::uniform_int_distribution<int> dist;
-    TreeNode* roots[4];
+    MCTS* selfMct = nullptr;
 
-    explicit MCTSPlayer(int color);
+    ThreadPool* threadPool = nullptr;
 
-    void getNextStep(Step *nextStep);
+    MCTSPlayer(int color, ThreadPool* pool);
+
+    void getNextStep(Step *nextStep) const;
 
     void getFirstStep(Step* netStep);
 

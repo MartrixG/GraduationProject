@@ -9,27 +9,29 @@
 #include "Game.hpp"
 #include "RandomPlayer.hpp"
 #include "TreeNode.hpp"
+#include "ThreadPool.hpp"
 
 class MCTS
 {
 public:
     TreeNode* root;
-    std::default_random_engine randNum;
-    std::uniform_int_distribution<int> dist;
+    size_t poolSize;
 
-    explicit MCTS(Game* game);
+    ThreadPool* threadPool = nullptr;
 
-    int search(TreeNode* &chosenNode);
+    MCTS(Game* game, ThreadPool* pool);
+
+    int search(TreeNode* &chosenNode) const;
 
     static void expand(TreeNode* node, int location);
 
-    static int defaultPolicy(TreeNode* node);
+    static void defaultPolicy(TreeNode* node);
 
-    static void backup(TreeNode* node, int winColor);
+    static void addThreadVis(TreeNode* node);
 
-    static void updateAllChildren(TreeNode* node);
+    void updateAllChildren(TreeNode* node) const;
 
-    void work();
+    void work() const;
 };
 
 #endif //MARTRIXGOC_MCTS_HPP

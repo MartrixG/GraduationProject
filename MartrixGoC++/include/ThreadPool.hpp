@@ -14,16 +14,23 @@
 #include <functional>
 #include <stdexcept>
 #include <thread>
-#include "SafeQueue.hpp"
+#include <atomic>
+#include "fstream"
 
 class ThreadPool
 {
 public:
+    size_t poolSize;
+    std::atomic<int> queueSize = 0;
+
     explicit ThreadPool(size_t);
 
-    template<class Fn, class... ArgTypes>
-            auto enqueue(Fn &&f, ArgTypes &&... args)
-            -> std::future<typename std::result_of<Fn(ArgTypes...)>::type>;
+    template<class F, class... Args>
+    auto commit(F&& f, Args&&... args)
+    -> std::future<typename std::result_of<F(Args...)>::type>;
+
+    template<class F, class... Args>
+    void addTask(F&& f, Args&&... args);
 
     ~ThreadPool();
 
@@ -38,6 +45,7 @@ private:
 
 inline ThreadPool::ThreadPool(size_t threads)
 {
+    this->poolSize = threads;
     this->stop = false;
     for(size_t i = 0; i < threads; i++)
     {
@@ -65,18 +73,20 @@ inline ThreadPool::ThreadPool(size_t threads)
                             task = std::move(this->tasks.front());
                             // 任务被取出，任务队列pop
                             this->tasks.pop();
+                            queueSize--;
                         }
-                        task();
+                        if(task)
+                            task();
                     }
                 }
         );
     }
 }
 
-template<class Fn, class... ArgTypes>
-auto ThreadPool::enqueue(Fn &&f, ArgTypes &&... args) -> std::future<typename std::result_of<Fn(ArgTypes...)>::type>
+template<class F, class... Args>
+auto ThreadPool::commit(F&& f, Args&&... args) -> std::future<typename std::result_of<F(Args...)>::type>
 {
-    using returnType = typename std::result_of<Fn(ArgTypes...)>::type;
+    using returnType = typename std::result_of<F(Args...)>::type;
 
     // make_shared：定义智能指针，会自动回收task，只需要关注make_shared包装的内容即可。
     // packaged_task：包装一个可以被调用的对象，配合future使用可以异步获取该可调用对象产生的结果。
@@ -87,7 +97,7 @@ auto ThreadPool::enqueue(Fn &&f, ArgTypes &&... args) -> std::future<typename st
     //    std::cout << fn_half(10) << '\n'; 被包装后的函数使用时只需要传入一个参数即可。
     // forward：完美转发不论传入的是任何左值或者右值都会按照原来的类型传参。
     auto task = std::make_shared< std::packaged_task<returnType()> >(
-            std::bind(std::forward<Fn>(f), std::forward<ArgTypes>(args)...)
+            std::bind(std::forward<F>(f), std::forward<Args>(args)...)
     );
     // 把返回值绑定future包装的res中，便可以异步获取res的结果。
     std::future<returnType> res = task->get_future();
@@ -107,8 +117,32 @@ auto ThreadPool::enqueue(Fn &&f, ArgTypes &&... args) -> std::future<typename st
                       { (*task)(); });
     }
     // 随便唤醒一个线程。
+//        markFileStream << "notify one start.\n";
+//        markFileStream.flush();
+//    clock_t start = std::clock();
     condition.notify_one();
+//    clock_t end = std::clock();
+//        markFileStream << "notify one end.\n";
+//        markFileStream << "notify one time span:" << end - start << '\n';
+//        markFileStream.flush();
     return res;
+}
+
+template<class F, class... Args>
+void ThreadPool::addTask(F&& f, Args&&... args)
+{
+    std::unique_lock<std::mutex> lock(queueMutex);
+    if(stop)
+    {
+        lock.unlock();
+        f(args...);
+    }
+    else
+    {
+        tasks.push(std::bind(std::forward<F>(f), std::forward<Args>(args)...));
+        queueSize++;
+        condition.notify_one();
+    }
 }
 
 inline ThreadPool::~ThreadPool()

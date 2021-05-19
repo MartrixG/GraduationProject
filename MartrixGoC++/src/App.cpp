@@ -236,12 +236,12 @@ void Application::uiSocket(int argc, char** argv)
     if(srcMessage[0] == '1')
     {
         uiPlayer = new SocketPlayer(BLACK_PLAYER);
-        mctsPlayer = new MCTSPlayer(WHITE_PLAYER);
+//        mctsPlayer = new MCTSPlayer(WHITE_PLAYER);
     }
     else
     {
         uiPlayer = new SocketPlayer(WHITE_PLAYER);
-        mctsPlayer = new MCTSPlayer(BLACK_PLAYER);
+//        mctsPlayer = new MCTSPlayer(BLACK_PLAYER);
     }
     handCapNum = srcMessage[1] - '0';
     for(int i = 0; i < handCapNum - 1; i++)
@@ -322,8 +322,13 @@ void Application::mctsPlayerTest(int argc, char** argv)
     Point::pointsInit(allBoardPoints, allAround, allDiagonal);
     Game game = Game(allBoardPoints, allAround, allDiagonal);
 
-    auto* blackPlayer = new MCTSPlayer(BLACK_PLAYER);
-    auto* whitePlayer = new MCTSPlayer(WHITE_PLAYER);
+    int threadNum;
+    char* _;
+    threadNum = strtol(argv[2], &_, 10);
+    ThreadPool threadPool(threadNum);
+
+    auto* blackPlayer = new MCTSPlayer(BLACK_PLAYER, &threadPool);
+    auto* whitePlayer = new MCTSPlayer(WHITE_PLAYER, &threadPool);
     MCTSPlayer* player = whitePlayer;
 
     blackPlayer->getFirstStep(game.nextStep);
@@ -336,7 +341,6 @@ void Application::mctsPlayerTest(int argc, char** argv)
     while(true)
     {
         player->updatePlayer(&game);
-        return;
         player->getNextStep(game.nextStep);
         if(game.nextStep->pos == -1)
         {

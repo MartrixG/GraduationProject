@@ -42,21 +42,8 @@ int func()
 
 void testCode(int argc, char* argv[])
 {
-//    GoBlock::test();
-//    Point::test();
-    ThreadPool pool(16);
-    std::queue<std::future<int>> resQueue;
-    for(size_t i = 0; i < 32; i++)
-    {
-        resQueue.push(pool.enqueue(func));
-    }
-    for(size_t i = 0; i < 237100; i++)
-    {
-        while(!resQueue.front().valid());
-        resQueue.front().get();
-        resQueue.pop();
-        resQueue.push(pool.enqueue(func));
-    }
+    GoBlock::test();
+    Point::test();
 }
 
 int main(int argc, char* argv[])

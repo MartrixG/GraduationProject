@@ -5,7 +5,6 @@
 #ifndef MARTRIXGOC_GAME_HPP
 #define MARTRIXGOC_GAME_HPP
 
-#include <vector>
 #include <string>
 #include <iostream>
 #include <unordered_map>
@@ -39,9 +38,6 @@ public:
     Step* nextStep = nullptr;  BlockPtr targetBlock = nullptr; bool pickUpFlag = false;
     std::unordered_set<BlockPtr> opponentBlock = std::unordered_set<BlockPtr>();
     std::unordered_set<BlockPtr> mergedBlock = std::unordered_set<BlockPtr>();
-    //
-//    vector_2d(int) tmpBoard = vector_2d(int)(BOARD_SIZE, std::vector<int>(BOARD_SIZE));
-    //
 
     Game(PointPtr* points, PArVecPtr* around, PDiVecPtr* diagonal);
 
@@ -55,7 +51,7 @@ public:
 
     void boardStrEncode(char* boardStr) const;
 
-    int getWinner();
+    int getWinner() const;
 
     void legalMove(int* legalMoves, int* qiAfterMove, size_t &len);
 
