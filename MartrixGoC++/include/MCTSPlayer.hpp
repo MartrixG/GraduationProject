@@ -12,7 +12,9 @@
 #include "Game.hpp"
 #include "MCTS.hpp"
 #include "ThreadPool.hpp"
+#include "Log.hpp"
 
+extern MiniLog logger;
 class TreeNode;
 
 class MCTSPlayer
@@ -21,11 +23,12 @@ public:
     int playerColor;
     std::default_random_engine randNum;
     std::uniform_int_distribution<int> dist;
+    int timeLimit;
     MCTS* selfMct = nullptr;
 
     ThreadPool* threadPool = nullptr;
 
-    MCTSPlayer(int color, ThreadPool* pool);
+    MCTSPlayer(int color, ThreadPool* pool, int timeLimit);
 
     void getNextStep(Step *nextStep) const;
 

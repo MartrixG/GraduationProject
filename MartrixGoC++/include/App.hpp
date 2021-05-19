@@ -8,7 +8,9 @@
 #include <iostream>
 #include <fstream>
 #include "Game.hpp"
+#include "Log.hpp"
 
+extern MiniLog logger;
 
 class Application
 {

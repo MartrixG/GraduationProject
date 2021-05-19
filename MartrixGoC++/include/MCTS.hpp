@@ -10,6 +10,9 @@
 #include "RandomPlayer.hpp"
 #include "TreeNode.hpp"
 #include "ThreadPool.hpp"
+#include "Log.hpp"
+
+extern MiniLog logger;
 
 class MCTS
 {
@@ -31,7 +34,7 @@ public:
 
     void updateAllChildren(TreeNode* node) const;
 
-    void work() const;
+    void work(int rolloutTime) const;
 };
 
 #endif //MARTRIXGOC_MCTS_HPP

@@ -6,11 +6,12 @@
 #include <cstring>
 #include "MCTSPlayer.hpp"
 
-MCTSPlayer::MCTSPlayer(int color, ThreadPool* pool)
+MCTSPlayer::MCTSPlayer(int color, ThreadPool* pool, int timeLimit)
 {
     this->playerColor = color;
     this->randNum = std::default_random_engine(GetCurrentThreadId() + std::chrono::system_clock::now().time_since_epoch().count());
     this->dist = std::uniform_int_distribution<int>(0, 0x7fffffff);
+    this->timeLimit = timeLimit;
     this->threadPool = pool;
 }
 
@@ -57,17 +58,23 @@ void MCTSPlayer::updatePlayer(Game* game)
     }
     else
     {
-        size_t chosenStep;
+        size_t chosenStep = -1;
         for(size_t i = 0; i < this->selfMct->root->legalMoveSize; i++)
         {
             if(this->selfMct->root->legalMove[i] == game->nextStep->pos)
             {
                 chosenStep = i;
+                logger.info("Find step searched.");
             }
             else
             {
                 delete this->selfMct->root->children[i];
             }
+        }
+        if(chosenStep == -1)
+        {
+            logger.fatal("Can not find step searched.");
+            exit(EXIT_FAILURE);
         }
         this->selfMct->root = this->selfMct->root->children[chosenStep];
         this->selfMct->root->parent = nullptr;
@@ -79,10 +86,17 @@ void MCTSPlayer::updatePlayer(Game* game)
                 historySearchChild++;
             }
         }
-        std::cout <<"history search child number:" << historySearchChild;
-        std::cout << "\nhistory search count:" << this->selfMct->root->numRollouts << std::endl;
+        logger.info("history search child number:" + std::to_string(historySearchChild));
+        logger.info("history search count:" + std::to_string(this->selfMct->root->numRollouts));
     }
-    this->selfMct->work();
-    std::cout << "\ntot search:" << this->selfMct->root->numRollouts
-              << " thread vis:" << this->selfMct->root->threadVis << "\n";
+    this->selfMct->work(this->timeLimit);
+    logger.info("tot search:" + std::to_string(this->selfMct->root->numRollouts));
+    if(this->selfMct->root->threadVis != 0)
+    {
+        logger.warning("root thread vis:" + std::to_string(this->selfMct->root->threadVis));
+    }
+    else
+    {
+        logger.info("root thread vis:" + std::to_string(this->selfMct->root->threadVis));
+    }
 }

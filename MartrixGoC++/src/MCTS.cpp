@@ -121,9 +121,13 @@ void MCTS::updateAllChildren(TreeNode* node) const
             this->threadPool->addTask(defaultPolicy, node->children[i]);
         }
     }
+    while(this->threadPool->availableThreads != this->poolSize)
+    {
+        for(size_t i = 0; i < 1000000; i++);
+    }
 }
 
-void MCTS::work() const
+void MCTS::work(int rolloutTime) const
 {
     clock_t start = std::clock(), end;
     if(this->root->legalMoveSize == 0)
@@ -136,7 +140,7 @@ void MCTS::work() const
     while (true)
     {
         end = std::clock();
-        if(end - start >= 30000)
+        if(end - start >= rolloutTime)
         {
             break;
         }
@@ -145,18 +149,24 @@ void MCTS::work() const
         {
             continue;
         }
+        logger.debug("Expand start.");
         MCTS::expand(expandNode, location);
+        logger.debug("Expand end.");
+        logger.debug("AddVis start.");
         MCTS::addThreadVis(expandNode->children[location]);
+        logger.debug("AddVis end.");
+        logger.debug("Push start.");
         this->threadPool->addTask(defaultPolicy, expandNode->children[location]);
+        logger.debug("Push end.");
 
         while(this->threadPool->queueSize >= 2 * (int)this->poolSize)
         {
-            for(size_t i = 0; i < 100000; i++);
+            for(size_t i = 0; i < 1000000; i++);
         }
     }
-    std::cout << "last pending works:" << this->threadPool->queueSize << std::endl;
-    while(this->threadPool->queueSize != 0)
+    logger.info("Last pending works:" + std::to_string(this->threadPool->queueSize));
+    while(this->threadPool->availableThreads != this->poolSize)
     {
-        for(size_t i = 0; i < 100000; i++);
+        for(size_t i = 0; i < 1000000; i++);
     }
 }

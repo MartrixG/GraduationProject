@@ -22,6 +22,7 @@ class ThreadPool
 public:
     size_t poolSize;
     std::atomic<int> queueSize = 0;
+    std::atomic<size_t> availableThreads = 0;
 
     explicit ThreadPool(size_t);
 
@@ -46,6 +47,7 @@ private:
 inline ThreadPool::ThreadPool(size_t threads)
 {
     this->poolSize = threads;
+    this->availableThreads = threads;
     this->stop = false;
     for(size_t i = 0; i < threads; i++)
     {
@@ -75,8 +77,9 @@ inline ThreadPool::ThreadPool(size_t threads)
                             this->tasks.pop();
                             queueSize--;
                         }
-                        if(task)
-                            task();
+                        this->availableThreads--;
+                        task();
+                        this->availableThreads++;
                     }
                 }
         );

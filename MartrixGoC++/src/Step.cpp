@@ -31,3 +31,11 @@ bool Step::operator==(const Step &o) const
 {
     return this->pos == o.pos;
 }
+
+std::string Step::toString() const
+{
+    std::string res = this->player == BLACK_PLAYER ? "B " : "W ";
+    res += char('a' + this->pos / BOARD_SIZE);
+    res += char('a' + this->pos % BOARD_SIZE);
+    return res;
+}

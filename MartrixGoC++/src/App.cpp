@@ -316,6 +316,7 @@ void Application::randomPlayerTest(int argc, char** argv)
 
 void Application::mctsPlayerTest(int argc, char** argv)
 {
+    logger.info("mcts player test begin.");
     PointPtr allBoardPoints[BOARD_SIZE * BOARD_SIZE];
     PArVecPtr allAround[BOARD_SIZE * BOARD_SIZE];
     PDiVecPtr allDiagonal[BOARD_SIZE * BOARD_SIZE];
@@ -327,8 +328,8 @@ void Application::mctsPlayerTest(int argc, char** argv)
     threadNum = strtol(argv[2], &_, 10);
     ThreadPool threadPool(threadNum);
 
-    auto* blackPlayer = new MCTSPlayer(BLACK_PLAYER, &threadPool);
-    auto* whitePlayer = new MCTSPlayer(WHITE_PLAYER, &threadPool);
+    auto* blackPlayer = new MCTSPlayer(BLACK_PLAYER, &threadPool, 30000);
+    auto* whitePlayer = new MCTSPlayer(WHITE_PLAYER, &threadPool, 30000);
     MCTSPlayer* player = whitePlayer;
 
     blackPlayer->getFirstStep(game.nextStep);
@@ -349,11 +350,13 @@ void Application::mctsPlayerTest(int argc, char** argv)
         if(game.nextStep->pos == -2)
         {
             std::cout << player->playerColor << " Confess.\n";
-            break;
+            std::cout << BLACK_PLAYER + WHITE_PLAYER - player->playerColor << " win.\n";
+            return;
         }
         game.moveAnalyze(game.nextStep);
         game.move();
         std::cout << *game.nextStep << '\n';
+        logger.info(game.nextStep->toString());
         std::cout << game;
         std::cout << '\n';
         player->playerColor = BLACK_PLAYER + WHITE_PLAYER - player->playerColor;

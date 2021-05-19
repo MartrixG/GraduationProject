@@ -25,6 +25,8 @@ public:
 
     Step(int x, int y, int player);
 
+    std::string toString() const;
+
     friend std::ostream &operator<<(std::ostream &out, const Step &o)
     {
         out << (o.player == BLACK_PLAYER ? "B " : "W ");
