@@ -123,7 +123,7 @@ void MCTS::updateAllChildren(TreeNode* node) const
     }
     while(this->threadPool->availableThreads != this->poolSize)
     {
-        for(size_t i = 0; i < 1000000; i++);
+        Sleep(0);
     }
 }
 
@@ -159,14 +159,22 @@ void MCTS::work(int rolloutTime) const
         this->threadPool->addTask(defaultPolicy, expandNode->children[location]);
         logger.debug("Push end.");
 
-        while(this->threadPool->queueSize >= 2 * (int)this->poolSize)
+        if(this->threadPool->queueSize >= 2 * (int)this->poolSize)
         {
-            for(size_t i = 0; i < 1000000; i++);
+            while (this->threadPool->availableThreads != this->poolSize)
+            {
+                Sleep(0);
+            }
         }
     }
     logger.info("Last pending works:" + std::to_string(this->threadPool->queueSize));
     while(this->threadPool->availableThreads != this->poolSize)
     {
-        for(size_t i = 0; i < 1000000; i++);
+        Sleep(0);
     }
+}
+
+MCTS::~MCTS()
+{
+    delete root;
 }

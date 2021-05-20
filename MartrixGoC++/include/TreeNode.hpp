@@ -10,7 +10,9 @@
 #include <atomic>
 #include "Game.hpp"
 #include "RandomPlayer.hpp"
+#include "Log.hpp"
 
+extern MiniLog logger;
 const double C = 2.0;
 
 class TreeNode

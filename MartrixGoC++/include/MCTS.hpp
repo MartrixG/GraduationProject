@@ -35,6 +35,8 @@ public:
     void updateAllChildren(TreeNode* node) const;
 
     void work(int rolloutTime) const;
+
+    ~MCTS();
 };
 
 #endif //MARTRIXGOC_MCTS_HPP

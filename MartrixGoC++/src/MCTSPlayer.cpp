@@ -27,7 +27,13 @@ void MCTSPlayer::getFirstStep(Step* nextStep)
 void MCTSPlayer::getNextStep(Step* nextStep) const
 {
     TreeNode* root = this->selfMct->root;
-    nextStep->player = playerColor;
+    if(this->playerColor != root->game->player)
+    {
+        logger.fatal("Player error.");
+        exit(EXIT_FAILURE);
+    }
+    nextStep->player = this->playerColor;
+    int chosenStep;
     if(root->legalMoveSize == 0)
     {
         nextStep->pos = -1;
@@ -39,8 +45,14 @@ void MCTSPlayer::getNextStep(Step* nextStep) const
         if(vis > mostVis)
         {
             mostVis = vis;
-            winCount = this->selfMct->root->children[i]->winCount[root->game->player];
+            winCount = root->children[i]->winCount[root->game->player];
             nextStep->pos = root->legalMove[i];
+            chosenStep = (int)i;
+        }
+        else
+        {
+            delete root->children[i];
+            root->children[i] = nullptr;
         }
     }
     // Confess
@@ -48,49 +60,67 @@ void MCTSPlayer::getNextStep(Step* nextStep) const
     {
         nextStep->pos = -2;
     }
+    this->selfMct->root = root->children[chosenStep];
 }
 
 void MCTSPlayer::updatePlayer(Game* game)
 {
+    logger.info(std::string(this->playerColor == BLACK_PLAYER ? "Black player" : "White player") + std::string(" search start."));
     if(this->selfMct == nullptr)
     {
         this->selfMct = new MCTS(game, this->threadPool);
+        logger.info("MCT is null, creat new MCT.");
     }
     else
     {
-        size_t chosenStep = -1;
+        int chosenStep = -1;
+        if(this->selfMct->root->game->player != game->nextStep->player || this->playerColor != game->player)
+        {
+            logger.fatal("Player error.");
+            exit(EXIT_FAILURE);
+        }
         for(size_t i = 0; i < this->selfMct->root->legalMoveSize; i++)
         {
+            if(this->selfMct->root->children[i] == nullptr)
+            {
+                continue;
+            }
             if(this->selfMct->root->legalMove[i] == game->nextStep->pos)
             {
-                chosenStep = i;
-                logger.info("Find step searched.");
+                chosenStep = (int)i;
+                logger.info("Expand predict hit.");
             }
             else
             {
                 delete this->selfMct->root->children[i];
+                this->selfMct->root->children[i] = nullptr;
             }
         }
         if(chosenStep == -1)
         {
-            logger.fatal("Can not find step searched.");
-            exit(EXIT_FAILURE);
+            delete this->selfMct;
+            this->selfMct = new MCTS(game, this->threadPool);
+            logger.info("Expand predict miss. Creat new MCT.");
         }
-        this->selfMct->root = this->selfMct->root->children[chosenStep];
-        this->selfMct->root->parent = nullptr;
-        int historySearchChild = 0;
-        for(size_t i = 0; i < this->selfMct->root->legalMoveSize; i++)
+        else
         {
-            if(this->selfMct->root->children[i] != nullptr)
+            this->selfMct->root = this->selfMct->root->children[chosenStep];
+            this->selfMct->root->parent = nullptr;
+            int historySearchChild = 0;
+            for(size_t i = 0; i < this->selfMct->root->legalMoveSize; i++)
             {
-                historySearchChild++;
+                if(this->selfMct->root->children[i] != nullptr)
+                {
+                    historySearchChild++;
+                }
             }
+            logger.info("history search child number:" + std::to_string(historySearchChild));
+            logger.info("history search count:" + std::to_string(this->selfMct->root->numRollouts));
         }
-        logger.info("history search child number:" + std::to_string(historySearchChild));
-        logger.info("history search count:" + std::to_string(this->selfMct->root->numRollouts));
     }
+    logger.info("Search start.");
     this->selfMct->work(this->timeLimit);
-    logger.info("tot search:" + std::to_string(this->selfMct->root->numRollouts));
+    logger.info("Search finish. Total search:" + std::to_string(this->selfMct->root->numRollouts));
     if(this->selfMct->root->threadVis != 0)
     {
         logger.warning("root thread vis:" + std::to_string(this->selfMct->root->threadVis));

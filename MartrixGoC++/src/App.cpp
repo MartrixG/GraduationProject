@@ -328,12 +328,15 @@ void Application::mctsPlayerTest(int argc, char** argv)
     threadNum = strtol(argv[2], &_, 10);
     ThreadPool threadPool(threadNum);
 
-    auto* blackPlayer = new MCTSPlayer(BLACK_PLAYER, &threadPool, 30000);
-    auto* whitePlayer = new MCTSPlayer(WHITE_PLAYER, &threadPool, 30000);
+    auto* blackPlayer = new MCTSPlayer(BLACK_PLAYER, &threadPool, 10000);
+    auto* whitePlayer = new MCTSPlayer(WHITE_PLAYER, &threadPool, 5000);
+    logger.info("Black player search time limit:" + std::to_string(blackPlayer->timeLimit));
+    logger.info("White player search time limit:" + std::to_string(whitePlayer->timeLimit));
     MCTSPlayer* player = whitePlayer;
 
     blackPlayer->getFirstStep(game.nextStep);
     game.moveAnalyze(game.nextStep);
+    logger.info(game.nextStep->toString());
     game.move();
     std::cout << *game.nextStep << '\n';
     std::cout << game;
@@ -359,7 +362,8 @@ void Application::mctsPlayerTest(int argc, char** argv)
         logger.info(game.nextStep->toString());
         std::cout << game;
         std::cout << '\n';
-        player->playerColor = BLACK_PLAYER + WHITE_PLAYER - player->playerColor;
+        player = player->playerColor == BLACK_PLAYER ? whitePlayer : blackPlayer;
+//        player->playerColor = BLACK_PLAYER + WHITE_PLAYER - player->playerColor;
     }
     int winColor = 2 - ((double)game.getWinner() >= 2.5);
     std::cout << winColor << " win.\n";

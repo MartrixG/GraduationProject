@@ -17,6 +17,10 @@ double TreeNode::score(double totRollouts)
     auto parentWinCount = (double)this->winCount[BLACK_PLAYER + WHITE_PLAYER - this->game->player];
     auto threadVisD = (double)this->threadVis;
     auto thisNumRollouts = (double)this->numRollouts;
+    if(thisNumRollouts == 0)
+    {
+        logger.warning("0 rollout is in search.");
+    }
     return parentWinCount / thisNumRollouts + std::sqrt(C * std::log(totRollouts + threadVisD) / (thisNumRollouts + threadVisD));
 }
 
