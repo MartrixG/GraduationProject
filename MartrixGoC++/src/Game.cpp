@@ -205,12 +205,12 @@ void Game::getPickUpBlock(int targetPoint)
 
 void Game::boardStrEncode(char* boardStr) const
 {
-    boardStr[0] = char(this->player + '0');
+    boardStr[1] = char(this->player + '0');
     for(int i = 0; i < BOARD_SIZE * BOARD_SIZE; i++)
     {
-        boardStr[i + 1] = char(this->board[i] + '0');
+        boardStr[i + 2] = char(this->board[i] + '0');
     }
-    boardStr[BOARD_SIZE * BOARD_SIZE + 1] = '\0';
+    boardStr[BOARD_SIZE * BOARD_SIZE + 2] = '\0';
 }
 
 int Game::getWinner() const

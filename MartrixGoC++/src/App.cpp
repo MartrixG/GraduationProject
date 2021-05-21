@@ -201,21 +201,18 @@ bool initSocket(SOCKET &serverSocket, SOCKET &clientSocket, char* ipAddr, char* 
 
 void Application::uiSocket(int argc, char** argv)
 {
-    if (argc != 4)
-    {
-        std::cout << "arg number is invalid.";
-        return;
-    }
+    //ui 127.0.0.0 23333 16 a 10 m
+
     // init server socket
     SOCKET serverSocket, clientSocket;
     if (!initSocket(serverSocket, clientSocket, argv[2], argv[3]))
     {
-        std::cout << "init socket failed.\n";
+        logger.fatal("Init socket failed.");
         return;
     }
     else
     {
-        std::cout << "init socket success.\n";
+        logger.info("Init socket success.");
     }
     // init go game
     PointPtr allBoardPoints[BOARD_SIZE * BOARD_SIZE];
@@ -223,55 +220,180 @@ void Application::uiSocket(int argc, char** argv)
     PDiVecPtr allDiagonal[BOARD_SIZE * BOARD_SIZE];
     Point::pointsInit(allBoardPoints, allAround, allDiagonal);
     Game game = Game(allBoardPoints, allAround, allDiagonal);
-    Step nextStep(-1, -1, -1);
-
-    char srcMessage[512];
-    int bufSize = 512;
-    int handCapNum = 0;
-    memset(srcMessage, 0, sizeof(srcMessage));
-
-    recv(clientSocket, srcMessage, bufSize, 0);
-    SocketPlayer* uiPlayer;
-    MCTSPlayer* mctsPlayer;
-    if(srcMessage[0] == '1')
+    logger.info("Game init.");
+    // init thread pool
+    int num;
+    char* _;
+    num = strtol(argv[4], &_, 10);
+    ThreadPool threadPool(num);
+    logger.info("Thread pool init. using " + std::to_string(num) + " threads.");
+    // init player
+    std::string blackPlayerType = argv[5];
+    std::string whitePlayerType = argv[7];
+    SocketPlayer* uiBlackPlayer = nullptr;
+    SocketPlayer* uiWhitePlayer = nullptr;
+    MCTSPlayer* mctsBlackPlayer = nullptr;
+    MCTSPlayer* mctsWhitePlayer = nullptr;
+    if(blackPlayerType == "ai")
     {
-        uiPlayer = new SocketPlayer(BLACK_PLAYER);
-//        mctsPlayer = new MCTSPlayer(WHITE_PLAYER);
+        num = strtol(argv[6], &_, 10);
+        mctsBlackPlayer = new MCTSPlayer(BLACK_PLAYER, &threadPool, num * 1000);
+    }
+    else if(blackPlayerType == "human")
+    {
+        uiBlackPlayer = new SocketPlayer(BLACK_PLAYER);
     }
     else
     {
-        uiPlayer = new SocketPlayer(WHITE_PLAYER);
-//        mctsPlayer = new MCTSPlayer(BLACK_PLAYER);
+        logger.fatal("Error player type.");
+        return;
     }
-    handCapNum = srcMessage[1] - '0';
-    for(int i = 0; i < handCapNum - 1; i++)
+    if(whitePlayerType == "ai")
     {
-        //pass
+        num = strtol(argv[8], &_, 10);
+        mctsWhitePlayer = new MCTSPlayer(WHITE_PLAYER, &threadPool, num * 1000);
     }
-    if(mctsPlayer->playerColor == BLACK_PLAYER)
+    else if(whitePlayerType == "human")
     {
-        mctsPlayer->getFirstStep(&nextStep);
-        game.moveAnalyze(&nextStep);
+        uiWhitePlayer = new SocketPlayer(WHITE_PLAYER);
+    }
+    else
+    {
+        logger.fatal("Error player type.");
+        return;
+    }
+    // init message & wait for start
+    char srcMessage[512];
+    int bufSize = 512;
+    memset(srcMessage, 0, sizeof(srcMessage));
+    recv(clientSocket, srcMessage, bufSize, 0);
+    // init logger
+    if(srcMessage[0] == startFlag)
+    {
+        logger.info("Game start.");
+        if(blackPlayerType == "ai")
+        {
+            logger.info("Black player:ai.");
+        }
+        else
+        {
+            logger.info("Black player:human.");
+        }
+        if(whitePlayerType == "ai")
+        {
+            logger.info("White player:ai.");
+        }
+        else
+        {
+            logger.info("White player:human.");
+        }
+    }
+    // first step
+    // c: game start
+    // g: game end
+    // e: null operator
+    // b: board str
+    // c: confess
+    // n: ui next step
+    if(blackPlayerType == "ai")
+    {
+        mctsBlackPlayer->getFirstStep(game.nextStep);
+        game.moveAnalyze(game.nextStep);
         game.move();
         game.boardStrEncode(srcMessage);
         send(clientSocket, srcMessage, bufSize, 0);
     }
+    else
+    {
+        srcMessage[0] = emptyOperateFlag;
+        srcMessage[1] = '\0';
+        send(clientSocket, srcMessage, bufSize, 0);
+        recv(clientSocket, srcMessage, bufSize, 0);
+        uiBlackPlayer->updatePlayer(srcMessage);
+        uiBlackPlayer->getNextStep(game.nextStep);
+        game.moveAnalyze(game.nextStep);
+        game.move();
+        game.boardStrEncode(srcMessage);
+        send(clientSocket, srcMessage, bufSize, 0);
+    }
+    // main game body
+    MCTSPlayer* mctsPlayer = nullptr;
+    SocketPlayer* uiPlayer = nullptr;
+    int nowPlayerColor = WHITE_PLAYER;
     while (true)
     {
-        recv(clientSocket, srcMessage, bufSize, 0);
-        if(srcMessage[0] == 'c')
+        if(nowPlayerColor == WHITE_PLAYER)
         {
-            break;
+            if(whitePlayerType == "ai")
+            {
+                mctsPlayer = mctsWhitePlayer;
+            }
+            if(whitePlayerType == "human")
+            {
+                uiPlayer = uiWhitePlayer;
+            }
         }
-        uiPlayer->updatePlayer(srcMessage);
-//        gameCore(&game, uiPlayer);
-        game.boardStrEncode(srcMessage);
-        send(clientSocket, srcMessage, bufSize, 0);
-
-        mctsPlayer->updatePlayer(&game);
-//        gameCore(&game, mctsPlayer);
-        game.boardStrEncode(srcMessage);
-        send(clientSocket, srcMessage, bufSize, 0);
+        else
+        {
+            if(blackPlayerType == "ai")
+            {
+                mctsPlayer = mctsBlackPlayer;
+            }
+            if(blackPlayerType == "human")
+            {
+                uiPlayer = uiBlackPlayer;
+            }
+        }
+        if((nowPlayerColor == WHITE_PLAYER && mctsWhitePlayer != nullptr) || (nowPlayerColor == BLACK_PLAYER && mctsBlackPlayer != nullptr))
+        {
+            recv(clientSocket, srcMessage, bufSize, 0);
+            if(srcMessage[0] != emptyOperateFlag)
+            {
+                logger.fatal("Wrong player turn. Expect ai white player.");
+                break;
+            }
+            mctsPlayer->updatePlayer(&game);
+            mctsPlayer->getNextStep(game.nextStep);
+            if(game.nextStep->pos == -2)
+            {
+                srcMessage[0] = confessFlag;
+                srcMessage[1] = '\0';
+                send(clientSocket, srcMessage, bufSize, 0);
+                logger.info("ai confess.");
+                break;
+            }
+            game.moveAnalyze(game.nextStep);
+            logger.info(game.nextStep->toString() + " (ai)");
+            game.move();
+            srcMessage[0] = boardStateStr;
+            game.boardStrEncode(srcMessage);
+            send(clientSocket, srcMessage, bufSize, 0);
+        }
+        else
+        {
+            recv(clientSocket, srcMessage, bufSize, 0);
+            if(srcMessage[0] != uiNextStepFlag)
+            {
+                logger.fatal("Wrong player turn. Expect human white player.");
+                break;
+            }
+            uiPlayer->updatePlayer(srcMessage);
+            uiPlayer->getNextStep(game.nextStep);
+            if(game.moveAnalyze(game.nextStep))
+            {
+                logger.info(game.nextStep->toString() + " (human)");
+                game.move();
+                srcMessage[0] = boardStateStr;
+                game.boardStrEncode(srcMessage);
+                send(clientSocket, srcMessage, bufSize, 0);
+            }
+            else
+            {
+                logger.info("Human chose illegal position.");
+                continue;
+            }
+        }
+        nowPlayerColor = BLACK_PLAYER + WHITE_PLAYER - nowPlayerColor;
     }
     closesocket(clientSocket);
     closesocket(serverSocket);

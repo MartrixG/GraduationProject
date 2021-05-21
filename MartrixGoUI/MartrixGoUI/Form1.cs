@@ -125,16 +125,15 @@ namespace MartrixGoUI
 
         private void SocketBtn_Click(object sender, EventArgs e)
         {
-            HandCapFlag = true;
-            SendMsg = "b";
-            for(int i = 0; i < 361; i++)
-            {
-                SendMsg += Board[i].ToString();
-            }
-            SendMsg += '\0';
+            SendMsg = "s\0";
             ClientSocket.Send(Encoding.UTF8.GetBytes(SendMsg));
-            ClientSocket.Receive(RecvBuf);
-            Repaint(Encoding.UTF8.GetString(RecvBuf));
+            string recv = "e";
+            while (recv.StartsWith("e"))
+            {
+                ClientSocket.Receive(RecvBuf);
+                recv = Encoding.UTF8.GetString(RecvBuf);
+            }
+            Repaint(recv);
         }
 
         private void CloseBtn_Click(object sender, EventArgs e)
@@ -145,7 +144,7 @@ namespace MartrixGoUI
 
         private void Repaint(string RecvBoard)
         {
-            Player = RecvBoard[0] - '0';
+            Player = RecvBoard[1] - '0';
             for(int i = 1; i < 362; i++)
             {
                 if(Board[i - 1] != RecvBoard[i] - '0')

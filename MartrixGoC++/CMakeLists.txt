@@ -7,7 +7,7 @@ set(CMAKE_CXX_FLAGS -Wall)
 set(CMAKE_CXX_FLAGS_DEBUG   "-g -Wall" )
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -Wall")
 
-SET(CMAKE_BUILD_TYPE "Release")
+SET(CMAKE_BUILD_TYPE "Debug")
 
 include_directories(${CMAKE_CURRENT_LIST_DIR}/include)
 

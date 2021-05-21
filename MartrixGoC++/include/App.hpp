@@ -12,6 +12,13 @@
 
 extern MiniLog logger;
 
+const char startFlag = 's';
+const char gameEndFlag = 'g';
+const char emptyOperateFlag = 'e';
+const char boardStateStr = 'b';
+const char confessFlag = 'c';
+const char uiNextStepFlag = 'n';
+
 class Application
 {
 public:

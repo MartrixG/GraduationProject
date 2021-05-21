@@ -30,21 +30,11 @@ namespace MartrixGoUI
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainWindow));
-            this.BoardPic = new System.Windows.Forms.PictureBox();
             this.SocketBtn = new System.Windows.Forms.Button();
             this.CloseBtn = new System.Windows.Forms.Button();
+            this.BoardPic = new System.Windows.Forms.PictureBox();
             ((System.ComponentModel.ISupportInitialize)(this.BoardPic)).BeginInit();
             this.SuspendLayout();
-            // 
-            // BoardPic
-            // 
-            this.BoardPic.Image = global::MartrixGoUI.Properties.Resources.棋盘;
-            this.BoardPic.Location = new System.Drawing.Point(12, 12);
-            this.BoardPic.Name = "BoardPic";
-            this.BoardPic.Size = new System.Drawing.Size(900, 900);
-            this.BoardPic.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.BoardPic.TabIndex = 0;
-            this.BoardPic.TabStop = false;
             // 
             // SocketBtn
             // 
@@ -66,6 +56,16 @@ namespace MartrixGoUI
             this.CloseBtn.UseVisualStyleBackColor = true;
             this.CloseBtn.Click += new System.EventHandler(this.CloseBtn_Click);
             // 
+            // BoardPic
+            // 
+            this.BoardPic.Image = global::MartrixGoUI.Properties.Resources.棋盘;
+            this.BoardPic.Location = new System.Drawing.Point(12, 12);
+            this.BoardPic.Name = "BoardPic";
+            this.BoardPic.Size = new System.Drawing.Size(900, 900);
+            this.BoardPic.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.BoardPic.TabIndex = 0;
+            this.BoardPic.TabStop = false;
+            // 
             // MainWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
@@ -86,18 +86,17 @@ namespace MartrixGoUI
         }
 
         #endregion
-
-        private System.Windows.Forms.PictureBox BoardPic;
         private System.Windows.Forms.PictureBox[] PointPic;
-        private System.Windows.Forms.Button SocketBtn;
         private System.Net.Sockets.Socket ClientSocket, SeverSocket;
-        private System.Windows.Forms.Button CloseBtn;
 
         private int Player;
         private bool HandCapFlag;
         private int[] Board;
         private string SendMsg;
         private byte[] RecvBuf;
+        private System.Windows.Forms.Button SocketBtn;
+        private System.Windows.Forms.Button CloseBtn;
+        private System.Windows.Forms.PictureBox BoardPic;
     }
 }
 
