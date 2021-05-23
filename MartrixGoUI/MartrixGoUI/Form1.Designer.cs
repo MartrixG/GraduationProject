@@ -30,21 +30,19 @@ namespace MartrixGoUI
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainWindow));
-            this.SocketBtn = new System.Windows.Forms.Button();
+            this.StartBtn = new System.Windows.Forms.Button();
             this.CloseBtn = new System.Windows.Forms.Button();
-            this.BoardPic = new System.Windows.Forms.PictureBox();
-            ((System.ComponentModel.ISupportInitialize)(this.BoardPic)).BeginInit();
             this.SuspendLayout();
             // 
-            // SocketBtn
+            // StartBtn
             // 
-            this.SocketBtn.Location = new System.Drawing.Point(976, 69);
-            this.SocketBtn.Name = "SocketBtn";
-            this.SocketBtn.Size = new System.Drawing.Size(135, 51);
-            this.SocketBtn.TabIndex = 1;
-            this.SocketBtn.Text = "Socket link";
-            this.SocketBtn.UseVisualStyleBackColor = true;
-            this.SocketBtn.Click += new System.EventHandler(this.SocketBtn_Click);
+            this.StartBtn.Location = new System.Drawing.Point(976, 69);
+            this.StartBtn.Name = "StartBtn";
+            this.StartBtn.Size = new System.Drawing.Size(135, 51);
+            this.StartBtn.TabIndex = 1;
+            this.StartBtn.Text = "Start";
+            this.StartBtn.UseVisualStyleBackColor = true;
+            this.StartBtn.Click += new System.EventHandler(this.StartBtn_Click);
             // 
             // CloseBtn
             // 
@@ -56,47 +54,37 @@ namespace MartrixGoUI
             this.CloseBtn.UseVisualStyleBackColor = true;
             this.CloseBtn.Click += new System.EventHandler(this.CloseBtn_Click);
             // 
-            // BoardPic
-            // 
-            this.BoardPic.Image = global::MartrixGoUI.Properties.Resources.棋盘;
-            this.BoardPic.Location = new System.Drawing.Point(12, 12);
-            this.BoardPic.Name = "BoardPic";
-            this.BoardPic.Size = new System.Drawing.Size(900, 900);
-            this.BoardPic.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.BoardPic.TabIndex = 0;
-            this.BoardPic.TabStop = false;
-            // 
             // MainWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1198, 923);
             this.Controls.Add(this.CloseBtn);
-            this.Controls.Add(this.SocketBtn);
-            this.Controls.Add(this.BoardPic);
+            this.Controls.Add(this.StartBtn);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "MainWindow";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "MartrixGo";
             this.Load += new System.EventHandler(this.MainWindow_Load);
-            ((System.ComponentModel.ISupportInitialize)(this.BoardPic)).EndInit();
             this.ResumeLayout(false);
-
         }
 
         #endregion
         private System.Windows.Forms.PictureBox[] PointPic;
         private System.Net.Sockets.Socket ClientSocket, SeverSocket;
 
-        private int Player;
-        private bool HandCapFlag;
+        private int NowPlayerColor;
+        private bool NowAiPlayer;
         private int[] Board;
         private string SendMsg;
         private byte[] RecvBuf;
-        private System.Windows.Forms.Button SocketBtn;
+        private System.Windows.Forms.Button StartBtn;
         private System.Windows.Forms.Button CloseBtn;
         private System.Windows.Forms.PictureBox BoardPic;
+
+        private int BoardSize;
+        private string BlackPlayerType, WhitePlayerType;
     }
 }
 

@@ -1,7 +1,7 @@
 ﻿
 namespace MartrixGoUI
 {
-    partial class Form2
+    partial class StartForm
     {
         /// <summary>
         /// Required designer variable.
@@ -29,7 +29,7 @@ namespace MartrixGoUI
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form2));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(StartForm));
             this.StartMain = new System.Windows.Forms.Button();
             this.comboBox1 = new System.Windows.Forms.ComboBox();
             this.boardSizeTextBox = new System.Windows.Forms.TextBox();
@@ -125,7 +125,7 @@ namespace MartrixGoUI
             this.comboBox3.TabIndex = 6;
             this.comboBox3.SelectedIndexChanged += new System.EventHandler(this.ComboBox3_SelectedIndexChanged);
             // 
-            // Form2
+            // StartForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -138,7 +138,7 @@ namespace MartrixGoUI
             this.Controls.Add(this.comboBox1);
             this.Controls.Add(this.StartMain);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Name = "Form2";
+            this.Name = "StartForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "MartrixGo";
             this.Load += new System.EventHandler(this.Form2_Load);
@@ -157,8 +157,13 @@ namespace MartrixGoUI
         private System.Windows.Forms.TextBox WhitePlayerTextBox;
         private System.Windows.Forms.ComboBox comboBox3;
 
+        public bool StartSucess = false;
         public int BoardSize;
         public int BlackPlayer;
         public int WhitePlayer;
+        public string BlackPlayerType;
+        public string BlackTime;
+        public string WhitePlayerType;
+        public string WhiteTime;
     }
 }

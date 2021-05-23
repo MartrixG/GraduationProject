@@ -18,14 +18,27 @@ namespace MartrixGoUI
             Application.SetHighDpiMode(HighDpiMode.SystemAware);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Form StartMenu = new Form2();
+            StartForm StartMenu = new();
             Application.Run(StartMenu);
-
-            //string backendGoArgs = "ui 127.0.0.0 23333 16 ai 10 human 0";
-            //Process processexe = Process.Start("E:/LEARNING/GraduationProject/MartrixGoC++/cmake-build-debug/MartrixGoC++.exe", backendGoArgs);
-
-            Form MainWindow = new MainWindow();
+            if (!StartMenu.StartSucess)
+                return;
+            string backendGoArgs = "ui 127.0.0.1 23333 16";
+            backendGoArgs += " " + StartMenu.BlackPlayerType;
+            backendGoArgs += " " + StartMenu.BlackTime;
+            backendGoArgs += " " + StartMenu.WhitePlayerType;
+            backendGoArgs += " " + StartMenu.WhiteTime;
+            Process ProcessExe = new();
+            ProcessStartInfo ProInfo = new("E:/LEARNING/GraduationProject/MartrixGoC++/cmake-build-debug/MartrixGoC++.exe", backendGoArgs);
+            ProInfo.CreateNoWindow = true;
+            ProInfo.UseShellExecute = false;
+            ProInfo.RedirectStandardOutput = true;
+            ProcessExe.StartInfo = ProInfo;
+            ProcessExe.Start();
+            MainWindow MainWindow = new();
+            MainWindow.Init(StartMenu.BlackPlayerType, StartMenu.WhitePlayerType, StartMenu.BoardSize);
             Application.Run(MainWindow);
+            ProcessExe.WaitForExit();
+            ProcessExe.Close();
         }
     }
 }

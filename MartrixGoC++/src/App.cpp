@@ -88,8 +88,7 @@ void Application::makeData(int argc, char* argv[])
 //            line++;
 //            std::cout << std::left << std::setw(4) << line << "/ " << lines << '\n';
         }
-    }
-    else
+    } else
     {
         while (chosenNumberOfLine != 0)
         {
@@ -103,7 +102,8 @@ void Application::makeData(int argc, char* argv[])
 }
 
 void Application::gameInformationAnalyze(PointPtr* allBoardPoints, PArVecPtr* around, PDiVecPtr* diagonal,
-                                         std::string &srcSgf, std::ofstream &featureFileStream, std::ofstream &labelFileStream)
+                                         std::string &srcSgf, std::ofstream &featureFileStream,
+                                         std::ofstream &labelFileStream)
 {
     // init go game
     Game game = Game(allBoardPoints, around, diagonal);
@@ -146,21 +146,20 @@ void Application::commandLine(int argc, char* argv[])
     CommandLinePlayer* player = blackPlayer;
     std::cout << "game start.\n" << game;
 
-    while(true)
+    while (true)
     {
         player->getNextStep(game.nextStep);
-        if(game.nextStep->pos == -1)
+        if (game.nextStep->pos == -1)
         {
             std::cout << "finish.\n";
             break;
         }
-        if(game.moveAnalyze(game.nextStep))
+        if (game.moveAnalyze(game.nextStep))
         {
             game.move();
             std::cout << game;
             std::cout << '\n';
-        }
-        else
+        } else
         {
             std::cout << "illegal position.\n";
             player = player == blackPlayer ? whitePlayer : blackPlayer;
@@ -188,14 +187,16 @@ bool initSocket(SOCKET &serverSocket, SOCKET &clientSocket, char* ipAddr, char* 
     err = bind(serverSocket, (SOCKADDR*) &serverAddr, sizeof(serverAddr));
     if (err != 0)
     { return false; }
+    logger.info("Init socket success.");
     // listening
+    logger.info("Server socket listening at: " + std::string(ipAddr) + ":" + std::to_string(portNumber));
     listen(serverSocket, 5);
     // init client socket
     sockaddr_in clientAddr{};
     int clientAddrSize = sizeof(clientAddr);
     // catch connect
     clientSocket = accept(serverSocket, (SOCKADDR*) &clientAddr, &clientAddrSize);
-    std::cout << "connect start. client addr:" << clientAddr.sin_port << '\n';
+    logger.info("Accept client response. Client addr:" + std::to_string(clientAddr.sin_port));
     return true;
 }
 
@@ -209,10 +210,6 @@ void Application::uiSocket(int argc, char** argv)
     {
         logger.fatal("Init socket failed.");
         return;
-    }
-    else
-    {
-        logger.info("Init socket success.");
     }
     // init go game
     PointPtr allBoardPoints[BOARD_SIZE * BOARD_SIZE];
@@ -234,30 +231,26 @@ void Application::uiSocket(int argc, char** argv)
     SocketPlayer* uiWhitePlayer = nullptr;
     MCTSPlayer* mctsBlackPlayer = nullptr;
     MCTSPlayer* mctsWhitePlayer = nullptr;
-    if(blackPlayerType == "ai")
+    if (blackPlayerType == "ai")
     {
         num = strtol(argv[6], &_, 10);
         mctsBlackPlayer = new MCTSPlayer(BLACK_PLAYER, &threadPool, num * 1000);
-    }
-    else if(blackPlayerType == "human")
+    } else if (blackPlayerType == "human")
     {
         uiBlackPlayer = new SocketPlayer(BLACK_PLAYER);
-    }
-    else
+    } else
     {
         logger.fatal("Error player type.");
         return;
     }
-    if(whitePlayerType == "ai")
+    if (whitePlayerType == "ai")
     {
         num = strtol(argv[8], &_, 10);
         mctsWhitePlayer = new MCTSPlayer(WHITE_PLAYER, &threadPool, num * 1000);
-    }
-    else if(whitePlayerType == "human")
+    } else if (whitePlayerType == "human")
     {
         uiWhitePlayer = new SocketPlayer(WHITE_PLAYER);
-    }
-    else
+    } else
     {
         logger.fatal("Error player type.");
         return;
@@ -268,93 +261,73 @@ void Application::uiSocket(int argc, char** argv)
     memset(srcMessage, 0, sizeof(srcMessage));
     recv(clientSocket, srcMessage, bufSize, 0);
     // init logger
-    if(srcMessage[0] == startFlag)
+    if (srcMessage[0] == startFlag)
     {
         logger.info("Game start.");
-        if(blackPlayerType == "ai")
+        if (blackPlayerType == "ai")
         {
             logger.info("Black player:ai.");
-        }
-        else
+        } else
         {
             logger.info("Black player:human.");
         }
-        if(whitePlayerType == "ai")
+        if (whitePlayerType == "ai")
         {
             logger.info("White player:ai.");
-        }
-        else
+        } else
         {
             logger.info("White player:human.");
         }
+    } else
+    {
+        logger.fatal("Wrong start flag.");
+        return;
     }
     // first step
-    // c: game start
+    // s: game start
     // g: game end
     // e: null operator
     // b: board str
     // c: confess
     // n: ui next step
-    if(blackPlayerType == "ai")
+    if (blackPlayerType == "ai")
     {
         mctsBlackPlayer->getFirstStep(game.nextStep);
         game.moveAnalyze(game.nextStep);
         game.move();
+        srcMessage[0] = boardStateStr;
         game.boardStrEncode(srcMessage);
         send(clientSocket, srcMessage, bufSize, 0);
-    }
-    else
+    } else
     {
-        srcMessage[0] = emptyOperateFlag;
-        srcMessage[1] = '\0';
-        send(clientSocket, srcMessage, bufSize, 0);
         recv(clientSocket, srcMessage, bufSize, 0);
         uiBlackPlayer->updatePlayer(srcMessage);
         uiBlackPlayer->getNextStep(game.nextStep);
         game.moveAnalyze(game.nextStep);
         game.move();
+        srcMessage[0] = boardStateStr;
         game.boardStrEncode(srcMessage);
         send(clientSocket, srcMessage, bufSize, 0);
     }
     // main game body
-    MCTSPlayer* mctsPlayer = nullptr;
-    SocketPlayer* uiPlayer = nullptr;
+    MCTSPlayer* mctsPlayer;
+    SocketPlayer* uiPlayer;
     int nowPlayerColor = WHITE_PLAYER;
     while (true)
     {
-        if(nowPlayerColor == WHITE_PLAYER)
+        if ((nowPlayerColor == WHITE_PLAYER && mctsWhitePlayer != nullptr) ||
+            (nowPlayerColor == BLACK_PLAYER && mctsBlackPlayer != nullptr))
         {
-            if(whitePlayerType == "ai")
+            if (nowPlayerColor == WHITE_PLAYER)
             {
                 mctsPlayer = mctsWhitePlayer;
-            }
-            if(whitePlayerType == "human")
-            {
-                uiPlayer = uiWhitePlayer;
-            }
-        }
-        else
-        {
-            if(blackPlayerType == "ai")
+            } else
             {
                 mctsPlayer = mctsBlackPlayer;
             }
-            if(blackPlayerType == "human")
-            {
-                uiPlayer = uiBlackPlayer;
-            }
-        }
-        if((nowPlayerColor == WHITE_PLAYER && mctsWhitePlayer != nullptr) || (nowPlayerColor == BLACK_PLAYER && mctsBlackPlayer != nullptr))
-        {
-            recv(clientSocket, srcMessage, bufSize, 0);
-            if(srcMessage[0] != emptyOperateFlag)
-            {
-                logger.fatal("Wrong player turn. Expect ai white player.");
-                break;
-            }
             mctsPlayer->updatePlayer(&game);
             mctsPlayer->getNextStep(game.nextStep);
-            if(game.nextStep->pos == -2)
+            if (game.nextStep->pos == -2)
             {
                 srcMessage[0] = confessFlag;
                 srcMessage[1] = '\0';
@@ -368,26 +341,33 @@ void Application::uiSocket(int argc, char** argv)
             srcMessage[0] = boardStateStr;
             game.boardStrEncode(srcMessage);
             send(clientSocket, srcMessage, bufSize, 0);
-        }
-        else
+        } else
         {
-            recv(clientSocket, srcMessage, bufSize, 0);
-            if(srcMessage[0] != uiNextStepFlag)
+            if (nowPlayerColor == WHITE_PLAYER)
             {
-                logger.fatal("Wrong player turn. Expect human white player.");
+                uiPlayer = uiWhitePlayer;
+            } else
+            {
+                uiPlayer = uiBlackPlayer;
+            }
+            recv(clientSocket, srcMessage, bufSize, 0);
+            if (srcMessage[0] != uiNextStepFlag)
+            {
+                logger.fatal("Wrong player turn. Expect human player.");
                 break;
             }
             uiPlayer->updatePlayer(srcMessage);
             uiPlayer->getNextStep(game.nextStep);
-            if(game.moveAnalyze(game.nextStep))
+            bool analyzeFlag = game.moveAnalyze(game.nextStep);
+            if (analyzeFlag)
             {
                 logger.info(game.nextStep->toString() + " (human)");
                 game.move();
-                srcMessage[0] = boardStateStr;
-                game.boardStrEncode(srcMessage);
-                send(clientSocket, srcMessage, bufSize, 0);
             }
-            else
+            srcMessage[0] = boardStateStr;
+            game.boardStrEncode(srcMessage);
+            send(clientSocket, srcMessage, bufSize, 0);
+            if (!analyzeFlag)
             {
                 logger.info("Human chose illegal position.");
                 continue;
@@ -415,15 +395,15 @@ void Application::randomPlayerTest(int argc, char** argv)
     auto* blackPlayer = new RandomPlayer(BLACK_PLAYER);
     auto* whitePlayer = new RandomPlayer(WHITE_PLAYER);
 
-    for(int i = 0; i < num; i++)
+    for (int i = 0; i < num; i++)
     {
         Game game = Game(allBoardPoints, allAround, allDiagonal);
         RandomPlayer* player = blackPlayer;
-        while(true)
+        while (true)
         {
             player->updatePlayer(&game);
             player->getNextStep(game.nextStep);
-            if(game.nextStep->pos == -1)
+            if (game.nextStep->pos == -1)
             {
                 break;
             }
@@ -431,7 +411,7 @@ void Application::randomPlayerTest(int argc, char** argv)
             game.move();
             player = player == blackPlayer ? whitePlayer : blackPlayer;
         }
-        b[1 - ((double)game.getWinner() >= 2.5)]++;
+        b[1 - ((double) game.getWinner() >= 2.5)]++;
     }
     std::cout << "B:" << b[0] << "  W:" << b[1] << '\n';
 }
@@ -464,15 +444,15 @@ void Application::mctsPlayerTest(int argc, char** argv)
     std::cout << game;
     std::cout << '\n';
 
-    while(true)
+    while (true)
     {
         player->updatePlayer(&game);
         player->getNextStep(game.nextStep);
-        if(game.nextStep->pos == -1)
+        if (game.nextStep->pos == -1)
         {
             break;
         }
-        if(game.nextStep->pos == -2)
+        if (game.nextStep->pos == -2)
         {
             std::cout << player->playerColor << " Confess.\n";
             std::cout << BLACK_PLAYER + WHITE_PLAYER - player->playerColor << " win.\n";
@@ -487,6 +467,6 @@ void Application::mctsPlayerTest(int argc, char** argv)
         player = player->playerColor == BLACK_PLAYER ? whitePlayer : blackPlayer;
 //        player->playerColor = BLACK_PLAYER + WHITE_PLAYER - player->playerColor;
     }
-    int winColor = 2 - ((double)game.getWinner() >= 2.5);
+    int winColor = 2 - ((double) game.getWinner() >= 2.5);
     std::cout << winColor << " win.\n";
 }

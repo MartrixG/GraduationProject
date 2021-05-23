@@ -133,9 +133,19 @@ namespace MartrixGoUI.Properties {
         /// <summary>
         ///   查找 System.Drawing.Bitmap 类型的本地化资源。
         /// </summary>
-        internal static System.Drawing.Bitmap 棋盘 {
+        internal static System.Drawing.Bitmap 棋盘19x19 {
             get {
-                object obj = ResourceManager.GetObject("棋盘", resourceCulture);
+                object obj = ResourceManager.GetObject("棋盘19x19", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap 棋盘9x9 {
+            get {
+                object obj = ResourceManager.GetObject("棋盘9x9", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
