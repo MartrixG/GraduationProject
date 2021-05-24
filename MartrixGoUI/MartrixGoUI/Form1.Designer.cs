@@ -82,6 +82,7 @@ namespace MartrixGoUI
         private System.Windows.Forms.Button StartBtn;
         private System.Windows.Forms.Button CloseBtn;
         private System.Windows.Forms.PictureBox BoardPic;
+        private int RecvMsgProcessCode;
 
         private int BoardSize;
         private string BlackPlayerType, WhitePlayerType;

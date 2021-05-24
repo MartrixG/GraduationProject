@@ -332,7 +332,7 @@ void Application::uiSocket(int argc, char** argv)
                 srcMessage[0] = confessFlag;
                 srcMessage[1] = '\0';
                 send(clientSocket, srcMessage, bufSize, 0);
-                logger.info("ai confess.");
+                logger.info(nowPlayerColor == BLACK_PLAYER ? "Black" : "White" + std::string("ai confess."));
                 break;
             }
             game.moveAnalyze(game.nextStep);
@@ -431,7 +431,7 @@ void Application::mctsPlayerTest(int argc, char** argv)
     ThreadPool threadPool(threadNum);
 
     auto* blackPlayer = new MCTSPlayer(BLACK_PLAYER, &threadPool, 10000);
-    auto* whitePlayer = new MCTSPlayer(WHITE_PLAYER, &threadPool, 5000);
+    auto* whitePlayer = new MCTSPlayer(WHITE_PLAYER, &threadPool, 10000);
     logger.info("Black player search time limit:" + std::to_string(blackPlayer->timeLimit));
     logger.info("White player search time limit:" + std::to_string(whitePlayer->timeLimit));
     MCTSPlayer* player = whitePlayer;

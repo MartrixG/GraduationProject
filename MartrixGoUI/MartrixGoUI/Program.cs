@@ -26,7 +26,8 @@ namespace MartrixGoUI
             backendGoArgs += " " + StartMenu.BlackPlayerType;
             backendGoArgs += " " + StartMenu.BlackTime;
             backendGoArgs += " " + StartMenu.WhitePlayerType;
-            backendGoArgs += " " + StartMenu.WhiteTime;
+            //backendGoArgs += " " + StartMenu.WhiteTime;
+            backendGoArgs += " 1";
             Process ProcessExe = new();
             ProcessStartInfo ProInfo = new("E:/LEARNING/GraduationProject/MartrixGoC++/cmake-build-debug/MartrixGoC++.exe", backendGoArgs);
             ProInfo.CreateNoWindow = true;

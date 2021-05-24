@@ -10,6 +10,8 @@ namespace MartrixGoUI
 {
     public partial class MainWindow : Form
     {
+        delegate void AsynUpdateUI(string RecvBoard);
+
         public MainWindow()
         {
             InitializeComponent();
@@ -173,8 +175,8 @@ namespace MartrixGoUI
                 SendMsg += '\0';
                 ClientSocket.Send(Encoding.UTF8.GetBytes(SendMsg));
                 ClientSocket.Receive(RecvBuf);
-                int flag = Repaint(Encoding.UTF8.GetString(RecvBuf));
-                if (flag != 1)
+                Repaint(Encoding.UTF8.GetString(RecvBuf));
+                if (RecvMsgProcessCode != 1)
                 {
                     MessageBox.Show("Expect board encode from backend.");
                     return;
@@ -196,21 +198,20 @@ namespace MartrixGoUI
             if(BlackPlayerType == "ai")
             {
                 ClientSocket.Receive(RecvBuf);
-                int flag = Repaint(Encoding.UTF8.GetString(RecvBuf));
-                if(flag != 1)
-                {
-                    MessageBox.Show("Expect board encode from backend.");
-                    return;
-                }
+                Repaint(Encoding.UTF8.GetString(RecvBuf));
                 if(WhitePlayerType != "ai")
                 {
                     NowAiPlayer = false;
                 }
                 else
                 {
-                    Thread thread = new(new ThreadStart(WaitForAi));
+                    AiProcess ai = new();
+                    ai.UpdateUIDelegate += Repaint;
+                    ai.TaskCallBack += WaitForAi;
+
+                    Thread thread = new(new ParameterizedThreadStart(ai.WaitForBackend));
                     thread.IsBackground = true;
-                    thread.Start();
+                    thread.Start(ClientSocket);
                 }
             }
         }
@@ -223,29 +224,46 @@ namespace MartrixGoUI
 
         private void WaitForAi()
         {
-            ClientSocket.Receive(RecvBuf);
-            int flag = Repaint(Encoding.UTF8.GetString(RecvBuf));
-            if (flag != 1)
+            switch(RecvMsgProcessCode)
             {
-                MessageBox.Show("Expect board encode from backend.");
-                return;
-            }
-            if ((NowPlayerColor == 1 && BlackPlayerType == "ai") || (NowPlayerColor == 2 && WhitePlayerType == "ai"))
-            {
-                NowAiPlayer = true;
-                WaitForAi();
-            }
-            else
-            {
-                NowAiPlayer = false;
+                case 0:
+                    MessageBox.Show("Expect board encode from backend.");
+                    return;
+                case 1:
+                    if ((NowPlayerColor == 1 && BlackPlayerType == "ai") || (NowPlayerColor == 2 && WhitePlayerType == "ai"))
+                    {
+                        NowAiPlayer = true;
+                        AiProcess ai = new();
+                        ai.UpdateUIDelegate += Repaint;
+                        ai.TaskCallBack += WaitForAi;
+
+                        Thread thread = new(new ParameterizedThreadStart(ai.WaitForBackend));
+                        thread.IsBackground = true;
+                        thread.Start(ClientSocket);
+                    }
+                    else
+                    {
+                        NowAiPlayer = false;
+                    }
+                    break;
+                case 2:
+                    MessageBox.Show(NowPlayerColor == 1 ? "Black player" : "White player" + " confess.");
+                    NowAiPlayer = true;
+                    break;
             }
         }
 
-        private int Repaint(string RecvBoard)
+        private void Repaint(string RecvBoard)
         {
+            if(RecvBoard.StartsWith('c'))
+            {
+                RecvMsgProcessCode = 2;
+                return;
+            }
             if(!RecvBoard.StartsWith('b'))
             {
-               return 0;
+                RecvMsgProcessCode = 0;
+                return;
             }
             NowPlayerColor = RecvBoard[1] - '0';
             for(int i = 0; i < BoardSize * BoardSize; i++)
@@ -267,7 +285,23 @@ namespace MartrixGoUI
                     }
                 }
             }
-            return 1;
+            RecvMsgProcessCode = 1;
+        }
+    }
+    public class AiProcess
+    {
+        public delegate void UpdateUI(string RecvBoard);
+        public UpdateUI UpdateUIDelegate;
+
+        public delegate void AccomplishTask();
+        public AccomplishTask TaskCallBack;
+
+        public void WaitForBackend(object ClientSocket)
+        {
+            byte[] RecvBuf = new byte[512];
+            ((Socket)ClientSocket).Receive(RecvBuf);
+            UpdateUIDelegate(Encoding.UTF8.GetString(RecvBuf));
+            TaskCallBack();
         }
     }
 }
