@@ -7,7 +7,6 @@
 
 #include <random>
 #include <chrono>
-#include "windows.h"
 #include "Game.hpp"
 
 class RandomPlayer

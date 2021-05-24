@@ -9,9 +9,8 @@ RandomPlayer::RandomPlayer(int color)
     this->playerColor = color;
     this->legalMove = new int[BOARD_SIZE * BOARD_SIZE];
     this->qiAfterMove = new int[BOARD_SIZE * BOARD_SIZE];
-    struct timespec tn{};
-    clock_gettime(CLOCK_REALTIME, &tn);
-    this->randNum = std::default_random_engine(tn.tv_nsec);
+    int64_t now = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+    this->randNum = std::default_random_engine(now);
     this->dist = std::uniform_int_distribution<int>(0, 0x7fffffff);
 }
 

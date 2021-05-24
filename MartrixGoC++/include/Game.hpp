@@ -28,13 +28,13 @@ public:
 //    std::vector<Step*> steps = std::vector<Step*>();
     // board point information
     int* board = nullptr;
-    long long boardZobristHash = 0;
+    int64_t boardZobristHash = 0;
     BlockPtr* pointBlockMap = nullptr;
     // history information
 //    std::vector<vector_2d(int)> historyBoard = std::vector<vector_2d(int)>();
-    std::unordered_set<long long> historyZobristHash = std::unordered_set<long long>();
+    std::unordered_set<int64_t> historyZobristHash = std::unordered_set<int64_t>();
     // tmp analyze information
-    long long newBoardZobristHash = 0;
+    int64_t newBoardZobristHash = 0;
     Step* nextStep = nullptr;  BlockPtr targetBlock = nullptr; bool pickUpFlag = false;
     std::unordered_set<BlockPtr> opponentBlock = std::unordered_set<BlockPtr>();
     std::unordered_set<BlockPtr> mergedBlock = std::unordered_set<BlockPtr>();

@@ -7,8 +7,9 @@
 
 #include <fstream>
 #include <cstring>
-#include <ctime>
-#include <sys/time.h>
+#include <chrono>
+#include <sstream>
+#include <iomanip>
 
 class MiniLog
 {
@@ -17,7 +18,7 @@ private:
     std::ofstream logger;
     bool isDebug = false;
 
-    static const std::string& getTimeStamp();
+    static std::string getTimeStamp();
 
 public:
     MiniLog() = default;

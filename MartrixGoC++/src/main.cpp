@@ -1,5 +1,6 @@
 #include <map>
 #include <iostream>
+#include <filesystem>
 #include "App.hpp"
 
 enum argsEnum
@@ -21,16 +22,20 @@ void initArgs()
 
 void testCode(int argc, char* argv[])
 {
-    GoBlock::test();
-    Point::test();
+//    GoBlock::test();
+//    Point::test();
+    auto t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    std::cout << std::put_time(std::localtime(&t), "%Y-%m-%d %H:%M:%S") << std::endl;
 }
 
 MiniLog logger;
 
 int main(int argc, char* argv[])
 {
-//    clock_t start = std::clock();
-    logger.init("E:/LEARNING/GraduationProject/data/out/log.txt", false);
+    auto t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    std::stringstream fileName;
+    fileName << std::put_time(std::localtime(&t), "/log/%Y-%m-%d--%H-%M-%S_log.txt");
+    logger.init(std::filesystem::current_path().generic_string() + fileName.str(), false);
     logger.debug("Debug mode is on.");
     initArgs();
     if (argsTransform.find(argv[1]) == argsTransform.end())
@@ -62,6 +67,4 @@ int main(int argc, char* argv[])
             testCode(argc, argv);
             break;
     }
-//    clock_t end = std::clock();
-//    std::cout << '\n' << end - start << '\n';
 }

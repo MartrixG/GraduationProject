@@ -37,11 +37,13 @@ namespace MartrixGoUI
             this.comboBox2 = new System.Windows.Forms.ComboBox();
             this.WhitePlayerTextBox = new System.Windows.Forms.TextBox();
             this.comboBox3 = new System.Windows.Forms.ComboBox();
+            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.comboBox4 = new System.Windows.Forms.ComboBox();
             this.SuspendLayout();
             // 
             // StartMain
             // 
-            this.StartMain.Location = new System.Drawing.Point(144, 133);
+            this.StartMain.Location = new System.Drawing.Point(144, 174);
             this.StartMain.Name = "StartMain";
             this.StartMain.Size = new System.Drawing.Size(93, 29);
             this.StartMain.TabIndex = 0;
@@ -125,11 +127,31 @@ namespace MartrixGoUI
             this.comboBox3.TabIndex = 6;
             this.comboBox3.SelectedIndexChanged += new System.EventHandler(this.ComboBox3_SelectedIndexChanged);
             // 
+            // textBox1
+            // 
+            this.textBox1.Font = new System.Drawing.Font("Microsoft YaHei UI", 10.28571F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.textBox1.Location = new System.Drawing.Point(27, 128);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(144, 29);
+            this.textBox1.TabIndex = 7;
+            this.textBox1.Text = "搜索线程数";
+            this.textBox1.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // comboBox4
+            // 
+            this.comboBox4.FormattingEnabled = true;
+            this.comboBox4.Location = new System.Drawing.Point(208, 128);
+            this.comboBox4.Name = "comboBox4";
+            this.comboBox4.Size = new System.Drawing.Size(154, 28);
+            this.comboBox4.TabIndex = 8;
+            // 
             // StartForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(387, 174);
+            this.ClientSize = new System.Drawing.Size(384, 215);
+            this.Controls.Add(this.comboBox4);
+            this.Controls.Add(this.textBox1);
             this.Controls.Add(this.comboBox3);
             this.Controls.Add(this.WhitePlayerTextBox);
             this.Controls.Add(this.comboBox2);
@@ -165,5 +187,7 @@ namespace MartrixGoUI
         public string BlackTime;
         public string WhitePlayerType;
         public string WhiteTime;
+        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.ComboBox comboBox4;
     }
 }

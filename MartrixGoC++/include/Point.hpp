@@ -18,9 +18,9 @@ public:
     using PDiVecPtr = std::vector<int>*;
 
     int pos;
-    long long zobristHash[2]{};
+    int64_t zobristHash[2]{};
 
-    Point(int pos, long long blackHash, long long whiteHash);
+    Point(int pos, int64_t blackHash, int64_t whiteHash);
 
     static void pointsInit(PointPtr* allBoardPoints, PArVecPtr* allAround, PDiVecPtr* allDiagonal);
 

@@ -7,7 +7,7 @@
 #include "Point.hpp"
 #include <cassert>
 
-Point::Point(int pos, long long blackHash, long long whiteHash)
+Point::Point(int pos, int64_t blackHash, int64_t whiteHash)
 {
     this->pos = pos;
     this->zobristHash[0] = blackHash;
@@ -48,7 +48,7 @@ void Point::pointsInit(PointPtr* allBoardPoints, PArVecPtr* allAround, PDiVecPtr
 {
     unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
     std::mt19937_64 rand_num(seed);
-    std::uniform_int_distribution<long long> dist(0, 0x7fffffffffffffff);
+    std::uniform_int_distribution<int64_t> dist(0, 0x7fffffffffffffff);
     for(int i = 0; i < BOARD_SIZE * BOARD_SIZE; i++)
     {
         allBoardPoints[i] = new Point(i, dist(rand_num), dist(rand_num));

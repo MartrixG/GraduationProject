@@ -123,7 +123,7 @@ void MCTS::updateAllChildren(TreeNode* node) const
     }
     while(this->threadPool->availableThreads != this->poolSize)
     {
-        Sleep(0);
+        sleep(0);
     }
 }
 
@@ -140,7 +140,7 @@ void MCTS::work(int rolloutTime) const
     while (true)
     {
         end = std::clock();
-        if(end - start >= rolloutTime)
+        if(end - start > rolloutTime)
         {
             break;
         }
@@ -157,14 +157,14 @@ void MCTS::work(int rolloutTime) const
         {
             while (this->threadPool->availableThreads != this->poolSize)
             {
-                Sleep(0);
+                sleep(0);
             }
         }
     }
     logger.info("Last pending works:" + std::to_string(this->threadPool->queueSize));
     while(this->threadPool->availableThreads != this->poolSize)
     {
-        Sleep(0);
+        sleep(0);
     }
 }
 

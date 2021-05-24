@@ -22,7 +22,7 @@ public:
     std::bitset<BOARD_SIZE * BOARD_SIZE> points = std::bitset<BOARD_SIZE * BOARD_SIZE>();
     std::bitset<BOARD_SIZE * BOARD_SIZE> qiPoints = std::bitset<BOARD_SIZE * BOARD_SIZE>();
     int color = -1;
-    long long zobristHash = 0LL;
+    int64_t zobristHash = 0LL;
 
     GoBlock();
 
