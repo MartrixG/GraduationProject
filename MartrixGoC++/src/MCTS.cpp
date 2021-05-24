@@ -149,15 +149,9 @@ void MCTS::work(int rolloutTime) const
         {
             continue;
         }
-        logger.debug("Expand start.");
         MCTS::expand(expandNode, location);
-        logger.debug("Expand end.");
-        logger.debug("AddVis start.");
         MCTS::addThreadVis(expandNode->children[location]);
-        logger.debug("AddVis end.");
-        logger.debug("Push start.");
         this->threadPool->addTask(defaultPolicy, expandNode->children[location]);
-        logger.debug("Push end.");
 
         if(this->threadPool->queueSize >= 2 * (int)this->poolSize)
         {

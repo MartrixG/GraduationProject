@@ -31,6 +31,7 @@ int main(int argc, char* argv[])
 {
 //    clock_t start = std::clock();
     logger.init("E:/LEARNING/GraduationProject/data/out/log.txt", false);
+    logger.debug("Debug mode is on.");
     initArgs();
     if (argsTransform.find(argv[1]) == argsTransform.end())
     {

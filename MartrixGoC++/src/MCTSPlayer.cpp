@@ -39,18 +39,28 @@ void MCTSPlayer::getNextStep(Step* nextStep) const
         nextStep->pos = -1;
     }
     int mostVis = -1, winCount = 0;
+    int totVis = 0;
     for(size_t i = 0; i < this->selfMct->root->legalMoveSize; i++)
     {
         int vis = root->children[i]->numRollouts;
         if(vis > mostVis)
         {
+            if(mostVis != -1)
+            {
+                logger.debug("Find new max vis. Delete pre max children:" + std::to_string(chosenStep) + " num:" + std::to_string(root->children[chosenStep]->numRollouts));
+                totVis += root->children[chosenStep]->numRollouts;
+                delete root->children[chosenStep];
+                root->children[chosenStep] = nullptr;
+            }
             mostVis = vis;
-            winCount = root->children[i]->winCount[root->game->player];
+            winCount = root->children[i]->winCount[this->playerColor];
             nextStep->pos = root->legalMove[i];
             chosenStep = (int)i;
         }
         else
         {
+            logger.debug("Delete children:" + std::to_string(i) + " num:" + std::to_string(root->children[i]->numRollouts));
+            totVis += root->children[i]->numRollouts;
             delete root->children[i];
             root->children[i] = nullptr;
         }
@@ -60,7 +70,18 @@ void MCTSPlayer::getNextStep(Step* nextStep) const
     {
         nextStep->pos = -2;
     }
+    totVis += root->children[chosenStep]->numRollouts;
+    logger.debug("tot vis : " + std::to_string(totVis));
+    if(totVis + 1 != root->numRollouts)
+    {
+        logger.warning("Children rollout does not match with root rollout.");
+    }
     this->selfMct->root = root->children[chosenStep];
+    this->selfMct->root->parent = nullptr;
+
+    logger.debug("Delete pre root:" + std::to_string(chosenStep));
+    root->children[chosenStep] = nullptr;
+    delete root;
 }
 
 void MCTSPlayer::updatePlayer(Game* game)
@@ -104,8 +125,11 @@ void MCTSPlayer::updatePlayer(Game* game)
         }
         else
         {
+            TreeNode* preRoot = this->selfMct->root;
             this->selfMct->root = this->selfMct->root->children[chosenStep];
             this->selfMct->root->parent = nullptr;
+            preRoot->children[chosenStep] = nullptr;
+            delete preRoot;
             int historySearchChild = 0;
             for(size_t i = 0; i < this->selfMct->root->legalMoveSize; i++)
             {
