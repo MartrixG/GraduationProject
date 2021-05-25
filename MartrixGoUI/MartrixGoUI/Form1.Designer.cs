@@ -31,7 +31,6 @@ namespace MartrixGoUI
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainWindow));
             this.StartBtn = new System.Windows.Forms.Button();
-            this.CloseBtn = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // StartBtn
@@ -44,22 +43,11 @@ namespace MartrixGoUI
             this.StartBtn.UseVisualStyleBackColor = true;
             this.StartBtn.Click += new System.EventHandler(this.StartBtn_Click);
             // 
-            // CloseBtn
-            // 
-            this.CloseBtn.Location = new System.Drawing.Point(976, 147);
-            this.CloseBtn.Name = "CloseBtn";
-            this.CloseBtn.Size = new System.Drawing.Size(135, 50);
-            this.CloseBtn.TabIndex = 2;
-            this.CloseBtn.Text = "Close";
-            this.CloseBtn.UseVisualStyleBackColor = true;
-            this.CloseBtn.Click += new System.EventHandler(this.CloseBtn_Click);
-            // 
             // MainWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1198, 923);
-            this.Controls.Add(this.CloseBtn);
             this.Controls.Add(this.StartBtn);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -89,7 +77,6 @@ namespace MartrixGoUI
         private string BlackPlayerType, WhitePlayerType;
 
         public System.Diagnostics.Process BackendProcess;
-        private System.Windows.Forms.Button CloseBtn;
     }
 }
 

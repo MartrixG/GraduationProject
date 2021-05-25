@@ -216,12 +216,6 @@ namespace MartrixGoUI
             }
         }
 
-        private void CloseBtn_Click(object sender, EventArgs e)
-        {
-            StartBtn.Enabled = false;
-            BackendProcess.Close();
-        }
-
         private void WaitForAi()
         {
             switch(RecvMsgProcessCode)

@@ -33,7 +33,7 @@ inline int MCTS::search(TreeNode* &chosenNode) const
             {
                 continue;
             }
-            tmpScore = child->score(totRollouts);
+            tmpScore = child->score(totRollouts) + PRI_VALUE[chosenNode->legalMove[pos]];
             if(tmpScore > score)
             {
                 score = tmpScore;

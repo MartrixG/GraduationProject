@@ -21,8 +21,6 @@ class MCTSPlayer
 {
 public:
     int playerColor;
-    std::default_random_engine randNum;
-    std::uniform_int_distribution<int> dist;
     int timeLimit;
     MCTS* selfMct = nullptr;
 

@@ -9,8 +9,6 @@
 MCTSPlayer::MCTSPlayer(int color, ThreadPool* pool, int timeLimit)
 {
     this->playerColor = color;
-    this->randNum = std::default_random_engine(GetCurrentThreadId() + std::chrono::system_clock::now().time_since_epoch().count());
-    this->dist = std::uniform_int_distribution<int>(0, 0x7fffffff);
     this->timeLimit = timeLimit;
     this->threadPool = pool;
 }
@@ -18,10 +16,7 @@ MCTSPlayer::MCTSPlayer(int color, ThreadPool* pool, int timeLimit)
 void MCTSPlayer::getFirstStep(Step* nextStep)
 {
     nextStep->player = playerColor;
-    int star = BOARD_SIZE * (BOARD_SIZE / 4 - 1) + BOARD_SIZE - (BOARD_SIZE / 4);
-    int dPos[3] = {0, -1, BOARD_SIZE};
-    int i = this->dist(this->randNum) % 3;
-    nextStep->pos = star + dPos[i];
+    nextStep->pos = BOARD_SIZE == 9 ? 24 : 72;
 }
 
 void MCTSPlayer::getNextStep(Step* nextStep) const
