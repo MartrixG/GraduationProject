@@ -50,7 +50,7 @@ namespace MartrixGoUI
             this.CloseBtn.Name = "CloseBtn";
             this.CloseBtn.Size = new System.Drawing.Size(135, 50);
             this.CloseBtn.TabIndex = 2;
-            this.CloseBtn.Text = "Close Socket";
+            this.CloseBtn.Text = "Close";
             this.CloseBtn.UseVisualStyleBackColor = true;
             this.CloseBtn.Click += new System.EventHandler(this.CloseBtn_Click);
             // 
@@ -66,8 +66,10 @@ namespace MartrixGoUI
             this.Name = "MainWindow";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "MartrixGo";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainWindow_FormClosing);
             this.Load += new System.EventHandler(this.MainWindow_Load);
             this.ResumeLayout(false);
+
         }
 
         #endregion
@@ -80,12 +82,14 @@ namespace MartrixGoUI
         private string SendMsg;
         private byte[] RecvBuf;
         private System.Windows.Forms.Button StartBtn;
-        private System.Windows.Forms.Button CloseBtn;
         private System.Windows.Forms.PictureBox BoardPic;
         private int RecvMsgProcessCode;
 
         private int BoardSize;
         private string BlackPlayerType, WhitePlayerType;
+
+        public System.Diagnostics.Process BackendProcess;
+        private System.Windows.Forms.Button CloseBtn;
     }
 }
 

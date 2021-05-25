@@ -13,8 +13,6 @@
 extern MiniLog logger;
 
 const char startFlag = 's';
-const char gameEndFlag = 'g';
-const char emptyOperateFlag = 'e';
 const char boardStateStr = 'b';
 const char confessFlag = 'c';
 const char uiNextStepFlag = 'n';
@@ -33,7 +31,7 @@ public:
     static void gameInformationAnalyze(PointPtr* allBoardPoints, PArVecPtr* around, PDiVecPtr* diagonal,
                                        std::string &srcSgf, std::ofstream &featureFileStream, std::ofstream&labelFileStream);
 
-    static void commandLine(int argc, char* argv[]);
+    static void commandLine();
 
     static void uiSocket(int argc, char* argv[]);
 

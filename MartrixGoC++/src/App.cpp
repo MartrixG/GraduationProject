@@ -79,14 +79,14 @@ void Application::makeData(int argc, char* argv[])
     int chosenNumberOfLine;
     char* _;
     chosenNumberOfLine = strtol(argv[4], &_, 10);
-//    int line = 0, lines = 9348;
+    int line = 0, lines = 9348;
     if (chosenNumberOfLine == 0)
     {
         while (std::getline(srcFileStream, srcSgf))
         {
             gameInformationAnalyze(allBoardPoints, allAround, allDiagonal, srcSgf, featureFileStream, labelFileStream);
-//            line++;
-//            std::cout << std::left << std::setw(4) << line << "/ " << lines << '\n';
+            line++;
+            std::cout << std::left << std::setw(4) << line << "/ " << lines << '\n';
         }
     } else
     {
@@ -132,7 +132,7 @@ void Application::gameInformationAnalyze(PointPtr* allBoardPoints, PArVecPtr* ar
     } while (sgf.haveNextStep());
 }
 
-void Application::commandLine(int argc, char* argv[])
+void Application::commandLine()
 {
     // init go game
     PointPtr allBoardPoints[BOARD_SIZE * BOARD_SIZE];
@@ -202,8 +202,12 @@ bool initSocket(SOCKET &serverSocket, SOCKET &clientSocket, char* ipAddr, char* 
 
 void Application::uiSocket(int argc, char** argv)
 {
-    //ui 127.0.0.0 23333 16 a 10 m
-
+    //ui 127.0.0.0 23333 16 ai 10 human 0
+    if(argc != 9)
+    {
+        logger.fatal("Arg number error.");
+        return;
+    }
     // init server socket
     SOCKET serverSocket, clientSocket;
     if (!initSocket(serverSocket, clientSocket, argv[2], argv[3]))
@@ -217,7 +221,7 @@ void Application::uiSocket(int argc, char** argv)
     PDiVecPtr allDiagonal[BOARD_SIZE * BOARD_SIZE];
     Point::pointsInit(allBoardPoints, allAround, allDiagonal);
     Game game = Game(allBoardPoints, allAround, allDiagonal);
-    logger.info("Game init.");
+    logger.info("Game init finish.");
     // init thread pool
     int num;
     char* _;
@@ -382,6 +386,10 @@ void Application::uiSocket(int argc, char** argv)
 
 void Application::randomPlayerTest(int argc, char** argv)
 {
+    if(argc != 3)
+    {
+        return;
+    }
     PointPtr allBoardPoints[BOARD_SIZE * BOARD_SIZE];
     PArVecPtr allAround[BOARD_SIZE * BOARD_SIZE];
     PDiVecPtr allDiagonal[BOARD_SIZE * BOARD_SIZE];
@@ -418,6 +426,11 @@ void Application::randomPlayerTest(int argc, char** argv)
 
 void Application::mctsPlayerTest(int argc, char** argv)
 {
+    if(argc != 3)
+    {
+        logger.fatal("Arg number error.");
+        return;
+    }
     logger.info("mcts player test begin.");
     PointPtr allBoardPoints[BOARD_SIZE * BOARD_SIZE];
     PArVecPtr allAround[BOARD_SIZE * BOARD_SIZE];

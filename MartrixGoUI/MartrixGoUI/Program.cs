@@ -1,9 +1,7 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Diagnostics;
+using System.IO;
 
 namespace MartrixGoUI
 {
@@ -22,14 +20,29 @@ namespace MartrixGoUI
             Application.Run(StartMenu);
             if (!StartMenu.StartSucess)
                 return;
-            string backendGoArgs = "ui 127.0.0.1 23333 16";
+            string backendGoArgs = "ui 127.0.0.1 23333";
+            backendGoArgs += " " + StartMenu.ThreadNum;
             backendGoArgs += " " + StartMenu.BlackPlayerType;
             backendGoArgs += " " + StartMenu.BlackTime;
             backendGoArgs += " " + StartMenu.WhitePlayerType;
-            //backendGoArgs += " " + StartMenu.WhiteTime;
-            backendGoArgs += " 1";
+            backendGoArgs += " " + StartMenu.WhiteTime;
             Process ProcessExe = new();
-            ProcessStartInfo ProInfo = new("E:/LEARNING/GraduationProject/MartrixGoC++/cmake-build-debug/MartrixGoC++.exe", backendGoArgs);
+            string LocalPath = Environment.CurrentDirectory;
+            string GoBackend;
+            if(StartMenu.BoardSize == 9)
+            {
+                GoBackend = "/MaritrixGoBackend9.exe";
+            }
+            else
+            {
+                GoBackend = "/MaritrixGoBackend19.exe";
+            }
+            if(!File.Exists(LocalPath + GoBackend))
+            {
+                MessageBox.Show("Please confirm the existence of MaritrixGoBackend.exe", "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            ProcessStartInfo ProInfo = new(LocalPath + GoBackend, backendGoArgs);
             ProInfo.CreateNoWindow = true;
             ProInfo.UseShellExecute = false;
             ProInfo.RedirectStandardOutput = true;
@@ -37,9 +50,8 @@ namespace MartrixGoUI
             ProcessExe.Start();
             MainWindow MainWindow = new();
             MainWindow.Init(StartMenu.BlackPlayerType, StartMenu.WhitePlayerType, StartMenu.BoardSize);
+            MainWindow.BackendProcess = ProcessExe;
             Application.Run(MainWindow);
-            ProcessExe.WaitForExit();
-            ProcessExe.Close();
         }
     }
 }

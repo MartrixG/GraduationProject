@@ -37,7 +37,7 @@ namespace MartrixGoUI
             this.comboBox2 = new System.Windows.Forms.ComboBox();
             this.WhitePlayerTextBox = new System.Windows.Forms.TextBox();
             this.comboBox3 = new System.Windows.Forms.ComboBox();
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.SearchThreadTextBox = new System.Windows.Forms.TextBox();
             this.comboBox4 = new System.Windows.Forms.ComboBox();
             this.SuspendLayout();
             // 
@@ -70,6 +70,7 @@ namespace MartrixGoUI
             this.boardSizeTextBox.Font = new System.Drawing.Font("Microsoft YaHei UI", 10.28571F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.boardSizeTextBox.Location = new System.Drawing.Point(27, 22);
             this.boardSizeTextBox.Name = "boardSizeTextBox";
+            this.boardSizeTextBox.ReadOnly = true;
             this.boardSizeTextBox.Size = new System.Drawing.Size(144, 29);
             this.boardSizeTextBox.TabIndex = 2;
             this.boardSizeTextBox.Text = "棋盘大小";
@@ -80,6 +81,7 @@ namespace MartrixGoUI
             this.BlackPayerChoseTextBox.Font = new System.Drawing.Font("Microsoft YaHei UI", 10.28571F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.BlackPayerChoseTextBox.Location = new System.Drawing.Point(27, 57);
             this.BlackPayerChoseTextBox.Name = "BlackPayerChoseTextBox";
+            this.BlackPayerChoseTextBox.ReadOnly = true;
             this.BlackPayerChoseTextBox.Size = new System.Drawing.Size(144, 29);
             this.BlackPayerChoseTextBox.TabIndex = 3;
             this.BlackPayerChoseTextBox.Text = "黑方棋手";
@@ -106,6 +108,7 @@ namespace MartrixGoUI
             this.WhitePlayerTextBox.Font = new System.Drawing.Font("Microsoft YaHei UI", 10.28571F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.WhitePlayerTextBox.Location = new System.Drawing.Point(27, 92);
             this.WhitePlayerTextBox.Name = "WhitePlayerTextBox";
+            this.WhitePlayerTextBox.ReadOnly = true;
             this.WhitePlayerTextBox.Size = new System.Drawing.Size(144, 29);
             this.WhitePlayerTextBox.TabIndex = 5;
             this.WhitePlayerTextBox.Text = "白方棋手";
@@ -127,23 +130,35 @@ namespace MartrixGoUI
             this.comboBox3.TabIndex = 6;
             this.comboBox3.SelectedIndexChanged += new System.EventHandler(this.ComboBox3_SelectedIndexChanged);
             // 
-            // textBox1
+            // SearchThreadTextBox
             // 
-            this.textBox1.Font = new System.Drawing.Font("Microsoft YaHei UI", 10.28571F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.textBox1.Location = new System.Drawing.Point(27, 128);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(144, 29);
-            this.textBox1.TabIndex = 7;
-            this.textBox1.Text = "搜索线程数";
-            this.textBox1.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.SearchThreadTextBox.Font = new System.Drawing.Font("Microsoft YaHei UI", 10.28571F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.SearchThreadTextBox.Location = new System.Drawing.Point(27, 128);
+            this.SearchThreadTextBox.Name = "SearchThreadTextBox";
+            this.SearchThreadTextBox.ReadOnly = true;
+            this.SearchThreadTextBox.Size = new System.Drawing.Size(144, 29);
+            this.SearchThreadTextBox.TabIndex = 7;
+            this.SearchThreadTextBox.Text = "搜索线程数";
+            this.SearchThreadTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // comboBox4
             // 
+            this.comboBox4.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox4.Font = new System.Drawing.Font("Microsoft YaHei UI", 9.07563F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.comboBox4.FormattingEnabled = true;
+            this.comboBox4.Items.AddRange(new object[] {
+            "请选择搜索线程数...",
+            "1",
+            "2",
+            "4",
+            "8",
+            "10",
+            "16"});
             this.comboBox4.Location = new System.Drawing.Point(208, 128);
             this.comboBox4.Name = "comboBox4";
             this.comboBox4.Size = new System.Drawing.Size(154, 28);
             this.comboBox4.TabIndex = 8;
+            this.comboBox4.SelectedIndexChanged += new System.EventHandler(this.ComboBox4_SelectedIndexChanged);
             // 
             // StartForm
             // 
@@ -151,7 +166,7 @@ namespace MartrixGoUI
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(384, 215);
             this.Controls.Add(this.comboBox4);
-            this.Controls.Add(this.textBox1);
+            this.Controls.Add(this.SearchThreadTextBox);
             this.Controls.Add(this.comboBox3);
             this.Controls.Add(this.WhitePlayerTextBox);
             this.Controls.Add(this.comboBox2);
@@ -159,6 +174,7 @@ namespace MartrixGoUI
             this.Controls.Add(this.boardSizeTextBox);
             this.Controls.Add(this.comboBox1);
             this.Controls.Add(this.StartMain);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "StartForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
@@ -178,16 +194,18 @@ namespace MartrixGoUI
         private System.Windows.Forms.ComboBox comboBox2;
         private System.Windows.Forms.TextBox WhitePlayerTextBox;
         private System.Windows.Forms.ComboBox comboBox3;
+        private System.Windows.Forms.TextBox SearchThreadTextBox;
+        private System.Windows.Forms.ComboBox comboBox4;
 
         public bool StartSucess = false;
         public int BoardSize;
         public int BlackPlayer;
         public int WhitePlayer;
+        public int ThreadNumCode;
         public string BlackPlayerType;
         public string BlackTime;
         public string WhitePlayerType;
         public string WhiteTime;
-        private System.Windows.Forms.TextBox textBox1;
-        private System.Windows.Forms.ComboBox comboBox4;
+        public string ThreadNum;
     }
 }

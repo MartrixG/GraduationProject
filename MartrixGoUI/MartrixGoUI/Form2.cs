@@ -19,9 +19,9 @@ namespace MartrixGoUI
 
         private void StartMain_Click(object sender, EventArgs e)
         {
-            if (BoardSize * BlackPlayer * WhitePlayer == 0)
+            if (BoardSize * BlackPlayer * WhitePlayer * ThreadNumCode == 0)
             {
-                MessageBox.Show("请确保三个选项均已被选择");
+                MessageBox.Show("请确保所有选项均已被选择");
             }
             else
             {
@@ -36,6 +36,7 @@ namespace MartrixGoUI
             comboBox1.Text = "请选择棋盘大小...";
             comboBox2.Text = "请选择黑方棋手...";
             comboBox3.Text = "请选择白方棋手...";
+            comboBox4.Text = "请选择搜索线程数...";
         }
         private void ComboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -89,6 +90,32 @@ namespace MartrixGoUI
                 case 4:
                     WhitePlayerType = "human";
                     WhiteTime = "0";
+                    break;
+            }
+        }
+
+        private void ComboBox4_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            ThreadNumCode = comboBox4.SelectedIndex;
+            switch(ThreadNumCode)
+            {
+                case 1:
+                    ThreadNum = "1";
+                    break;
+                case 2:
+                    ThreadNum = "2";
+                    break;
+                case 3:
+                    ThreadNum = "4";
+                    break;
+                case 4:
+                    ThreadNum = "8";
+                    break;
+                case 5:
+                    ThreadNum = "10";
+                    break;
+                case 6:
+                    ThreadNum = "16";
                     break;
             }
         }

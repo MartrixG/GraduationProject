@@ -218,8 +218,8 @@ namespace MartrixGoUI
 
         private void CloseBtn_Click(object sender, EventArgs e)
         {
-            ClientSocket.Send(Encoding.UTF8.GetBytes("close"));
             StartBtn.Enabled = false;
+            BackendProcess.Close();
         }
 
         private void WaitForAi()
@@ -247,7 +247,7 @@ namespace MartrixGoUI
                     }
                     break;
                 case 2:
-                    MessageBox.Show(NowPlayerColor == 1 ? "Black player" : "White player" + " confess.");
+                    MessageBox.Show(NowPlayerColor == 1 ? "Black player confess." : "White player confess.", "Confess", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     NowAiPlayer = true;
                     break;
             }
@@ -286,6 +286,11 @@ namespace MartrixGoUI
                 }
             }
             RecvMsgProcessCode = 1;
+        }
+
+        private void MainWindow_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            BackendProcess.Close();
         }
     }
     public class AiProcess
