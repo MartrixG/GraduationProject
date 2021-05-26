@@ -103,6 +103,16 @@ namespace MartrixGoUI.Properties {
         /// <summary>
         ///   查找 System.Drawing.Bitmap 类型的本地化资源。
         /// </summary>
+        internal static System.Drawing.Bitmap blackStone3 {
+            get {
+                object obj = ResourceManager.GetObject("blackStone3", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
         internal static System.Drawing.Bitmap whiteStone {
             get {
                 object obj = ResourceManager.GetObject("whiteStone", resourceCulture);
@@ -126,6 +136,16 @@ namespace MartrixGoUI.Properties {
         internal static System.Drawing.Bitmap whiteStone_75 {
             get {
                 object obj = ResourceManager.GetObject("whiteStone_75", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap whiteStone3 {
+            get {
+                object obj = ResourceManager.GetObject("whiteStone3", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

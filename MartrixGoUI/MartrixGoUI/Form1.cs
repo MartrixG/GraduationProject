@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using System.Net.Sockets;
 using System.Net;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace MartrixGoUI
 {
@@ -22,6 +25,7 @@ namespace MartrixGoUI
             BlackPlayerType = Player1;
             WhitePlayerType = Player2;
             BoardSize = Size;
+            NowAiPlayer = true;
         }
 
         private void MainWindow_Load(object sender, EventArgs e)
@@ -33,11 +37,21 @@ namespace MartrixGoUI
             }
             if(BoardSize == 19)
             {
-                ClientSize = new Size(1100, 920);
-                StartBtn.Location = new Point(ClientSize.Width - 150, 20);
-                CloseBtn.Location = new Point(ClientSize.Width - 150, 80);
+                Text += ": " + (BlackPlayerType == "ai" ? "AI" : "玩家") + " 对 " + (WhitePlayerType == "ai" ? "AI" : "玩家");
+                InformaitionLabel.Location = new Point(12, 10);
+                InformaitionLabel.Size = new Size(900, 27);
+                ClientSize = new Size(1080, 950);
+
+                StartBtn.Location = new Point(ClientSize.Width - 150, 15 + 25 + 5);
+                pictureBox1.Location = new Point(ClientSize.Width - 150, 40 + 29 + 15);
+                label1.Location = new Point(ClientSize.Width - 150 + 88, 40 + 29 + 15);
+                label1.Text = (BlackPlayerType == "ai" ? "AI" : "玩家");
+                pictureBox2.Location = new Point(ClientSize.Width - 150, 40 + 29 + 15 + 29 + 15);
+                label2.Location = new Point(ClientSize.Width - 150 + 88, 40 + 29 + 15 + 29 + 15);
+                label2.Text = (WhitePlayerType == "ai" ? "AI" : "玩家");
+
                 BoardPic.Image = Properties.Resources.棋盘19x19;
-                BoardPic.Location = new Point(12, 12);
+                BoardPic.Location = new Point(12, 12 + 25 + 5);
                 BoardPic.Name = "BoardPic";
                 BoardPic.Size = new Size(900, 900);
                 BoardPic.SizeMode =PictureBoxSizeMode.StretchImage;
@@ -57,7 +71,6 @@ namespace MartrixGoUI
                         Board[i * 19 + j] = 0;
                         PointPic[i * 19 + j] = new PictureBox
                         {
-                            //Image = Properties.Resources.blackStone_65,
                             Location = new Point(12 + j * 46, 14 + i * 46),
                             Name = (i * 19 + j).ToString(),
                             Size = new Size(46, 46),
@@ -74,11 +87,21 @@ namespace MartrixGoUI
             }
             else
             {
-                ClientSize = new Size(640, 480);
-                StartBtn.Location = new Point(ClientSize.Width - 150, 20);
-                CloseBtn.Location = new Point(ClientSize.Width - 150, 80);
+                Text += ": " + (BlackPlayerType == "ai" ? "AI" : "玩家") + " 对 " + (WhitePlayerType == "ai" ? "AI" : "玩家");
+                InformaitionLabel.Location = new Point(12, 10);
+                InformaitionLabel.Size = new Size(460, 27);
+                ClientSize = new Size(640, 505);
+
+                StartBtn.Location = new Point(ClientSize.Width - 150, 10 + 25 + 5);
+                pictureBox1.Location = new Point(ClientSize.Width - 150, 40 + 29 + 10);
+                label1.Location = new Point(ClientSize.Width - 150 + 88, 40 + 29 + 10);
+                label1.Text = (BlackPlayerType == "ai" ? "AI" : "玩家");
+                pictureBox2.Location = new Point(ClientSize.Width - 150, 40 + 29 + 10 + 29 + 10);
+                label2.Location = new Point(ClientSize.Width - 150 + 88, 40 + 29 + 10 + 29 + 10);
+                label2.Text = (WhitePlayerType == "ai" ? "AI" : "玩家");
+
                 BoardPic.Image = Properties.Resources.棋盘9x9;
-                BoardPic.Location = new Point(12, 12);
+                BoardPic.Location = new Point(12, 10 + 25 + 5);
                 BoardPic.Name = "BoardPic";
                 BoardPic.Size = new Size(460, 460);
                 BoardPic.SizeMode = PictureBoxSizeMode.StretchImage;
@@ -98,7 +121,6 @@ namespace MartrixGoUI
                         Board[i * 9 + j] = 0;
                         PointPic[i * 9 + j] = new PictureBox
                         {
-                            //Image = Properties.Resources.blackStone_65,
                             Location = new Point(23 + j * 46, 23 + i * 46),
                             Name = (i * 9 + j).ToString(),
                             Size = new Size(46, 46),
@@ -113,6 +135,7 @@ namespace MartrixGoUI
                     }
                 }
             }
+            StepNum = 0;
             IPEndPoint point = new(IPAddress.Parse("127.0.0.1"), 23333);
             ClientSocket = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             try
@@ -121,7 +144,8 @@ namespace MartrixGoUI
             }
             catch(Exception ex)
             {
-                MessageBox.Show(ex.ToString());
+                MessageBox.Show(ex.ToString(), "Connect error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Close();
             }
         }
 
@@ -184,9 +208,10 @@ namespace MartrixGoUI
                 if((NowPlayerColor == 1 && BlackPlayerType == "ai") || (NowPlayerColor == 2 && WhitePlayerType == "ai"))
                 {
                     NowAiPlayer = true;
-                    Thread thread = new(new ThreadStart(WaitForAi));
-                    thread.IsBackground = true;
-                    thread.Start();
+                    using BackgroundWorker bw = new();
+                    bw.DoWork += new DoWorkEventHandler(WaitingForAi);
+                    bw.RunWorkerCompleted += new RunWorkerCompletedEventHandler(WaitForAi);
+                    bw.RunWorkerAsync();
                 }
             }
         }
@@ -199,26 +224,41 @@ namespace MartrixGoUI
             {
                 ClientSocket.Receive(RecvBuf);
                 Repaint(Encoding.UTF8.GetString(RecvBuf));
-                if(WhitePlayerType != "ai")
+                if (WhitePlayerType != "ai")
                 {
                     NowAiPlayer = false;
                 }
                 else
                 {
-                    AiProcess ai = new();
-                    ai.UpdateUIDelegate += Repaint;
-                    ai.TaskCallBack += WaitForAi;
-
-                    Thread thread = new(new ParameterizedThreadStart(ai.WaitForBackend));
-                    thread.IsBackground = true;
-                    thread.Start(ClientSocket);
+                    using BackgroundWorker bw = new();
+                    bw.DoWork += new DoWorkEventHandler(WaitingForAi);
+                    bw.RunWorkerCompleted += new RunWorkerCompletedEventHandler(WaitForAi);
+                    bw.RunWorkerAsync();
                 }
+            }
+            else
+            {
+                NowAiPlayer = false;
+            }
+            StartBtn.Enabled = false;
+        }
+
+        private void WaitingForAi(object sender, DoWorkEventArgs e)
+        {
+            try
+            {
+                ClientSocket.Receive(RecvBuf);
+            }
+            catch (Exception Ex)
+            {
+                Ex.ToString();
             }
         }
 
-        private void WaitForAi()
+        private void WaitForAi(object sender, RunWorkerCompletedEventArgs e)
         {
-            switch(RecvMsgProcessCode)
+            Repaint(Encoding.UTF8.GetString(RecvBuf));
+            switch (RecvMsgProcessCode)
             {
                 case 0:
                     MessageBox.Show("Expect board encode from backend.");
@@ -227,13 +267,10 @@ namespace MartrixGoUI
                     if ((NowPlayerColor == 1 && BlackPlayerType == "ai") || (NowPlayerColor == 2 && WhitePlayerType == "ai"))
                     {
                         NowAiPlayer = true;
-                        AiProcess ai = new();
-                        ai.UpdateUIDelegate += Repaint;
-                        ai.TaskCallBack += WaitForAi;
-
-                        Thread thread = new(new ParameterizedThreadStart(ai.WaitForBackend));
-                        thread.IsBackground = true;
-                        thread.Start(ClientSocket);
+                        using BackgroundWorker bw = new();
+                        bw.DoWork += new DoWorkEventHandler(WaitingForAi);
+                        bw.RunWorkerCompleted += new RunWorkerCompletedEventHandler(WaitForAi);
+                        bw.RunWorkerAsync();
                     }
                     else
                     {
@@ -249,7 +286,7 @@ namespace MartrixGoUI
 
         private void Repaint(string RecvBoard)
         {
-            if(RecvBoard.StartsWith('c'))
+            if (RecvBoard.StartsWith('c'))
             {
                 RecvMsgProcessCode = 2;
                 return;
@@ -259,12 +296,16 @@ namespace MartrixGoUI
                 RecvMsgProcessCode = 0;
                 return;
             }
-            NowPlayerColor = RecvBoard[1] - '0';
             for(int i = 0; i < BoardSize * BoardSize; i++)
             {
                 if(Board[i] != RecvBoard[i + 2] - '0')
                 {
+                    StepNum++;
                     Board[i] = RecvBoard[i + 2] - '0';
+                    if (Board[i] == NowPlayerColor)
+                    {
+                        LastMovePos = i;
+                    }
                     switch (Board[i])
                     {
                         case 0:
@@ -279,28 +320,17 @@ namespace MartrixGoUI
                     }
                 }
             }
+            NowPlayerColor = RecvBoard[1] - '0';
             RecvMsgProcessCode = 1;
+
+            InformaitionLabel.Text = "第" + StepNum.ToString() + "手" + "(" + (NowPlayerColor == 1 ? "白" : "黑");
+            int x = LastMovePos / BoardSize;
+            x = BoardSize - x;
+            char y = (char)('A' + LastMovePos % BoardSize);
+            if (y == 'I') y = 'J';
+            InformaitionLabel.Text += (y + x.ToString() + "):该" + (NowPlayerColor == 1 ? "黑" : "白") + "下");
         }
 
-        private void MainWindow_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            BackendProcess.Close();
-        }
-    }
-    public class AiProcess
-    {
-        public delegate void UpdateUI(string RecvBoard);
-        public UpdateUI UpdateUIDelegate;
 
-        public delegate void AccomplishTask();
-        public AccomplishTask TaskCallBack;
-
-        public void WaitForBackend(object ClientSocket)
-        {
-            byte[] RecvBuf = new byte[512];
-            ((Socket)ClientSocket).Receive(RecvBuf);
-            UpdateUIDelegate(Encoding.UTF8.GetString(RecvBuf));
-            TaskCallBack();
-        }
     }
 }

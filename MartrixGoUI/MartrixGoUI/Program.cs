@@ -26,7 +26,7 @@ namespace MartrixGoUI
             backendGoArgs += " " + StartMenu.BlackTime;
             backendGoArgs += " " + StartMenu.WhitePlayerType;
             backendGoArgs += " " + StartMenu.WhiteTime;
-            Process ProcessExe = new();
+            Process BackendGoProcess = new();
             string LocalPath = Environment.CurrentDirectory;
             string GoBackend;
             if(StartMenu.BoardSize == 9)
@@ -46,12 +46,12 @@ namespace MartrixGoUI
             ProInfo.CreateNoWindow = true;
             ProInfo.UseShellExecute = false;
             ProInfo.RedirectStandardOutput = true;
-            ProcessExe.StartInfo = ProInfo;
-            ProcessExe.Start();
+            BackendGoProcess.StartInfo = ProInfo;
+            BackendGoProcess.Start();
             MainWindow MainWindow = new();
             MainWindow.Init(StartMenu.BlackPlayerType, StartMenu.WhitePlayerType, StartMenu.BoardSize);
-            MainWindow.BackendProcess = ProcessExe;
             Application.Run(MainWindow);
+            BackendGoProcess.Kill();
         }
     }
 }
