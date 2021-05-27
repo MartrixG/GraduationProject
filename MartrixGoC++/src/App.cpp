@@ -115,11 +115,10 @@ void Application::gameInformationAnalyze(PointPtr* allBoardPoints, PArVecPtr* ar
         game.initHandCap(sgf.steps, sgf.HA - 1);
     }
     // step by step
-    Step* step = nullptr;
-    sgf.getNextStep(step);
+    sgf.getNextStep(game.nextStep);
     do
     {
-        if (game.moveAnalyze(step))
+        if (game.moveAnalyze(game.nextStep))
         {
             game.move();
             boardEncode(game, featureFileStream);
@@ -127,8 +126,8 @@ void Application::gameInformationAnalyze(PointPtr* allBoardPoints, PArVecPtr* ar
         {
             break;
         }
-        sgf.getNextStep(step);
-        labelFileStream << *step << '\n';
+        sgf.getNextStep(game.nextStep);
+        labelFileStream << *game.nextStep << '\n';
     } while (sgf.haveNextStep());
 }
 
@@ -407,7 +406,7 @@ void Application::randomPlayerTest(int argc, char** argv)
     {
         Game game = Game(allBoardPoints, allAround, allDiagonal);
         RandomPlayer* player = blackPlayer;
-        while (true)
+        for(int j = 0; j < 120; j++)
         {
             player->updatePlayer(&game);
             player->getNextStep(game.nextStep);
@@ -419,7 +418,7 @@ void Application::randomPlayerTest(int argc, char** argv)
             game.move();
             player = player == blackPlayer ? whitePlayer : blackPlayer;
         }
-        b[1 - ((double) game.getWinner() >= 2.5)]++;
+        b[1 - ((double) game.getWinner() >= 2)]++;
     }
     std::cout << "B:" << b[0] << "  W:" << b[1] << '\n';
 }

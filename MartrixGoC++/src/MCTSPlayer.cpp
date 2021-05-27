@@ -61,7 +61,7 @@ void MCTSPlayer::getNextStep(Step* nextStep) const
         }
     }
     // Confess
-    if((double)winCount / (double)mostVis < 0.05)
+    if((double)winCount / (double)mostVis < 0.15)
     {
         nextStep->pos = -2;
     }

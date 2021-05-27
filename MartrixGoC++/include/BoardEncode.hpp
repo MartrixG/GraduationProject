@@ -22,22 +22,19 @@ static void boardEncode(Game &game, std::ofstream &featureFileStream)
     }
     //turn
     //layer:1 state[x][y] = k, (x, y) is last k step
-//    std::vector<Step*>* steps = &game.steps;
-//    int length = int(steps->size()), epoch = std::min(7, length);
-//    for (int i = 0; i < epoch; i++)
-//    {
-//        state[1][(*steps)[length - i - 1]->pos] = i + 1;
-//    }
-//    for (int i = 0; i < BOARD_SIZE; i++)
-//    {
-//        for (int j = 0; j < BOARD_SIZE; j++)
-//        {
-//            if (game.historyBoard[game.historyBoard.size() - epoch][i][j] != 0)
-//            {
-//                state[1][i * BOARD_SIZE + j] = epoch + 1;
-//            }
-//        }
-//    }
+    std::vector<Step*>* steps = &game.steps;
+    int length = int(steps->size()), epoch = std::min(7, length);
+    for (int i = 0; i < epoch; i++)
+    {
+        state[1][(*steps)[length - i - 1]->pos] = i + 1;
+    }
+    for (int i = 0; i < BOARD_SIZE * BOARD_SIZE; i++)
+    {
+        if (game.historyBoard[game.historyBoard.size() - epoch][i] != 0)
+        {
+            state[1][i] = 8;
+        }
+    }
     //qi
     //layer:2 state[x][y] = k, (x, y) has k liberties
     //capture
