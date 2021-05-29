@@ -17,7 +17,8 @@ if __name__ == '__main__':
     parser.add_argument('--config', default='config/config.json', type=str,
                         help='The path of the configuration.')
     parser.add_argument('--data_path', default='data/', type=str)
-    parser.add_argument('--workers', type=int, default=4, help='number of data loading workers (default: 4)')
+    parser.add_argument('--workers', type=int, default=0, help='number of data loading workers (default: 4)')
+    parser.add_argument('--grad_clip', type=float, default=5, help='gradient clipping')
     parser.add_argument('--print_frequency', type=int, default=50, help='print frequency (default: 200)')
     parser.add_argument('--seed', type=int, default=1, help='manual seed')
     parser.add_argument('--gpu', type=int, default=0, help='gpu device id')

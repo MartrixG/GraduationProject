@@ -5,8 +5,23 @@ import numpy as np
 import time
 import sys
 import json
+import torch
 
+from torch import optim, nn
 from collections import namedtuple
+
+
+class AverageMeter(object):
+
+    def __init__(self):
+        self.avg = 0
+        self.sum = 0
+        self.cnt = 0
+
+    def update(self, val, n=1):
+        self.sum += val * n
+        self.cnt += n
+        self.avg = self.sum / self.cnt
 
 
 def convert_param(original_list):
@@ -56,7 +71,6 @@ def log_config(args):
     logging.info('optimizer : {:}'.format(args.optimizer))
     logging.info('scheduler : {:}'.format(args.scheduler))
     logging.info('learning rate : {:}'.format(args.lr))
-    logging.info('momentum : {:}'.format(args.momentum))
     logging.info('weight_decay : {:}'.format(args.weight_decay))
     logging.info('args:{:}'.format(args))
 
@@ -88,3 +102,38 @@ def prepare(args):
     fh.setFormatter(logging.Formatter(log_format))
     logging.getLogger().addHandler(fh)
     return seed
+
+
+def get_opt_scheduler(params, optm, lr, decay, scheduler_name, epoch):
+    if optm == 'SGD':
+        optimizer = optim.SGD(params, lr, weight_decay=decay, momentum=0.9)
+    elif optm == 'Adam':
+        optimizer = optim.Adam(params, lr, weight_decay=decay)
+    else:
+        raise ValueError
+
+    if scheduler_name == 'PolyScheduler':
+        scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, epoch, eta_min=0.0001)
+    else:
+        raise ValueError
+    criterion = nn.CrossEntropyLoss()
+    return optimizer, scheduler, criterion
+
+
+def accuracy(output, target, top_k=(1,)):
+    max_k = max(top_k)
+    batch_size = target.size(0)
+
+    _, pred = output.topk(max_k, 1, True, True)
+    pred = pred.t()
+    correct = pred.eq(target.view(1, -1).expand_as(pred))
+
+    res = []
+    for k in top_k:
+        correct_k = correct[:k].view(-1).float().sum(0)
+        res.append(correct_k.mul_(100.0 / batch_size))
+    return res
+
+
+def save(model, model_path):
+    torch.save(model.state_dict(), model_path)

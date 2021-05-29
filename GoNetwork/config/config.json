@@ -1,13 +1,10 @@
 {
     "name":           ["str", "SgfBoard"],
     "type":           ["str", "train"],
-    "layers":         ["int", "20"],
-    "drop_path_prob": ["float", "0.2"],
-    "batch_size":     ["int", "96"],
-    "epoch":          ["int", "600"],
+    "batch_size":     ["int", "4"],
+    "epoch":          ["int", "100"],
     "optimizer":      ["str", "SGD"],
     "scheduler":      ["str", "PolyScheduler"],
-    "lr":             ["float", "0.025"],
-    "momentum":       ["float", "0.9"],
+    "lr":             ["float", "0.003"],
     "weight_decay":   ["float", "3e-4"]
 }
