@@ -33,7 +33,7 @@ inline int MCTS::search(TreeNode* &chosenNode) const
             {
                 continue;
             }
-            tmpScore = child->score(totRollouts) + PRI_VALUE[chosenNode->legalMove[pos]];
+            tmpScore = child->score(totRollouts);
             if(tmpScore > score)
             {
                 score = tmpScore;
@@ -91,7 +91,7 @@ void MCTS::defaultPolicy(TreeNode* node)
         experimentGame.move();
         player->playerColor = BLACK_PLAYER + WHITE_PLAYER - player->playerColor;
     }
-    int winColor = 2 - (experimentGame.getWinner() >= 0);
+    int winColor = 2 - (experimentGame.getWinner() >= 2);
     while(node != nullptr)
     {
         node->threadVis--;

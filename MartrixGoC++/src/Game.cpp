@@ -14,6 +14,7 @@ Game::Game(PointPtr* points, PArVecPtr* around, PDiVecPtr* diagonal)
     this->targetBlock = new GoBlock();
     this->nextStep = new Step(-1, -1, -1);
     this->historyZobristHash.insert(0);
+    this->historyBoard.emplace_back(BOARD_SIZE * BOARD_SIZE);
 
     this->board = new int[BOARD_SIZE * BOARD_SIZE];
     this->pointBlockMap = new BlockPtr[BOARD_SIZE * BOARD_SIZE];
@@ -21,6 +22,7 @@ Game::Game(PointPtr* points, PArVecPtr* around, PDiVecPtr* diagonal)
     {
         this->board[i] = 0;
         this->pointBlockMap[i] = nullptr;
+        this->historyBoard[0][i] = this->board[i];
     }
 }
 
@@ -59,6 +61,11 @@ void Game::initHandCap(std::vector<Step*> &handCapSteps, int numOfHandCap)
         }
     }
     this->boardZobristHash = this->newBoardZobristHash;
+    this->historyBoard.emplace_back(BOARD_SIZE * BOARD_SIZE);
+    for(size_t i = 0; i < BOARD_SIZE * BOARD_SIZE; i++)
+    {
+        this->historyBoard.back()[i] = this->board[i];
+    }
 }
 
 bool Game::moveAnalyze(Step* step)
@@ -90,6 +97,12 @@ void Game::move()
 {
     PointPtr targetPoint = this->allBoardPoints[this->nextStep->pos];
     this->historyZobristHash.insert(this->newBoardZobristHash);
+    this->steps.push_back(new Step(this->nextStep->pos / BOARD_SIZE, this->nextStep->pos % BOARD_SIZE, this->player));
+    this->historyBoard.emplace_back(BOARD_SIZE * BOARD_SIZE);
+    for(size_t i = 0; i < BOARD_SIZE * BOARD_SIZE; i++)
+    {
+        this->historyBoard.back()[i] = this->board[i];
+    }
     this->boardZobristHash = this->newBoardZobristHash;
 
     // board update
@@ -325,4 +338,8 @@ Game::~Game()
     delete nextStep;
     delete []board;
     delete []pointBlockMap;
+    for(auto &step : this->steps)
+    {
+        delete step;
+    }
 }

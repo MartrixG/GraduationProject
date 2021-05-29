@@ -25,13 +25,14 @@ public:
     PointPtr* allBoardPoints;
     PArVecPtr* allAround;
     PDiVecPtr* allDiagonal;
-//    std::vector<Step*> steps = std::vector<Step*>();
+    std::vector<Step*> steps = std::vector<Step*>();
     // board point information
     int* board = nullptr;
     int64_t boardZobristHash = 0;
     BlockPtr* pointBlockMap = nullptr;
     // history information
 //    std::vector<vector_2d(int)> historyBoard = std::vector<vector_2d(int)>();
+    std::vector<std::vector<int>> historyBoard = std::vector<std::vector<int>>();
     std::unordered_set<int64_t> historyZobristHash = std::unordered_set<int64_t>();
     // tmp analyze information
     int64_t newBoardZobristHash = 0;

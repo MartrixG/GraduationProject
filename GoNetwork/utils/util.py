@@ -130,7 +130,7 @@ def accuracy(output, target, top_k=(1,)):
 
     res = []
     for k in top_k:
-        correct_k = correct[:k].view(-1).float().sum(0)
+        correct_k = correct[:k].reshape(-1).float().sum(0)
         res.append(correct_k.mul_(100.0 / batch_size))
     return res
 

@@ -72,12 +72,12 @@ def mode_val(valid_loader, model, criterion, epoch_str, print_freq):
 
 def train(args):
     logging.info('Start load dataset.')
-    train_data, val_data, test_data = get_src_dataset(args.data_path)
+    train_data, val_data, test_data = get_src_dataset(args.data_path, args.train_size, args.val_size, args.test_size)
     train_loader, val_loader, test_loader = get_data_loader(train_data, val_data, test_data, args.batch_size, args.workers)
     logging.info('Data set loaded.')
 
     model = NetWork('policy', [1, 47, 19, 19], 361)
-    model = model.cuda(0)
+    model = model.cuda()
     flop, param = get_model_infos(model, [1, 47, 19, 19])
     logging.info('Params={:.2f} MB, FLOPs={:.2f} M'.format(param, flop))
 
