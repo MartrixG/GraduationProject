@@ -22,17 +22,19 @@ public:
     std::atomic<int> winCount[3] = {0};
     std::atomic<int> numRollouts = 0;
     std::atomic<int> threadVis = 0;
+    double qValue;
 
     std::unordered_set<int> visitedMove;
     int legalMove[BOARD_SIZE * BOARD_SIZE] = {0};
     int qiAfterMove[BOARD_SIZE * BOARD_SIZE] = {0};
+    float childQ[BOARD_SIZE * BOARD_SIZE] = {0};
     size_t legalMoveSize = 0;
 
     RandomPlayer* nodeRandomPlayer = nullptr;
     Game* game = nullptr;
     TreeNode* children[BOARD_SIZE * BOARD_SIZE] = {nullptr};
 
-    TreeNode(TreeNode* fa, Game* faGame);
+    TreeNode(TreeNode* fa, double q, Game* faGame);
 
     double score(double totRollouts);
 

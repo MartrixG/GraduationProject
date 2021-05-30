@@ -167,13 +167,13 @@ void Application::commandLine()
     }
 }
 
-bool initSocket(SOCKET &serverSocket, SOCKET &clientSocket, char* ipAddr, char* port)
+bool initServerSocketForUI(SOCKET &serverSocket, SOCKET &clientSocket, char* ipAddr, char* port)
 {
-    WSAData wsaData{};
-    int err;
-    err = WSAStartup(MAKEWORD(2, 2), &wsaData);
-    if (err != 0)
-    { return false; }
+//    WSAData wsaData{};
+//    int err;
+//    err = WSAStartup(MAKEWORD(2, 2), &wsaData);
+//    if (err != 0)
+//    { return false; }
     serverSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     sockaddr_in serverAddr{};
     memset(&serverAddr, 0, sizeof(serverAddr));
@@ -183,6 +183,7 @@ bool initSocket(SOCKET &serverSocket, SOCKET &clientSocket, char* ipAddr, char* 
     char* _;
     portNumber = strtol(port, &_, 10);
     serverAddr.sin_port = htons(portNumber);
+    int err;
     err = bind(serverSocket, (SOCKADDR*) &serverAddr, sizeof(serverAddr));
     if (err != 0)
     { return false; }
@@ -199,6 +200,23 @@ bool initSocket(SOCKET &serverSocket, SOCKET &clientSocket, char* ipAddr, char* 
     return true;
 }
 
+bool initClientSocketForAI(SOCKET &aiServerSocket, char* ipAddr, char* port)
+{
+    aiServerSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    sockaddr_in serverAddr{};
+    memset(&serverAddr, 0, sizeof(serverAddr));
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_addr.s_addr = inet_addr(ipAddr);
+    int portNumber;
+    char* _;
+    portNumber = strtol(port, &_, 10);
+    serverAddr.sin_port = htons(portNumber);
+    int err = connect(aiServerSocket, (SOCKADDR*) &serverAddr, sizeof(SOCKADDR));
+    if(err != 0)
+    {return false;}
+    return true;
+}
+
 void Application::uiSocket(int argc, char** argv)
 {
     //ui 127.0.0.0 23333 16 ai 10 human 0
@@ -207,13 +225,33 @@ void Application::uiSocket(int argc, char** argv)
         logger.fatal("Arg number error.");
         return;
     }
-    // init server socket
-    SOCKET serverSocket, clientSocket;
-    if (!initSocket(serverSocket, clientSocket, argv[2], argv[3]))
+    WSAData wsaData{};
+    int err;
+    err = WSAStartup(MAKEWORD(2, 2), &wsaData);
+    if (err != 0)
     {
         logger.fatal("Init socket failed.");
         return;
     }
+    // init server socket
+    SOCKET uiServerSocket, uiClientSocket;
+//    if (!initServerSocketForUI(uiServerSocket, uiClientSocket, argv[2], argv[3]))
+//    {
+//        logger.fatal("Init socket failed.");
+//        return;
+//    }
+
+    SOCKET aiServerSocket;
+    char defaultAiIp[10] = "127.0.0.1", defaultAiPort[6] = "23334";
+    if(BOARD_SIZE == 19)
+    {
+        if(!initClientSocketForAI(aiServerSocket, defaultAiIp, defaultAiPort))
+        {
+            logger.fatal("Init socket failed.");
+            return;
+        }
+    }
+
     // init go game
     PointPtr allBoardPoints[BOARD_SIZE * BOARD_SIZE];
     PArVecPtr allAround[BOARD_SIZE * BOARD_SIZE];
@@ -262,7 +300,10 @@ void Application::uiSocket(int argc, char** argv)
     char srcMessage[512];
     int bufSize = 512;
     memset(srcMessage, 0, sizeof(srcMessage));
-    recv(clientSocket, srcMessage, bufSize, 0);
+//    recv(uiClientSocket, srcMessage, bufSize, 0);
+//
+    srcMessage[0] = startFlag;
+//
     // init logger
     if (srcMessage[0] == startFlag)
     {
@@ -300,18 +341,52 @@ void Application::uiSocket(int argc, char** argv)
         game.move();
         srcMessage[0] = boardStateStr;
         game.boardStrEncode(srcMessage);
-        send(clientSocket, srcMessage, bufSize, 0);
+        send(uiClientSocket, srcMessage, bufSize, 0);
     } else
     {
-        recv(clientSocket, srcMessage, bufSize, 0);
+        recv(uiClientSocket, srcMessage, bufSize, 0);
         uiBlackPlayer->updatePlayer(srcMessage);
         uiBlackPlayer->getNextStep(game.nextStep);
         game.moveAnalyze(game.nextStep);
         game.move();
         srcMessage[0] = boardStateStr;
         game.boardStrEncode(srcMessage);
-        send(clientSocket, srcMessage, bufSize, 0);
+        send(uiClientSocket, srcMessage, bufSize, 0);
     }
+    //
+    std::string boardState = boardEncode(&game);
+    boardState.push_back(game.player == BLACK_PLAYER ? '1' : '2');
+    boardState.push_back('\n');
+    boardState += boardEncode(&game);
+    boardState.push_back(game.player == BLACK_PLAYER ? '1' : '2');
+    boardState.push_back('\n');
+    char sendMessage[boardState.length() + 1];
+    strcpy(sendMessage, boardState.c_str());
+    send(aiServerSocket, sendMessage, (int)boardState.length(), 0);
+    char recvMessage[2500];
+    int recvBuf = 2500;
+    for(size_t nodeNum = 0; nodeNum < 2; nodeNum++)
+    {
+        std::cout << "Node " << nodeNum << "q value:\n";
+        recv(aiServerSocket, recvMessage, recvBuf, 0);
+        size_t len = strlen(recvMessage);
+        if(len != 2166)
+        {return;}
+        float recvNum;
+        for(size_t i = 0; i < BOARD_SIZE * BOARD_SIZE; i++)
+        {
+            recvNum = 0.0;
+            for(size_t j = 0; j < 6; j++)
+            {
+                recvNum /= 10;
+                recvNum += float(recvMessage[i * 6 + j] - '0') / 10.0f;
+            }
+            printf("%.6f,", recvNum);
+        }
+        std::cout << std::endl;
+    }
+    return;
+    //
     // main game body
     MCTSPlayer* mctsPlayer;
     SocketPlayer* uiPlayer;
@@ -334,7 +409,7 @@ void Application::uiSocket(int argc, char** argv)
             {
                 srcMessage[0] = confessFlag;
                 srcMessage[1] = '\0';
-                send(clientSocket, srcMessage, bufSize, 0);
+                send(uiClientSocket, srcMessage, bufSize, 0);
                 logger.info(nowPlayerColor == BLACK_PLAYER ? "Black" : "White" + std::string("ai confess."));
                 break;
             }
@@ -343,7 +418,7 @@ void Application::uiSocket(int argc, char** argv)
             game.move();
             srcMessage[0] = boardStateStr;
             game.boardStrEncode(srcMessage);
-            send(clientSocket, srcMessage, bufSize, 0);
+            send(uiClientSocket, srcMessage, bufSize, 0);
         } else
         {
             if (nowPlayerColor == WHITE_PLAYER)
@@ -353,7 +428,7 @@ void Application::uiSocket(int argc, char** argv)
             {
                 uiPlayer = uiBlackPlayer;
             }
-            recv(clientSocket, srcMessage, bufSize, 0);
+            recv(uiClientSocket, srcMessage, bufSize, 0);
             if (srcMessage[0] != uiNextStepFlag)
             {
                 logger.fatal("Wrong player turn. Expect human player.");
@@ -369,7 +444,7 @@ void Application::uiSocket(int argc, char** argv)
             }
             srcMessage[0] = boardStateStr;
             game.boardStrEncode(srcMessage);
-            send(clientSocket, srcMessage, bufSize, 0);
+            send(uiClientSocket, srcMessage, bufSize, 0);
             if (!analyzeFlag)
             {
                 logger.info("Human chose illegal position.");
@@ -378,8 +453,8 @@ void Application::uiSocket(int argc, char** argv)
         }
         nowPlayerColor = BLACK_PLAYER + WHITE_PLAYER - nowPlayerColor;
     }
-    closesocket(clientSocket);
-    closesocket(serverSocket);
+    closesocket(uiClientSocket);
+    closesocket(uiServerSocket);
     WSACleanup();
 }
 

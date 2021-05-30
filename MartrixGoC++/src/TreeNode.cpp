@@ -4,11 +4,23 @@
 
 #include "TreeNode.hpp"
 
-TreeNode::TreeNode(TreeNode* fa, Game* faGame)
+TreeNode::TreeNode(TreeNode* fa, double q, Game* faGame)
 {
+    this->qValue = q;
     this->parent = fa;
     this->game = faGame;
     this->game->legalMove(this->legalMove, this->qiAfterMove, this->legalMoveSize);
+    if(BOARD_SIZE == 9)
+    {
+        for(float & i : childQ)
+        {
+            i = 1.0;
+        }
+    }
+    else
+    {
+        //
+    }
     this->nodeRandomPlayer = new RandomPlayer(BLACK_PLAYER);
 }
 

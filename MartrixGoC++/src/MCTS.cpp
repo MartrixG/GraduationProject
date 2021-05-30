@@ -9,7 +9,7 @@ MCTS::MCTS(Game* game, ThreadPool* pool)
 {
     Game* tmpGame = new Game(game->allBoardPoints, game->allAround, game->allDiagonal);
     game->copy(tmpGame);
-    this->root = new TreeNode(nullptr, tmpGame);
+    this->root = new TreeNode(nullptr, 1.0, tmpGame);
     MCTS::addThreadVis(root);
     MCTS::defaultPolicy(root);
 
@@ -67,7 +67,7 @@ inline void MCTS::expand(TreeNode* node, int location)
     tmpGame->nextStep->pos = node->legalMove[location];
     tmpGame->moveAnalyze(tmpGame->nextStep);
     tmpGame->move();
-    node->children[location] = new TreeNode(node, tmpGame);
+    node->children[location] = new TreeNode(node, node->childQ[location], tmpGame);
     node->visitedMove.insert(location);
 }
 
