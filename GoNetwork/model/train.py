@@ -76,10 +76,10 @@ def train(args):
     train_loader, val_loader, test_loader = get_data_loader(train_data, val_data, test_data, args.batch_size, args.workers)
     logging.info('Data set loaded.')
 
-    model = NetWork('policy', [1, 47, 19, 19], 361)
+    model = NetWork('policy', [1, args.input_channel, 19, 19], 361)
     model = model.cuda()
-    flop, param = get_model_infos(model, [1, 47, 19, 19])
-    logging.info('Params={:.2f} MB, FLOPs={:.2f} M'.format(param, flop))
+    flop, param = get_model_infos(model, [1, args.input_channel, 19, 19])
+    logging.info('Params={:.2f} M, FLOPs={:.2f} M'.format(param, flop))
 
     optimizer, scheduler, criterion = get_opt_scheduler(
         model.get_weights(), args.optimizer, args.lr, args.weight_decay, args.scheduler, args.epoch)

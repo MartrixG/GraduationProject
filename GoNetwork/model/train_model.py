@@ -8,8 +8,8 @@ class NetWork(nn.Module):
         self.x_shape = x_shape
         self.num_class = num_class
         self.first_layer = nn.Sequential(
-            nn.Conv2d(in_channels=47, out_channels=192, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2), bias=True),
-            nn.BatchNorm2d(192),
+            nn.Conv2d(in_channels=x_shape[1], out_channels=256, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2), bias=True),
+            nn.BatchNorm2d(256),
             nn.ReLU(),
         )
 
@@ -17,15 +17,15 @@ class NetWork(nn.Module):
         for i in range(19):
             self.blocks.append(
                 nn.Sequential(
-                    nn.Conv2d(in_channels=192, out_channels=192, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1)),
-                    nn.BatchNorm2d(192),
+                    nn.Conv2d(in_channels=256, out_channels=256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1)),
+                    nn.BatchNorm2d(256),
                     nn.ReLU(),
-                    nn.Conv2d(in_channels=192, out_channels=192, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1)),
-                    nn.BatchNorm2d(192)
+                    nn.Conv2d(in_channels=256, out_channels=256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1)),
+                    nn.BatchNorm2d(256)
                 )
             )
         self.relu = nn.ReLU()
-        self.classify_layer = nn.Conv2d(in_channels=192, out_channels=1, kernel_size=(1, 1), stride=(1, 1), padding=(0, 0))
+        self.classify_layer = nn.Conv2d(in_channels=256, out_channels=1, kernel_size=(1, 1), stride=(1, 1), padding=(0, 0))
 
     def forward(self, feature):
         x = self.first_layer(feature)
