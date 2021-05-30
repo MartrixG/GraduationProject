@@ -121,7 +121,7 @@ void Application::gameInformationAnalyze(PointPtr* allBoardPoints, PArVecPtr* ar
         if (game.moveAnalyze(game.nextStep))
         {
             game.move();
-            boardEncode(game, featureFileStream);
+            featureFileStream << boardEncode(&game) << '\n';
         } else
         {
             break;
