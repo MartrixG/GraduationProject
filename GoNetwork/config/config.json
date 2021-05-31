@@ -2,13 +2,13 @@
     "name":           ["str", "SgfBoard"],
     "type":           ["str", "train"],
     "input_channel":  ["int", "31"],
-    "batch_size":     ["int", "256"],
+    "batch_size":     ["int", "128"],
     "epoch":          ["int", "20"],
     "optimizer":      ["str", "SGD"],
     "scheduler":      ["str", "PolyScheduler"],
     "lr":             ["float", "0.003"],
     "weight_decay":   ["float", "3e-4"],
-    "train_size":     ["int", "1300000"],
+    "train_size":     ["int", "1000000"],
     "val_size":       ["int", "300000"],
     "test_size":      ["int", "100"]
 }

@@ -32,7 +32,7 @@ int main(int argc, char* argv[])
 {
     auto t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     std::stringstream fileName;
-    fileName << std::put_time(std::localtime(&t), "/log/%Y-%m-%d--%H-%M-%S_log.txt");
+    fileName << std::put_time(std::localtime(&t), "/log/%Y-%m-%d--%H-%M-%S_log.log");
     logger.init(std::filesystem::current_path().generic_string() + fileName.str(), false);
     logger.info("Board size:" + std::to_string(BOARD_SIZE) + "x" + std::to_string(BOARD_SIZE));
     logger.debug("Debug mode is on.");

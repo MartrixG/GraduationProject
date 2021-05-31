@@ -5,14 +5,12 @@ import numpy as np
 import logging
 import random
 
-import torch
 from torch import cuda, manual_seed, nn
 from utils.util import log_config, prepare, get_opt_scheduler, AverageMeter, accuracy, save
 from utils.dataset_process import get_src_dataset, get_data_loader
 from torch.backends import cudnn
 from model.train_model import NetWork
 from model.flop_benchmark import get_model_infos
-from socket import *
 
 
 def model_train(train_loader, model, criterion, optimizer, epoch_str, print_freq, grad_clip):
@@ -120,100 +118,6 @@ def train(args):
         scheduler.step()
 
     logging.info('best acc is {:.5f}%'.format(best_acc))
-
-
-def play():
-    files = os.listdir('.')
-    model_file = ''
-    for file in files:
-        if file == 'model.pt':
-            model_file = file
-    if model_file == '':
-        return
-
-    model = NetWork('forward', [1, 31, 19, 19], 361)
-    model.load_state_dict(torch.load(model_file))
-
-    if torch.cuda.is_available():
-        model = model.cuda()
-
-    server_name = '127.0.0.1'
-    server_port = 23334
-    buf_size = 120000
-    ADDR = (server_name, server_port)
-
-    server_socket = socket(AF_INET, SOCK_STREAM)
-    server_socket.bind(ADDR)
-
-    server_socket.listen(1)
-
-    client_socket, client_addr = server_socket.accept()
-    while True:
-        try:
-            data_byte = client_socket.recv(buf_size)
-        except IOError:
-            client_socket.close()
-            break
-        if not data_byte:
-            break
-        length = int.from_bytes(data_byte, signed=False, byteorder='big')
-        data_src = []
-        for i in range(length):
-            data_byte = client_socket.recv(1806)
-            data_src.append(data_byte.decode('utf8').strip())
-        prob = forward(data_src, model)
-        for one_state_res in prob:
-            client_socket.send(one_state_res)
-
-
-def forward(data_src, model):
-    layer_base = [0, 3, 11, 27, 19]
-    input_data = torch.zeros((len(data_src), 31, 19, 19), dtype=torch.float32)
-    for k in range(len(data_src)):
-        data = data_src[k]
-        color = int(data[-1])
-
-        feature = torch.tensor(np.array(list(map(int, data))[:-1], dtype=np.int8).reshape(5, 19, 19))
-
-        train_feature = torch.zeros((31, 19, 19), dtype=torch.float32)
-
-        for i in range(19):
-            for j in range(19):
-                if feature[0][i][j] == 0:
-                    train_feature[2][i][j] = 1
-                else:
-                    train_feature[1 - (int(feature[0][i][j]) == color)][i][j] = 1
-
-        train_feature[3] = torch.ones((19, 19))
-
-        for layer_num in range(1, 5):
-            layer = feature[layer_num]
-            for i in range(19):
-                for j in range(19):
-                    if layer[i][j] != 0:
-                        train_feature[layer_base[layer_num] + int(layer[i][j])][i][j] = 1
-
-        if color == 1:
-            train_feature[30] = torch.ones((19, 19))
-
-        input_data[k] = train_feature
-
-    if torch.cuda.is_available():
-        input_data = input_data.cuda()
-
-    out = model.forward(input_data)
-    out = out.cpu().detach().numpy()
-
-    pro = np.exp(out) / np.sum(np.exp(out))
-    res = []
-    for i in pro:
-        one_state_res = b''
-        for j in i:
-            float_str = "{:.6f}".format(j)[::-1]
-            one_state_res += float_str[0:-2].encode('utf8')
-        # one_state_res += b'\0'
-        res.append(one_state_res)
-    return res
 
 
 def main(args):
