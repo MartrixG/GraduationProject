@@ -1,11 +1,9 @@
 import os
-import sys
 import time
 
 import numpy as np
 import logging
 import random
-import struct
 
 import torch
 from torch import cuda, manual_seed, nn
@@ -124,7 +122,7 @@ def train(args):
     logging.info('best acc is {:.5f}%'.format(best_acc))
 
 
-def play(args):
+def play():
     files = os.listdir('.')
     model_file = ''
     for file in files:
@@ -133,15 +131,11 @@ def play(args):
     if model_file == '':
         return
 
-    logging.info("find model and loading.")
     model = NetWork('forward', [1, 31, 19, 19], 361)
     model.load_state_dict(torch.load(model_file))
 
     if torch.cuda.is_available():
         model = model.cuda()
-        logging.info("using GPU.")
-    else:
-        logging.info("using CPU.")
 
     server_name = '127.0.0.1'
     server_port = 23334
@@ -151,23 +145,22 @@ def play(args):
     server_socket = socket(AF_INET, SOCK_STREAM)
     server_socket.bind(ADDR)
 
-    logging.info("binding with 127.0.0.1:23334")
-    logging.info("listening...")
     server_socket.listen(1)
 
     client_socket, client_addr = server_socket.accept()
-    logging.info('client accept')
     while True:
         try:
             data_byte = client_socket.recv(buf_size)
-        except IOError as e:
-            logging.info(str(e))
-            logging.info('client close')
+        except IOError:
             client_socket.close()
             break
         if not data_byte:
             break
-        data_src = data_byte.decode('utf8').strip().split('\n')
+        length = int.from_bytes(data_byte, signed=False, byteorder='big')
+        data_src = []
+        for i in range(length):
+            data_byte = client_socket.recv(1806)
+            data_src.append(data_byte.decode('utf8').strip())
         prob = forward(data_src, model)
         for one_state_res in prob:
             client_socket.send(one_state_res)
@@ -212,17 +205,13 @@ def forward(data_src, model):
     out = out.cpu().detach().numpy()
 
     pro = np.exp(out) / np.sum(np.exp(out))
-    for i in pro:
-        for j in i:
-            print("{:.6f}".format(j), end=',')
-        print()
     res = []
     for i in pro:
         one_state_res = b''
         for j in i:
             float_str = "{:.6f}".format(j)[::-1]
             one_state_res += float_str[0:-2].encode('utf8')
-        one_state_res += b'\0'
+        # one_state_res += b'\0'
         res.append(one_state_res)
     return res
 
@@ -237,12 +226,12 @@ def main(args):
     cudnn.benchmark = False
     cudnn.deterministic = True
 
-    log_config(args)
     start = time.time()
     if args.type == 'train':
+        log_config(args)
         train(args)
     else:
-        play(args)
+        play()
     tot_time = time.time() - start
     m, s = divmod(tot_time, 60)
     h, m = divmod(m, 60)

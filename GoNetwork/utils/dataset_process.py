@@ -48,7 +48,7 @@ class NormalDataSet(Dataset):
 
 def get_src_dataset(root, train_size, val_size, test_size):
     # 1824026
-    val_base = 1500000
+    val_base = 1000000
     y_train_file = [line.strip() for line in open('{:}/train_data/label.txt'.format(root)).readlines()]
     x_train_data = np.zeros((train_size, 7, 19, 19), dtype=np.int8)
     y_train_data = np.zeros((train_size, 2), dtype=np.int32)
