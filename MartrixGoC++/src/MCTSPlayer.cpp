@@ -6,20 +6,36 @@
 #include <cstring>
 #include "MCTSPlayer.hpp"
 
-MCTSPlayer::MCTSPlayer(int color, ThreadPool* pool, int timeLimit)
+MCTSPlayer::MCTSPlayer(int color, ThreadPool* pool, int type, SOCKET &serverSocket)
 {
     this->playerColor = color;
-    this->timeLimit = timeLimit;
+    this->timeLimit = 20000;
     this->threadPool = pool;
+    this->server = serverSocket;
+    this->playerType = type;
+    // 1: mcts 2: dl 3: mcts + dl
+    switch (this->playerType)
+    {
+        case 1:
+            this->mctsFlag = true;
+            break;
+        case 2:
+            this->dlFlag = true;
+            break;
+        case 3:
+            this->mctsFlag = true;
+            this->dlFlag = true;
+            break;
+    }
 }
 
-void MCTSPlayer::getFirstStep(Step* nextStep)
+void MCTSPlayer::getFirstStep(Step* nextStep) const
 {
     nextStep->player = playerColor;
-    nextStep->pos = BOARD_SIZE == 9 ? 24 : 72;
+    nextStep->pos = 72;
 }
 
-void MCTSPlayer::getNextStep(Step* nextStep) const
+void MCTSPlayer::getNextStep(Step* nextStep)
 {
     TreeNode* root = this->selfMct->root;
     if(this->playerColor != root->game->player)
@@ -28,63 +44,85 @@ void MCTSPlayer::getNextStep(Step* nextStep) const
         exit(EXIT_FAILURE);
     }
     nextStep->player = this->playerColor;
-    int chosenStep;
+    int chosenStep = 0;
     if(root->legalMoveSize == 0)
     {
         nextStep->pos = -1;
     }
-    int mostVis = -1, winCount = 0;
-    int totVis = 0;
+    int mostVis = -1, winCount = 0, totVis = 0;
+    float maxQ = -1;
     for(size_t i = 0; i < this->selfMct->root->legalMoveSize; i++)
     {
-        int vis = root->children[i]->numRollouts;
-        if(vis > mostVis)
+        if(this->mctsFlag)
         {
-            if(mostVis != -1)
+            int vis = root->children[i]->numRollouts;
+            if(vis > mostVis)
             {
-                logger.debug("Find new max vis. Delete pre max children:" + std::to_string(chosenStep) + " num:" + std::to_string(root->children[chosenStep]->numRollouts));
-                totVis += root->children[chosenStep]->numRollouts;
-                delete root->children[chosenStep];
-                root->children[chosenStep] = nullptr;
+                if(mostVis != -1)
+                {
+                    logger.debug("Find new max vis child: " + std::to_string(i) + " vis num:" + std::to_string(root->children[i]->numRollouts));
+                    logger.debug("Delete pre max children:" + std::to_string(chosenStep) + " vis num:" + std::to_string(root->children[chosenStep]->numRollouts));
+                    totVis += root->children[chosenStep]->numRollouts;
+                    delete root->children[chosenStep];
+                    root->children[chosenStep] = nullptr;
+                }
+                mostVis = vis;
+                winCount = root->children[i]->winCount[this->playerColor];
+                nextStep->pos = root->legalMove[i];
+                chosenStep = (int)i;
             }
-            mostVis = vis;
-            winCount = root->children[i]->winCount[this->playerColor];
-            nextStep->pos = root->legalMove[i];
-            chosenStep = (int)i;
+            else
+            {
+                logger.debug("Delete children:" + std::to_string(i) + " num:" + std::to_string(root->children[i]->numRollouts));
+                totVis += root->children[i]->numRollouts;
+                delete root->children[i];
+                root->children[i] = nullptr;
+            }
         }
         else
         {
-            logger.debug("Delete children:" + std::to_string(i) + " num:" + std::to_string(root->children[i]->numRollouts));
-            totVis += root->children[i]->numRollouts;
-            delete root->children[i];
-            root->children[i] = nullptr;
+            if(root->childQ[root->legalMove[i]] > maxQ)
+            {
+                maxQ = root->childQ[root->legalMove[i]];
+                nextStep->pos = root->legalMove[i];
+            }
         }
     }
     // Confess
-    if((double)winCount / (double)mostVis < 0.15)
+    if(this->mctsFlag)
     {
-        nextStep->pos = -2;
-    }
-    totVis += root->children[chosenStep]->numRollouts;
-    logger.debug("tot vis : " + std::to_string(totVis));
-    if(totVis + 1 != root->numRollouts)
-    {
-        logger.warning("Children rollout does not match with root rollout.");
-    }
-    this->selfMct->root = root->children[chosenStep];
-    this->selfMct->root->parent = nullptr;
+        if((double)winCount / (double)mostVis < 0.15)
+        {
+            nextStep->pos = -2;
+        }
+        logger.info(std::string() + (this->playerColor == BLACK_PLAYER ? "B" : "W") + " predict win rate:" + std::to_string((double)winCount / (double)mostVis));
+        totVis += root->children[chosenStep]->numRollouts;
+        logger.debug("tot vis : " + std::to_string(totVis));
+        if(totVis + 1 != root->numRollouts)
+        {
+            logger.warning("Children rollout does not match with root rollout.");
+        }
+        this->selfMct->root = root->children[chosenStep];
+        this->selfMct->root->parent = nullptr;
 
-    logger.debug("Delete pre root:" + std::to_string(chosenStep));
-    root->children[chosenStep] = nullptr;
-    delete root;
+        logger.debug("Delete pre root:" + std::to_string(chosenStep));
+        root->children[chosenStep] = nullptr;
+        delete root;
+    }
+    else
+    {
+        delete this->selfMct;
+        this->selfMct = nullptr;
+    }
 }
 
 void MCTSPlayer::updatePlayer(Game* game)
 {
     logger.info(std::string(this->playerColor == BLACK_PLAYER ? "Black player" : "White player") + std::string(" search start."));
+
     if(this->selfMct == nullptr)
     {
-        this->selfMct = new MCTS(game, this->threadPool);
+        this->selfMct = new MCTS(game, this->threadPool, this->server, this->mctsFlag, this->dlFlag);
         logger.info("MCT is null, creat new MCT.");
     }
     else
@@ -115,7 +153,7 @@ void MCTSPlayer::updatePlayer(Game* game)
         if(chosenStep == -1)
         {
             delete this->selfMct;
-            this->selfMct = new MCTS(game, this->threadPool);
+            this->selfMct = new MCTS(game, this->threadPool, this->server, this->mctsFlag, this->dlFlag);
             logger.info("Expand predict miss. Creat new MCT.");
         }
         else

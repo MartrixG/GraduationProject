@@ -5,16 +5,27 @@
 #include "MCTS.hpp"
 #include <ctime>
 
-MCTS::MCTS(Game* game, ThreadPool* pool)
+MCTS::MCTS(Game* game, ThreadPool* pool, SOCKET &serverSocket, bool mctsFlag, bool dlFlag)
 {
+    this->threadPool = pool;
+    this->poolSize = pool->poolSize;
+    this->backend = new PythonBackend(serverSocket);
+    this->mctsFlag = mctsFlag;
+    this->dlFlag = dlFlag;
+
     Game* tmpGame = new Game(game->allBoardPoints, game->allAround, game->allDiagonal);
     game->copy(tmpGame);
     this->root = new TreeNode(nullptr, 1.0, tmpGame);
-    MCTS::addThreadVis(root);
-    MCTS::defaultPolicy(root);
-
-    this->threadPool = pool;
-    this->poolSize = pool->poolSize;
+    if(this->dlFlag)
+    {
+        this->backend->commit(this->root);
+        this->backend->pushRequest();
+    }
+    if(this->mctsFlag)
+    {
+        MCTS::addThreadVis(root);
+        MCTS::defaultPolicy(root);
+    }
 }
 
 inline int MCTS::search(TreeNode* &chosenNode) const
@@ -32,6 +43,15 @@ inline int MCTS::search(TreeNode* &chosenNode) const
             if(child->numRollouts == 0)
             {
                 continue;
+            }
+            if(this->dlFlag)
+            {
+                if(std::abs(child->qValue - 1.0) <= 1e-6)
+                {
+                    logger.warning("Meeting child's q not update.");
+                    this->backend->commit(chosenNode);
+                    this->backend->pushRequest();
+                }
             }
             tmpScore = child->score(totRollouts);
             if(tmpScore > score)
@@ -59,7 +79,7 @@ inline int MCTS::search(TreeNode* &chosenNode) const
     return (int)i;
 }
 
-inline void MCTS::expand(TreeNode* node, int location)
+inline void MCTS::expand(TreeNode* node, int location) const
 {
     Game* tmpGame = new Game(node->game->allBoardPoints, node->game->allAround, node->game->allDiagonal);
     node->game->copy(tmpGame);
@@ -69,6 +89,10 @@ inline void MCTS::expand(TreeNode* node, int location)
     tmpGame->move();
     node->children[location] = new TreeNode(node, node->childQ[location], tmpGame);
     node->visitedMove.insert(location);
+    if(this->dlFlag)
+    {
+        this->backend->commit(node->children[location]);
+    }
 }
 
 void MCTS::defaultPolicy(TreeNode* node)
@@ -129,12 +153,17 @@ void MCTS::updateAllChildren(TreeNode* node) const
 
 void MCTS::work(int rolloutTime) const
 {
+    if(!this->mctsFlag)
+    {
+        return;
+    }
     clock_t start = std::clock(), end;
     if(this->root->legalMoveSize == 0)
     {
         return;
     }
-    updateAllChildren(this->root);
+    if(!this->dlFlag)
+    { updateAllChildren(this->root); }
 
     TreeNode* expandNode = nullptr;
     while (true)
@@ -166,9 +195,15 @@ void MCTS::work(int rolloutTime) const
     {
         sleep(0);
     }
+    if(this->dlFlag)
+    {
+        logger.info("Last pending board state for model:" + std::to_string(this->backend->size()));
+        this->backend->clear();
+    }
 }
 
 MCTS::~MCTS()
 {
     delete root;
+    delete backend;
 }

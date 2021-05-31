@@ -48,7 +48,7 @@ inline std::string MiniLog::getTimeStamp()
     auto timeStamp = std::chrono::system_clock::now().time_since_epoch();
     auto millisecond = std::chrono::duration_cast<std::chrono::milliseconds>(timeStamp).count();
     std::time_t t(std::chrono::duration_cast<std::chrono::seconds>(timeStamp).count());
-    ss << std::put_time(std::localtime(&t), "[%Y-%m-%d %H:%M:%S");
-    ss << "," << std::setw(3) << std::setfill('0') << millisecond % 1000 << "]";
+    ss << std::put_time(std::localtime(&t), "%Y-%m-%d %H:%M:%S");
+    ss << "," << std::setw(3) << std::setfill('0') << millisecond % 1000;
     return ss.str();
 }

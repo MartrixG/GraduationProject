@@ -6,9 +6,7 @@
 #define MARTRIXGOC_TREENODE_HPP
 
 #include <unordered_set>
-#include <mutex>
 #include <atomic>
-#include "Game.hpp"
 #include "RandomPlayer.hpp"
 #include "Log.hpp"
 
@@ -26,7 +24,6 @@ public:
 
     std::unordered_set<int> visitedMove;
     int legalMove[BOARD_SIZE * BOARD_SIZE] = {0};
-    int qiAfterMove[BOARD_SIZE * BOARD_SIZE] = {0};
     float childQ[BOARD_SIZE * BOARD_SIZE] = {0};
     size_t legalMoveSize = 0;
 
@@ -35,6 +32,8 @@ public:
     TreeNode* children[BOARD_SIZE * BOARD_SIZE] = {nullptr};
 
     TreeNode(TreeNode* fa, double q, Game* faGame);
+
+    void updateChildQ(const char* recvMessage);
 
     double score(double totRollouts);
 

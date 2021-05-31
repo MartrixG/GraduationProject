@@ -2,16 +2,9 @@
 // Created by 11409 on 2021/4/22.
 //
 
-#include <string>
-#include <winsock.h>
-#include "Game.hpp"
-#include "GoSGF.hpp"
+#include <cstring>
 #include "App.hpp"
 #include "BoardEncode.hpp"
-#include "CommandLinePlayer.hpp"
-#include "SocketPlayer.hpp"
-#include "RandomPlayer.hpp"
-#include "MCTSPlayer.hpp"
 
 void Application::loadSGF(int argc, char* argv[])
 {
@@ -169,11 +162,6 @@ void Application::commandLine()
 
 bool initServerSocketForUI(SOCKET &serverSocket, SOCKET &clientSocket, char* ipAddr, char* port)
 {
-//    WSAData wsaData{};
-//    int err;
-//    err = WSAStartup(MAKEWORD(2, 2), &wsaData);
-//    if (err != 0)
-//    { return false; }
     serverSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     sockaddr_in serverAddr{};
     memset(&serverAddr, 0, sizeof(serverAddr));
@@ -219,7 +207,6 @@ bool initClientSocketForAI(SOCKET &aiServerSocket, char* ipAddr, char* port)
 
 void Application::uiSocket(int argc, char** argv)
 {
-    //ui 127.0.0.0 23333 16 ai 10 human 0
     if(argc != 9)
     {
         logger.fatal("Arg number error.");
@@ -235,21 +222,18 @@ void Application::uiSocket(int argc, char** argv)
     }
     // init server socket
     SOCKET uiServerSocket, uiClientSocket;
-//    if (!initServerSocketForUI(uiServerSocket, uiClientSocket, argv[2], argv[3]))
-//    {
-//        logger.fatal("Init socket failed.");
-//        return;
-//    }
+    if (!initServerSocketForUI(uiServerSocket, uiClientSocket, argv[2], argv[3]))
+    {
+        logger.fatal("Init socket failed.");
+        return;
+    }
 
     SOCKET aiServerSocket;
     char defaultAiIp[10] = "127.0.0.1", defaultAiPort[6] = "23334";
-    if(BOARD_SIZE == 19)
+    if(!initClientSocketForAI(aiServerSocket, defaultAiIp, defaultAiPort))
     {
-        if(!initClientSocketForAI(aiServerSocket, defaultAiIp, defaultAiPort))
-        {
-            logger.fatal("Init socket failed.");
-            return;
-        }
+        logger.fatal("Init socket failed.");
+        return;
     }
 
     // init go game
@@ -272,10 +256,13 @@ void Application::uiSocket(int argc, char** argv)
     SocketPlayer* uiWhitePlayer = nullptr;
     MCTSPlayer* mctsBlackPlayer = nullptr;
     MCTSPlayer* mctsWhitePlayer = nullptr;
+    // confirm ai type
+    // 1: mcts 2: dl 3: mcts + dl
     if (blackPlayerType == "ai")
     {
         num = strtol(argv[6], &_, 10);
-        mctsBlackPlayer = new MCTSPlayer(BLACK_PLAYER, &threadPool, num * 1000);
+        mctsBlackPlayer = new MCTSPlayer(BLACK_PLAYER, &threadPool, num, aiServerSocket);
+
     } else if (blackPlayerType == "human")
     {
         uiBlackPlayer = new SocketPlayer(BLACK_PLAYER);
@@ -287,7 +274,7 @@ void Application::uiSocket(int argc, char** argv)
     if (whitePlayerType == "ai")
     {
         num = strtol(argv[8], &_, 10);
-        mctsWhitePlayer = new MCTSPlayer(WHITE_PLAYER, &threadPool, num * 1000);
+        mctsWhitePlayer = new MCTSPlayer(WHITE_PLAYER, &threadPool, num, aiServerSocket);
     } else if (whitePlayerType == "human")
     {
         uiWhitePlayer = new SocketPlayer(WHITE_PLAYER);
@@ -300,10 +287,7 @@ void Application::uiSocket(int argc, char** argv)
     char srcMessage[512];
     int bufSize = 512;
     memset(srcMessage, 0, sizeof(srcMessage));
-//    recv(uiClientSocket, srcMessage, bufSize, 0);
-//
-    srcMessage[0] = startFlag;
-//
+    recv(uiClientSocket, srcMessage, bufSize, 0);
     // init logger
     if (srcMessage[0] == startFlag)
     {
@@ -353,40 +337,6 @@ void Application::uiSocket(int argc, char** argv)
         game.boardStrEncode(srcMessage);
         send(uiClientSocket, srcMessage, bufSize, 0);
     }
-    //
-    std::string boardState = boardEncode(&game);
-    boardState.push_back(game.player == BLACK_PLAYER ? '1' : '2');
-    boardState.push_back('\n');
-    boardState += boardEncode(&game);
-    boardState.push_back(game.player == BLACK_PLAYER ? '1' : '2');
-    boardState.push_back('\n');
-    char sendMessage[boardState.length() + 1];
-    strcpy(sendMessage, boardState.c_str());
-    send(aiServerSocket, sendMessage, (int)boardState.length(), 0);
-    char recvMessage[2500];
-    int recvBuf = 2500;
-    for(size_t nodeNum = 0; nodeNum < 2; nodeNum++)
-    {
-        std::cout << "Node " << nodeNum << "q value:\n";
-        recv(aiServerSocket, recvMessage, recvBuf, 0);
-        size_t len = strlen(recvMessage);
-        if(len != 2166)
-        {return;}
-        float recvNum;
-        for(size_t i = 0; i < BOARD_SIZE * BOARD_SIZE; i++)
-        {
-            recvNum = 0.0;
-            for(size_t j = 0; j < 6; j++)
-            {
-                recvNum /= 10;
-                recvNum += float(recvMessage[i * 6 + j] - '0') / 10.0f;
-            }
-            printf("%.6f,", recvNum);
-        }
-        std::cout << std::endl;
-    }
-    return;
-    //
     // main game body
     MCTSPlayer* mctsPlayer;
     SocketPlayer* uiPlayer;
@@ -455,6 +405,7 @@ void Application::uiSocket(int argc, char** argv)
     }
     closesocket(uiClientSocket);
     closesocket(uiServerSocket);
+    closesocket(aiServerSocket);
     WSACleanup();
 }
 
@@ -505,6 +456,24 @@ void Application::mctsPlayerTest(int argc, char** argv)
         logger.fatal("Arg number error.");
         return;
     }
+    // init backend socket
+    WSAData wsaData{};
+    int err;
+    err = WSAStartup(MAKEWORD(2, 2), &wsaData);
+    if (err != 0)
+    {
+        logger.fatal("Init socket failed.");
+        return;
+    }
+
+    SOCKET aiServerSocket;
+    char defaultAiIp[10] = "127.0.0.1", defaultAiPort[6] = "23334";
+    if(!initClientSocketForAI(aiServerSocket, defaultAiIp, defaultAiPort))
+    {
+        logger.fatal("Init socket failed.");
+        return;
+    }
+
     logger.info("mcts player test begin.");
     PointPtr allBoardPoints[BOARD_SIZE * BOARD_SIZE];
     PArVecPtr allAround[BOARD_SIZE * BOARD_SIZE];
@@ -517,8 +486,9 @@ void Application::mctsPlayerTest(int argc, char** argv)
     threadNum = strtol(argv[2], &_, 10);
     ThreadPool threadPool(threadNum);
 
-    auto* blackPlayer = new MCTSPlayer(BLACK_PLAYER, &threadPool, 10000);
-    auto* whitePlayer = new MCTSPlayer(WHITE_PLAYER, &threadPool, 10000);
+    // 1: mcts 2: dl 3: mcts + dl
+    auto* blackPlayer = new MCTSPlayer(BLACK_PLAYER, &threadPool, 3, aiServerSocket);
+    auto* whitePlayer = new MCTSPlayer(WHITE_PLAYER, &threadPool, 3, aiServerSocket);
     logger.info("Black player search time limit:" + std::to_string(blackPlayer->timeLimit));
     logger.info("White player search time limit:" + std::to_string(whitePlayer->timeLimit));
     MCTSPlayer* player = whitePlayer;
@@ -552,7 +522,6 @@ void Application::mctsPlayerTest(int argc, char** argv)
         std::cout << game;
         std::cout << '\n';
         player = player->playerColor == BLACK_PLAYER ? whitePlayer : blackPlayer;
-//        player->playerColor = BLACK_PLAYER + WHITE_PLAYER - player->playerColor;
     }
     int winColor = 2 - ((double) game.getWinner() >= 2.5);
     std::cout << winColor << " win.\n";

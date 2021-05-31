@@ -5,28 +5,27 @@
 #ifndef MARTRIXGOC_MCTS_HPP
 #define MARTRIXGOC_MCTS_HPP
 
-#include <exception>
-#include "Game.hpp"
 #include "RandomPlayer.hpp"
-#include "TreeNode.hpp"
 #include "ThreadPool.hpp"
+#include "PythonBackend.hpp"
 #include "Log.hpp"
-
-extern MiniLog logger;
 
 class MCTS
 {
 public:
+    PythonBackend* backend;
     TreeNode* root;
     size_t poolSize;
+    bool mctsFlag;
+    bool dlFlag;
 
     ThreadPool* threadPool = nullptr;
 
-    MCTS(Game* game, ThreadPool* pool);
+    MCTS(Game* game, ThreadPool* pool, SOCKET &serverSocket, bool mctsFlag, bool dlFlag);
 
     int search(TreeNode* &chosenNode) const;
 
-    static void expand(TreeNode* node, int location);
+    void expand(TreeNode* node, int location) const;
 
     static void defaultPolicy(TreeNode* node);
 

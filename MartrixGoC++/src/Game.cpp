@@ -255,7 +255,8 @@ void Game::legalMove(int* legalMoves, int* qiAfterMove, size_t &len)
             if(!this->isEye(i, this->player))
             {
                 legalMoves[len] = i;
-                qiAfterMove[len] = this->targetBlock->getQi();
+                if(qiAfterMove != nullptr)
+                { qiAfterMove[len] = this->targetBlock->getQi(); }
                 len++;
             }
         }
@@ -299,6 +300,11 @@ void Game::copy(Game* o) const
     for(size_t i = 0; i < BOARD_SIZE * BOARD_SIZE; i++)
     {
         o->board[i] = this->board[i];
+    }
+    o->historyBoard.assign(this->historyBoard.begin(), this->historyBoard.end());
+    for(auto& step : this->steps)
+    {
+        o->steps.push_back(new Step(step->pos / BOARD_SIZE, step->pos % BOARD_SIZE, step->player));
     }
     o->boardZobristHash = this->boardZobristHash;
     o->historyZobristHash = this->historyZobristHash;

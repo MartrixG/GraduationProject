@@ -7,8 +7,13 @@
 
 #include <iostream>
 #include <fstream>
-#include "Game.hpp"
+#include <winsock.h>
 #include "Log.hpp"
+#include "CommandLinePlayer.hpp"
+#include "SocketPlayer.hpp"
+#include "RandomPlayer.hpp"
+#include "MCTSPlayer.hpp"
+#include "GoSGF.hpp"
 
 extern MiniLog logger;
 
