@@ -225,10 +225,10 @@ def main(args):
     cuda.set_device(args.gpu)
     cudnn.benchmark = False
     cudnn.deterministic = True
+    log_config(args)
 
     start = time.time()
     if args.type == 'train':
-        log_config(args)
         train(args)
     else:
         play()
