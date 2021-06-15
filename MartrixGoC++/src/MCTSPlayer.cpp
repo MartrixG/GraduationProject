@@ -9,10 +9,10 @@
 MCTSPlayer::MCTSPlayer(int color, ThreadPool* pool, int type, SOCKET &serverSocket)
 {
     this->playerColor = color;
-    this->timeLimit = 20000;
+    this->timeLimit = type;
     this->threadPool = pool;
     this->server = serverSocket;
-    this->playerType = type;
+    this->playerType = type % 10;
     // 1: mcts 2: dl 3: mcts + dl
     switch (this->playerType)
     {

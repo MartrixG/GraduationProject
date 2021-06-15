@@ -39,11 +39,15 @@ namespace MartrixGoUI
             this.comboBox3 = new System.Windows.Forms.ComboBox();
             this.SearchThreadTextBox = new System.Windows.Forms.TextBox();
             this.comboBox4 = new System.Windows.Forms.ComboBox();
+            this.searchTimeBox1 = new System.Windows.Forms.TextBox();
+            this.comboBox5 = new System.Windows.Forms.ComboBox();
+            this.comboBox6 = new System.Windows.Forms.ComboBox();
+            this.searchTImeTextBox2 = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // StartMain
             // 
-            this.StartMain.Location = new System.Drawing.Point(144, 174);
+            this.StartMain.Location = new System.Drawing.Point(139, 233);
             this.StartMain.Name = "StartMain";
             this.StartMain.Size = new System.Drawing.Size(93, 29);
             this.StartMain.TabIndex = 0;
@@ -79,7 +83,7 @@ namespace MartrixGoUI
             // BlackPayerChoseTextBox
             // 
             this.BlackPayerChoseTextBox.Font = new System.Drawing.Font("Microsoft YaHei UI", 10.28571F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.BlackPayerChoseTextBox.Location = new System.Drawing.Point(27, 57);
+            this.BlackPayerChoseTextBox.Location = new System.Drawing.Point(27, 91);
             this.BlackPayerChoseTextBox.Name = "BlackPayerChoseTextBox";
             this.BlackPayerChoseTextBox.ReadOnly = true;
             this.BlackPayerChoseTextBox.Size = new System.Drawing.Size(144, 29);
@@ -97,7 +101,7 @@ namespace MartrixGoUI
             "AI(Medium)",
             "AI(Hard)",
             "玩家"});
-            this.comboBox2.Location = new System.Drawing.Point(208, 57);
+            this.comboBox2.Location = new System.Drawing.Point(208, 91);
             this.comboBox2.Name = "comboBox2";
             this.comboBox2.Size = new System.Drawing.Size(154, 28);
             this.comboBox2.TabIndex = 4;
@@ -106,7 +110,7 @@ namespace MartrixGoUI
             // WhitePlayerTextBox
             // 
             this.WhitePlayerTextBox.Font = new System.Drawing.Font("Microsoft YaHei UI", 10.28571F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.WhitePlayerTextBox.Location = new System.Drawing.Point(27, 92);
+            this.WhitePlayerTextBox.Location = new System.Drawing.Point(27, 162);
             this.WhitePlayerTextBox.Name = "WhitePlayerTextBox";
             this.WhitePlayerTextBox.ReadOnly = true;
             this.WhitePlayerTextBox.Size = new System.Drawing.Size(144, 29);
@@ -124,7 +128,7 @@ namespace MartrixGoUI
             "AI(Medium)",
             "AI(Hard)",
             "玩家"});
-            this.comboBox3.Location = new System.Drawing.Point(208, 91);
+            this.comboBox3.Location = new System.Drawing.Point(208, 161);
             this.comboBox3.Name = "comboBox3";
             this.comboBox3.Size = new System.Drawing.Size(154, 28);
             this.comboBox3.TabIndex = 6;
@@ -133,7 +137,7 @@ namespace MartrixGoUI
             // SearchThreadTextBox
             // 
             this.SearchThreadTextBox.Font = new System.Drawing.Font("Microsoft YaHei UI", 10.28571F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.SearchThreadTextBox.Location = new System.Drawing.Point(27, 128);
+            this.SearchThreadTextBox.Location = new System.Drawing.Point(27, 57);
             this.SearchThreadTextBox.Name = "SearchThreadTextBox";
             this.SearchThreadTextBox.ReadOnly = true;
             this.SearchThreadTextBox.Size = new System.Drawing.Size(144, 29);
@@ -154,17 +158,77 @@ namespace MartrixGoUI
             "8",
             "10",
             "16"});
-            this.comboBox4.Location = new System.Drawing.Point(208, 128);
+            this.comboBox4.Location = new System.Drawing.Point(208, 57);
             this.comboBox4.Name = "comboBox4";
             this.comboBox4.Size = new System.Drawing.Size(154, 28);
             this.comboBox4.TabIndex = 8;
             this.comboBox4.SelectedIndexChanged += new System.EventHandler(this.ComboBox4_SelectedIndexChanged);
             // 
+            // searchTimeBox1
+            // 
+            this.searchTimeBox1.Font = new System.Drawing.Font("Microsoft YaHei UI", 10.28571F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.searchTimeBox1.Location = new System.Drawing.Point(27, 127);
+            this.searchTimeBox1.Name = "searchTimeBox1";
+            this.searchTimeBox1.ReadOnly = true;
+            this.searchTimeBox1.Size = new System.Drawing.Size(144, 29);
+            this.searchTimeBox1.TabIndex = 9;
+            this.searchTimeBox1.Text = "搜索时间";
+            this.searchTimeBox1.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // comboBox5
+            // 
+            this.comboBox5.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox5.FormattingEnabled = true;
+            this.comboBox5.Items.AddRange(new object[] {
+            "请选择搜索时间...",
+            "10s",
+            "15s",
+            "20s",
+            "25s",
+            "30s"});
+            this.comboBox5.Location = new System.Drawing.Point(208, 127);
+            this.comboBox5.Name = "comboBox5";
+            this.comboBox5.Size = new System.Drawing.Size(154, 28);
+            this.comboBox5.TabIndex = 10;
+            this.comboBox5.SelectedIndexChanged += new System.EventHandler(this.comboBox5_SelectedIndexChanged);
+            // 
+            // comboBox6
+            // 
+            this.comboBox6.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox6.FormattingEnabled = true;
+            this.comboBox6.Items.AddRange(new object[] {
+            "请选择搜索时间...",
+            "10s",
+            "15s",
+            "20s",
+            "25s",
+            "30s"});
+            this.comboBox6.Location = new System.Drawing.Point(208, 196);
+            this.comboBox6.Name = "comboBox6";
+            this.comboBox6.Size = new System.Drawing.Size(154, 28);
+            this.comboBox6.TabIndex = 11;
+            this.comboBox6.SelectedIndexChanged += new System.EventHandler(this.comboBox6_SelectedIndexChanged);
+            // 
+            // searchTImeTextBox2
+            // 
+            this.searchTImeTextBox2.Font = new System.Drawing.Font("Microsoft YaHei UI", 10.28571F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.searchTImeTextBox2.Location = new System.Drawing.Point(27, 197);
+            this.searchTImeTextBox2.Name = "searchTImeTextBox2";
+            this.searchTImeTextBox2.ReadOnly = true;
+            this.searchTImeTextBox2.Size = new System.Drawing.Size(144, 29);
+            this.searchTImeTextBox2.TabIndex = 12;
+            this.searchTImeTextBox2.Text = "搜索时间";
+            this.searchTImeTextBox2.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
             // StartForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(384, 215);
+            this.ClientSize = new System.Drawing.Size(388, 274);
+            this.Controls.Add(this.searchTImeTextBox2);
+            this.Controls.Add(this.comboBox6);
+            this.Controls.Add(this.comboBox5);
+            this.Controls.Add(this.searchTimeBox1);
             this.Controls.Add(this.comboBox4);
             this.Controls.Add(this.SearchThreadTextBox);
             this.Controls.Add(this.comboBox3);
@@ -201,11 +265,21 @@ namespace MartrixGoUI
         public int BoardSize;
         public int BlackPlayer;
         public int WhitePlayer;
+
         public int ThreadNumCode;
-        public string BlackPlayerType;
-        public string BlackTime;
-        public string WhitePlayerType;
-        public string WhiteTime;
         public string ThreadNum;
+
+        public string BlackPlayerType;
+        public int BlackPlayerSearchTimeCode;
+        public string BlackTime;
+
+        public string WhitePlayerType;
+        public int WhitePlayerSearchTimeCode;
+        public string WhiteTime;
+        
+        private System.Windows.Forms.TextBox searchTimeBox1;
+        private System.Windows.Forms.ComboBox comboBox5;
+        private System.Windows.Forms.ComboBox comboBox6;
+        private System.Windows.Forms.TextBox searchTImeTextBox2;
     }
 }

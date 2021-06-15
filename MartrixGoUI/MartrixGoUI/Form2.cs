@@ -23,6 +23,10 @@ namespace MartrixGoUI
             {
                 MessageBox.Show("请确保所有选项均已被选择");
             }
+            else if((BlackPlayerType == "ai" && BlackPlayerSearchTimeCode == 0) || (WhitePlayerType == "ai" && WhitePlayerSearchTimeCode == 0))
+            {
+                MessageBox.Show("请确保所有选项均已被选择");
+            }
             else
             {
                 StartSucess = true;
@@ -37,6 +41,10 @@ namespace MartrixGoUI
             comboBox2.Text = "请选择黑方棋手...";
             comboBox3.Text = "请选择白方棋手...";
             comboBox4.Text = "请选择搜索线程数...";
+            comboBox5.Text = "请选择搜索时间...";
+            comboBox5.Enabled = false;
+            comboBox6.Text = "请选择搜索时间...";
+            comboBox6.Enabled = false;
         }
         private void ComboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -53,19 +61,24 @@ namespace MartrixGoUI
             {
                 case 1:
                     BlackPlayerType = "ai";
-                    BlackTime = "10";
+                    BlackTime = "1";
+                    comboBox5.Enabled = true;
                     break;
                 case 2:
                     BlackPlayerType = "ai";
-                    BlackTime = "20";
+                    BlackTime = "2";
+                    comboBox5.Enabled = true;
                     break;
                 case 3:
                     BlackPlayerType = "ai";
-                    BlackTime = "30";
+                    BlackTime = "3";
+                    comboBox5.Enabled = true;
                     break;
                 case 4:
                     BlackPlayerType = "human";
                     BlackTime = "0";
+                    comboBox5.Text = "请选择搜索时间...";
+                    comboBox5.Enabled = false;
                     break;
             }
         }
@@ -77,19 +90,24 @@ namespace MartrixGoUI
             {
                 case 1:
                     WhitePlayerType = "ai";
-                    WhiteTime = "10";
+                    WhiteTime = "1";
+                    comboBox6.Enabled = true;
                     break;
                 case 2:
                     WhitePlayerType = "ai";
-                    WhiteTime = "20";
+                    WhiteTime = "2";
+                    comboBox6.Enabled = true;
                     break;
                 case 3:
                     WhitePlayerType = "ai";
-                    WhiteTime = "30";
+                    WhiteTime = "3";
+                    comboBox6.Enabled = true;
                     break;
                 case 4:
                     WhitePlayerType = "human";
                     WhiteTime = "0";
+                    comboBox6.Text = "请选择搜索时间...";
+                    comboBox6.Enabled = false;
                     break;
             }
         }
@@ -116,6 +134,58 @@ namespace MartrixGoUI
                     break;
                 case 6:
                     ThreadNum = "16";
+                    break;
+            }
+        }
+
+        private void comboBox5_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            BlackPlayerSearchTimeCode = comboBox5.SelectedIndex;
+            if (BlackPlayerSearchTimeCode == 0)
+                return;
+            BlackTime = BlackTime.Substring(BlackTime.Length - 1, 1);
+            switch (BlackPlayerSearchTimeCode)
+            {
+                case 1:
+                    BlackTime = "1000" + BlackTime;
+                    break;
+                case 2:
+                    BlackTime = "1500" + BlackTime;
+                    break;
+                case 3:
+                    BlackTime = "2000" + BlackTime;
+                    break;
+                case 4:
+                    BlackTime = "2500" + BlackTime;
+                    break;
+                case 5:
+                    BlackTime = "3000" + BlackTime;
+                    break;
+            }
+        }
+
+        private void comboBox6_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            WhitePlayerSearchTimeCode = comboBox6.SelectedIndex;
+            if (WhitePlayerSearchTimeCode == 0)
+                return;
+            WhiteTime = WhiteTime.Substring(WhiteTime.Length - 1, 1);
+            switch(WhitePlayerSearchTimeCode)
+            {
+                case 1:
+                    WhiteTime = "1000" + WhiteTime;
+                    break;
+                case 2:
+                    WhiteTime = "1500" + WhiteTime;
+                    break;
+                case 3:
+                    WhiteTime = "2000" + WhiteTime;
+                    break;
+                case 4:
+                    WhiteTime = "2500" + WhiteTime;
+                    break;
+                case 5:
+                    WhiteTime = "3000" + WhiteTime;
                     break;
             }
         }

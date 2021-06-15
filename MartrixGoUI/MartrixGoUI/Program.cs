@@ -23,8 +23,16 @@ namespace MartrixGoUI
             string backendGoArgs = "ui 127.0.0.1 23333";
             backendGoArgs += " " + StartMenu.ThreadNum;
             backendGoArgs += " " + StartMenu.BlackPlayerType;
+            if(StartMenu.BoardSize == 9 && StartMenu.BlackPlayerType == "ai")
+            {
+                StartMenu.BlackTime = StartMenu.BlackTime[0..^3];
+            }
             backendGoArgs += " " + StartMenu.BlackTime;
             backendGoArgs += " " + StartMenu.WhitePlayerType;
+            if(StartMenu.BoardSize == 9 && StartMenu.WhitePlayerType == "ai")
+            {
+                StartMenu.WhiteTime = StartMenu.WhiteTime[0..^3];
+            }
             backendGoArgs += " " + StartMenu.WhiteTime;
             Process BackendGoProcess = new();
             string LocalPath = Environment.CurrentDirectory;

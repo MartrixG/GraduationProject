@@ -326,9 +326,10 @@ namespace MartrixGoUI
             InformaitionLabel.Text = "第" + StepNum.ToString() + "手" + "(" + (NowPlayerColor == 1 ? "白" : "黑");
             int x = LastMovePos / BoardSize;
             x = BoardSize - x;
-            char y = (char)('A' + LastMovePos % BoardSize);
-            if (y == 'I') y = 'J';
-            InformaitionLabel.Text += (y + x.ToString() + "):该" + (NowPlayerColor == 1 ? "黑" : "白") + "下");
+            int y = LastMovePos % BoardSize;
+            if (y >= 8)
+                y++;
+            InformaitionLabel.Text += (char)('A' + y) + x.ToString() + "):该" + (NowPlayerColor == 1 ? "黑" : "白") + "下";
         }
 
 
